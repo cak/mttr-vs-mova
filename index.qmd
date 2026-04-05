@@ -1,10 +1,10 @@
 ---
-title: "Why MTTR Alone Misleads"
-subtitle: "Add MOVA to Measure Real Risk"
+title: "MTTR vs. MOVA"
+subtitle: "Why MTTR Alone Misleads Security Teams"
 author: "Caleb Kinney"
-date: "BSides Charm 2026"
+date: ""
 execute:
-  echo: true
+  echo: false
   warning: false
   message: false
 jupyter: python3
@@ -19,13 +19,14 @@ import polars as pl
 from great_tables import GT, loc, style
 from plotnine import (
     aes,
+    coord_cartesian,
     element_blank,
     element_line,
     element_rect,
     element_text,
-    facet_wrap,
     geom_line,
     geom_point,
+    geom_text,
     ggplot,
     labs,
     scale_color_manual,
@@ -41,14 +42,14 @@ STRATEGY_LABELS = {
     "oldest_first": "Oldest-First",
     "newest_first": "Newest-First",
 }
-METRIC_COLORS = {"MTTR": "#335C67", "MOVA": "#C94C1A"}
+METRIC_COLORS = {"MTTR": "#1F6F78", "MOVA": "#C65A21"}
 STRATEGY_COLORS = {
     "Oldest-First": "#1F6F78",
     "Newest-First": "#8B1E3F",
 }
-ROOM_BG = "#f5efe4"
+ROOM_BG = "#f6f0e5"
 PANEL_BG = "#fffaf2"
-GRID_COLOR = "#d8cec0"
+GRID_COLOR = "#d9cfbf"
 
 
 def fmt_days(value: float) -> str:
@@ -56,10 +57,11 @@ def fmt_days(value: float) -> str:
 
 
 metrics_labeled = metrics.with_columns(
-    pl.col("strategy").replace(STRATEGY_LABELS).alias("strategy_label")
+    pl.col("strategy").replace(STRATEGY_LABELS).alias("strategy_label"),
+    pl.col("month").dt.strftime("%Y-%m").alias("month_label"),
 )
 
-plot_metrics = (
+plot_metrics = pd.DataFrame(
     metrics_labeled
     .select(
         pl.col("strategy_label").alias("strategy"),
@@ -75,17 +77,19 @@ plot_metrics = (
     )
     .to_dicts()
 )
-plot_metrics = pd.DataFrame(plot_metrics)
 
 newest_plot = plot_metrics[plot_metrics["strategy"] == "Newest-First"].copy()
 oldest_plot = plot_metrics[plot_metrics["strategy"] == "Oldest-First"].copy()
 
-tail_plot = (
+tail_plot = pd.DataFrame(
     metrics_labeled
-    .select(pl.col("strategy_label").alias("strategy"), "month_index", "aged_over_180")
+    .select(
+        pl.col("strategy_label").alias("strategy"),
+        "month_index",
+        "aged_over_180",
+    )
     .to_dicts()
 )
-tail_plot = pd.DataFrame(tail_plot)
 
 summary_display = (
     summary
@@ -116,7 +120,7 @@ card_lookup = {row["strategy"]: row for row in card_rows}
 shared_theme = (
     theme_minimal(base_size=22)
     + theme(
-        figure_size=(11.0, 4.8),
+        figure_size=(11.2, 5.25),
         legend_position="top",
         legend_title=element_blank(),
         panel_grid_minor=element_blank(),
@@ -124,47 +128,104 @@ shared_theme = (
         panel_grid_major_y=element_line(color=GRID_COLOR, size=0.55),
         panel_background=element_rect(fill=PANEL_BG, color=None),
         plot_background=element_rect(fill=ROOM_BG, color=None),
-        strip_background=element_rect(fill="#e9dfd0", color="#e9dfd0"),
-        strip_text=element_text(weight="bold", color="#111827"),
-        axis_title=element_text(color="#27343A"),
-        axis_text=element_text(color="#27343A"),
-        plot_title=element_text(weight="bold", color="#111827"),
-        plot_subtitle=element_text(color="#4b5563", margin={"b": 10}),
-        legend_text=element_text(color="#27343A"),
-        plot_margin=0.12,
+        strip_background=element_rect(fill="#eadfce", color="#eadfce"),
+        strip_text=element_text(weight="bold", color="#172026"),
+        axis_title=element_text(color="#26333A"),
+        axis_text=element_text(color="#26333A"),
+        plot_title=element_text(weight="bold", color="#101828"),
+        plot_subtitle=element_text(color="#55606B", margin={"b": 10}),
+        legend_text=element_text(color="#26333A"),
+        plot_margin=0.16,
     )
 )
 
-ojs_define(
-    metrics_js=(
-        metrics_labeled
-        .with_columns(
-            pl.col("month").dt.strftime("%Y-%m").alias("month_label"),
+chart_theme = shared_theme + theme(
+    legend_position="none",
+    axis_title_x=element_text(margin={"t": 10}),
+    axis_title_y=element_text(margin={"r": 10}),
+)
+
+tail_theme = shared_theme + theme(
+    legend_position="none",
+    axis_title_x=element_text(margin={"t": 10}),
+    axis_title_y=element_text(margin={"r": 10}),
+)
+
+
+def strategy_chart(source: pd.DataFrame, title: str, subtitle: str):
+    labels = source[source["month_index"] == source["month_index"].max()].copy()
+    labels["label"] = labels.apply(
+        lambda row: f'{row["metric"]} {row["days"]:.0f}d', axis=1
+    )
+
+    return (
+        ggplot(source, aes(x="month_index", y="days", color="metric"))
+        + geom_line(size=2.35)
+        + geom_point(
+            data=labels,
+            size=3.8,
         )
-        .select(
-            pl.col("strategy_label").alias("strategy"),
-            "month_index",
-            "month_label",
-            "mttr_days",
-            "mova_days",
-            "aged_over_180",
+        + geom_text(
+            data=labels,
+            mapping=aes(label="label"),
+            ha="left",
+            nudge_x=0.45,
+            size=10,
         )
-        .to_dicts()
-    ),
-    summary_js=card_rows,
+        + scale_color_manual(values=METRIC_COLORS)
+        + scale_x_continuous(breaks=[1, 6, 12, 18, 24])
+        + coord_cartesian(xlim=(1, 26))
+        + labs(
+            title=title,
+            subtitle=subtitle,
+            x="Month",
+            y="Days",
+        )
+        + chart_theme
+    )
+
+
+tail_labels = tail_plot[tail_plot["month_index"] == tail_plot["month_index"].max()].copy()
+tail_labels["label"] = tail_labels.apply(
+    lambda row: f'{row["strategy"]} {row["aged_over_180"]}', axis=1
 )
 ```
 
-## Quick Question {.center .hook-slide}
+## MTTR doubled {.center .hook-slide}
 
-::: {.metric-big .centered}
-What would you do
-if your MTTR doubled next month?
+:::: {.shock-card}
+::: {.shock-label}
+Mean time to remediate
 :::
 
-::: notes
-Pause here. Let them answer it silently before you move.
+:::: {.shock-row}
+::: {.shock-panel}
+::: {.shock-caption}
+Last month
 :::
+::: {.shock-value}
+15d
+:::
+:::
+
+::: {.shock-arrow}
+→
+:::
+
+::: {.shock-panel .danger}
+::: {.shock-caption}
+This month
+:::
+::: {.shock-value}
+31d
+:::
+:::
+::::
+
+::: {.shock-subtitle}
+Most dashboards would call this a problem before anyone asked a better question.
+:::
+::::
 
 ---
 
@@ -174,18 +235,16 @@ Pause here. Let them answer it silently before you move.
 - Something slowed down
 - The team got worse
 - Leadership should worry
-:::
-
-::: notes
-The audience already knows this reaction pattern. You are naming it so you can break it.
+- Somebody needs to explain the red number
 :::
 
 ---
 
-## Here is the trap {.center .statement-slide}
+## Here is the twist {.center .statement-slide}
 
 ::: {.metric-big .centered}
 MTTR can rise
+
 while risk drops
 :::
 
@@ -193,25 +252,15 @@ while risk drops
 Same team. Same capacity. Better prioritization.
 :::
 
-::: notes
-Deliver this cleanly. Do not defend it yet.
-:::
-
 ---
 
-## This talk is really about metric design
-
-::: {.lede}
-MTTR is not a bad metric. It is a useful metric that is very easy to over-trust.
-:::
+## Metrics decide what “good” looks like
 
 ::: {.callout}
-Dashboards do not lie. They simply omit with confidence.
+Dashboards do not lie. They omit professionally.
 :::
 
-::: notes
-That dry line usually gets a small laugh. Then move directly into definitions.
-:::
+If the only visible win is a lower MTTR, teams learn to chase a lower MTTR.
 
 # Start With MTTR {.center .section-slide}
 
@@ -219,13 +268,13 @@ That dry line usually gets a small laugh. Then move directly into definitions.
 
 Time to remediate **closed** vulnerabilities.
 
-::: notes
-Emphasize closed. That word does most of the work.
+::: {.kicker}
+Closed work only. That word does most of the work.
 :::
 
 ---
 
-## MTTR answers one real question
+## MTTR answers one honest question
 
 ::: {.metric-mid}
 How long did the work we finished take?
@@ -235,16 +284,12 @@ It is useful for spotting friction in completed remediation work.
 
 ---
 
-## MTTR does not answer these
+## MTTR does not tell you current exposure
 
 ::: {.incremental}
 - What is still open
 - How old the open backlog is
-- Whether exposure is shrinking right now
-:::
-
-::: notes
-This is the limit. Not a flaw, a boundary.
+- Whether risk is shrinking right now
 :::
 
 ---
@@ -253,16 +298,13 @@ This is the limit. Not a flaw, a boundary.
 
 ::: {.metric-mid .centered}
 MTTR measures completed work,
-not current exposure.
-:::
 
-::: notes
-This is one of the lines you want repeated back to you later.
+not current exposure.
 :::
 
 # Add MOVA {.center .section-slide}
 
-## MOVA asks the missing question
+## MOVA is the missing view
 
 ::: {.metric-mid}
 **Mean Open Vulnerability Age**
@@ -272,7 +314,7 @@ How old is the risk we still carry?
 
 ---
 
-## Flow and stock are different views
+## Flow and stock are different truths
 
 ::: {.definition-grid}
 <div class="definition-card">
@@ -287,40 +329,46 @@ How old is the risk we still carry?
 </div>
 :::
 
-::: notes
-Say flow and stock out loud. Security audiences recognize it immediately once named.
-:::
-
----
-
-## You need both
-
-One tells you about throughput.
-
-One tells you about exposure.
-
 ---
 
 ## Means can hide an ugly tail
 
-95 findings are 7 days old.
-
-5 findings are 400 days old.
-
-The average looks civilized. The tail does not.
-
-::: notes
-Use a slightly dry tone on civilized.
+::: {.tail-example-grid}
+<div class="tail-card">
+  <div class="tail-number">95</div>
+  <div class="tail-text">findings are 7 days old</div>
+</div>
+<div class="tail-card">
+  <div class="tail-number">5</div>
+  <div class="tail-text">findings are 400 days old</div>
+</div>
+<div class="tail-card emphasis">
+  <div class="tail-text strong">The average looks civilized.</div>
+  <div class="tail-text">The tail does not.</div>
+</div>
 :::
 
 ---
 
-## So report the tail too
+## Report a bundle, not a hero metric
 
-::: {.incremental}
-- MOVA
-- Open count
-- 180+ day backlog
+::: {.signal-grid}
+<div class="signal-card">
+  <div class="signal-name">MTTR</div>
+  <div class="signal-meaning">Closure speed</div>
+</div>
+<div class="signal-card">
+  <div class="signal-name">MOVA</div>
+  <div class="signal-meaning">Current exposure age</div>
+</div>
+<div class="signal-card">
+  <div class="signal-name">Open Count</div>
+  <div class="signal-meaning">Backlog size</div>
+</div>
+<div class="signal-card">
+  <div class="signal-name">180+ Days</div>
+  <div class="signal-meaning">Risk stranded in the tail</div>
+</div>
 :::
 
 # Same Data, Different Question {.center .section-slide}
@@ -328,6 +376,7 @@ Use a slightly dry tone on civilized.
 ## The data model is intentionally boring
 
 ```{python}
+#| echo: true
 import polars as pl
 from datetime import datetime
 
@@ -346,15 +395,12 @@ vulns = pl.DataFrame({
 })
 ```
 
-::: notes
-The model is small on purpose: identifier, created date, resolved date.
-:::
-
 ---
 
 ## Same data, first question {auto-animate="true"}
 
 ```{python}
+#| echo: true
 mttr = (
     vulns
     .filter(pl.col("resolved_at").is_not_null())
@@ -367,15 +413,12 @@ mttr = (
 )
 ```
 
-::: notes
-Closed only. Duration to closure. Mean. That is MTTR.
-:::
-
 ---
 
 ## Same data, second question {auto-animate="true"}
 
 ```{python}
+#| echo: true
 as_of = datetime(2026, 4, 1)
 
 mova = (
@@ -390,18 +433,35 @@ mova = (
 )
 ```
 
-::: notes
-Open only. Age as of now. Same schema, different filter, different truth.
-:::
-
 ---
 
-## The implementation point {.center}
+## The deck is wired to the pipeline
 
-::: {.metric-mid .centered}
-This is not a new platform.
+::: {.pipeline-grid}
+<div class="pipeline-card">
+  <div class="pipeline-step">01</div>
+  <div class="pipeline-title">Generate</div>
+  <div class="pipeline-text"><code>scripts/01_generate_data.py</code></div>
+</div>
+<div class="pipeline-card">
+  <div class="pipeline-step">02</div>
+  <div class="pipeline-title">Simulate</div>
+  <div class="pipeline-text"><code>scripts/02_simulate_metrics.py</code></div>
+</div>
+<div class="pipeline-card">
+  <div class="pipeline-step">03</div>
+  <div class="pipeline-title">Build Outputs</div>
+  <div class="pipeline-text"><code>scripts/03_build_outputs.py</code></div>
+</div>
+<div class="pipeline-card">
+  <div class="pipeline-step">04</div>
+  <div class="pipeline-title">Render Deck</div>
+  <div class="pipeline-text"><code>index.qmd</code> + Reveal.js</div>
+</div>
+:::
 
-It is a different query.
+::: {.kicker}
+Python writes parquet. Quarto executes charts and tables inline. Reveal.js handles pacing, auto-animate, and a small live view.
 :::
 
 # Hold Capacity Constant {.center .section-slide}
@@ -427,44 +487,25 @@ It is a different query.
 </div>
 :::
 
-::: notes
-The point is to deny the audience escape hatches. Capacity does not change.
-:::
-
----
-
-## Almost nothing changes
-
-::: {.incremental}
-- Same arrivals
-- Same fix capacity
-- Same data model
-- Same reporting window
-:::
-
 ---
 
 ## One choice changes everything
 
-::: {.metric-mid}
-How the team picks the next 60 fixes.
+::: {.strategy-grid}
+<div class="strategy-card">
+  <div class="eyebrow">Strategy A</div>
+  <h3>Newest-First</h3>
+  <p>Fix the most recently discovered findings first.</p>
+</div>
+<div class="strategy-card">
+  <div class="eyebrow">Strategy B</div>
+  <h3>Oldest-First</h3>
+  <p>Fix the longest-open findings first.</p>
+</div>
 :::
 
----
-
-## Two prioritization strategies
-
-| Strategy | What gets fixed first |
-|---|---|
-| Newest-First | most recently discovered findings |
-| Oldest-First | longest-open findings |
-
-::: {.muted}
-One optimizes optics. One cleans the basement.
-:::
-
-::: notes
-That line earns a small laugh if you do not oversell it.
+::: {.kicker}
+Same arrivals. Same fix rate. Same backlog size. Different ordering. One optimizes optics. One cleans the basement.
 :::
 
 ---
@@ -472,6 +513,7 @@ That line earns a small laugh if you do not oversell it.
 ## The core loop is small enough to inspect
 
 ```{python}
+#| echo: true
 def simulate(strategy: str) -> pl.DataFrame:
     for as_of in months:
         current = active_vulns(backlog, as_of)
@@ -483,44 +525,22 @@ def simulate(strategy: str) -> pl.DataFrame:
         })
 ```
 
-::: notes
-Same arrivals, same fix rate, same backlog size. Only ordering changes.
-:::
+# What Happens {.center .section-slide}
 
-# Results {.center .section-slide}
-
-## Newest-First makes MTTR look great
+## Newest-First makes MTTR look excellent
 
 ```{python}
 #| echo: false
-#| fig-alt: "Line chart for newest-first prioritization. MTTR stays low while MOVA climbs sharply across 24 months."
-(
-    ggplot(newest_plot, aes(x="month_index", y="days", color="metric"))
-    + geom_line(size=2.1)
-    + geom_point(
-        data=newest_plot[newest_plot["month_index"] == 24],
-        size=3.2,
-    )
-    + scale_color_manual(values=METRIC_COLORS)
-    + scale_x_continuous(breaks=[1, 6, 12, 18, 24])
-    + labs(
-        title="Newest-First",
-        subtitle="Low MTTR, aging backlog",
-        x="Month",
-        y="Days",
-    )
-    + shared_theme
+#| fig-alt: "Line chart for newest-first prioritization. MTTR stays near 15 days while MOVA rises above 900 days by month 24."
+strategy_chart(
+    newest_plot,
+    title="Newest-First",
+    subtitle="Low MTTR, steadily aging backlog",
 )
 ```
 
-::: {.metric-mid .centered}
-Low MTTR.
-
-Old risk.
-:::
-
-::: notes
-Tell them how to read it in one sentence: fast closures, terrible exposure.
+::: {.centered .muted}
+Fast closures. Old risk.
 :::
 
 ---
@@ -529,39 +549,21 @@ Tell them how to read it in one sentence: fast closures, terrible exposure.
 
 ```{python}
 #| echo: false
-#| fig-alt: "Line chart for oldest-first prioritization. MTTR rises while MOVA drops and stabilizes at a much lower level."
-(
-    ggplot(oldest_plot, aes(x="month_index", y="days", color="metric"))
-    + geom_line(size=2.1)
-    + geom_point(
-        data=oldest_plot[oldest_plot["month_index"] == 24],
-        size=3.2,
-    )
-    + scale_color_manual(values=METRIC_COLORS)
-    + scale_x_continuous(breaks=[1, 6, 12, 18, 24])
-    + labs(
-        title="Oldest-First",
-        subtitle="Higher MTTR, younger backlog",
-        x="Month",
-        y="Days",
-    )
-    + shared_theme
+#| fig-alt: "Line chart for oldest-first prioritization. MTTR stays above 220 days while MOVA falls to roughly 92 days by month 24."
+strategy_chart(
+    oldest_plot,
+    title="Oldest-First",
+    subtitle="Higher MTTR, much younger backlog",
 )
 ```
 
-::: {.metric-mid .centered}
-Higher MTTR.
-
-Lower exposure.
-:::
-
-::: notes
-Make the contrast explicit. The bad-looking MTTR is the better risk outcome.
+::: {.centered .muted}
+Slower closures. Lower exposure.
 :::
 
 ---
 
-## Same workload, opposite story
+## Compare them directly
 
 ```{python}
 #| echo: false
@@ -574,67 +576,50 @@ Make the contrast explicit. The bad-looking MTTR is the better risk outcome.
     .tab_spanner(label="Flow", columns=["MTTR (days)"])
     .tab_spanner(label="Exposure", columns=["MOVA (days)", "Open", "180+ days"])
     .fmt_number(columns=["MTTR (days)", "MOVA (days)"], decimals=1)
-    .data_color(columns=["MTTR (days)"], palette=["#E5F1F3", "#335C67"])
-    .data_color(columns=["MOVA (days)", "180+ days"], palette=["#FFF1EA", "#8B1E3F"])
+    .data_color(columns=["MTTR (days)"], palette=["#E4F1F2", "#1F6F78"])
+    .data_color(columns=["MOVA (days)", "180+ days"], palette=["#FFF0E8", "#8B1E3F"])
     .tab_style(
         style=style.fill(color="#f7f1e7"),
         locations=[loc.title(), loc.subtitle()],
     )
-    .tab_source_note(source_note="MTTR alone rewards the wrong strategy.")
+    .tab_source_note(source_note="MTTR alone rewards the strategy that leaves old risk behind.")
 )
 ```
 
-::: notes
-This is your numeric confirmation slide. Do not read every cell.
-:::
-
 ---
 
-## The paradox is the point {.center .statement-slide}
-
-::: {.metric-big .centered}
-Higher MTTR.
-
-Lower MOVA.
-:::
-
-::: {.kicker .centered}
-Oldest-first looks slower while exposure actually shrinks.
-:::
-
-# Show The Tail {.center .section-slide}
-
-## MTTR never shows the tail
+## The 180+ tail tells the truth MTTR cannot
 
 ```{python}
 #| echo: false
-#| fig-alt: "Line chart comparing the count of open vulnerabilities older than 180 days for newest-first and oldest-first prioritization."
+#| fig-alt: "Line chart comparing the count of open vulnerabilities older than 180 days for oldest-first and newest-first prioritization."
 (
     ggplot(tail_plot, aes(x="month_index", y="aged_over_180", color="strategy"))
-    + geom_line(size=2.2)
-    + geom_point(
-        data=tail_plot[tail_plot["month_index"] == 24],
-        size=3.2,
+    + geom_line(size=2.35)
+    + geom_point(data=tail_labels, size=3.8)
+    + geom_text(
+        data=tail_labels,
+        mapping=aes(label="label"),
+        ha="left",
+        nudge_x=0.45,
+        size=10,
     )
     + scale_color_manual(values=STRATEGY_COLORS)
     + scale_x_continuous(breaks=[1, 6, 12, 18, 24])
+    + coord_cartesian(xlim=(1, 26))
     + labs(
         title="180+ day backlog",
         subtitle="Newest-first keeps the tail alive",
         x="Month",
         y="Open vulnerabilities",
     )
-    + shared_theme
+    + tail_theme
 )
 ```
 
-::: notes
-This is the backlog MTTR hides. Read the end state, then move on.
-:::
-
 ---
 
-## This is why the tail matters
+## End state: the tail is the story
 
 ```{python}
 #| echo: false
@@ -661,14 +646,10 @@ print(
 ```
 
 ::: {.centered .muted}
-Newest-first ends with every open item in the 180+ bucket.
+Newest-first ends with every open item already in the 180+ bucket.
 :::
 
-::: notes
-Say the word every. It makes the cost obvious.
-:::
-
-# Reporting {.center .section-slide}
+---
 
 ## If leadership sees MTTR alone {auto-animate="true"}
 
@@ -694,10 +675,6 @@ print('<div class="dashboard-grid">' + "".join(cards) + "</div>")
 
 ::: {.centered .muted}
 This dashboard rewards the strategy that hides the backlog best.
-:::
-
-::: notes
-Pause long enough for the room to see newest-first as the fake winner.
 :::
 
 ---
@@ -741,41 +718,31 @@ print('<div class="dashboard-grid">' + "".join(cards) + "</div>")
 ```
 
 ::: {.centered .muted}
-MTTR is still there. It just stops being the only story.
-:::
-
-::: notes
-This is the leadership reporting slide. Let the reveal do the work.
+MTTR still matters. It just stops being the only story.
 :::
 
 ---
 
-## Report a small set of metrics
+## One live view, not a playground
 
-| Signal | What it tells you |
-|---|---|
-| MTTR | closure speed |
-| MOVA | age of current exposure |
-| Open count | backlog size |
-| 180+ days | risk stuck in the tail |
-
----
-
-## Read them together
-
-::: {.incremental}
-- MTTR rising + MOVA falling = backlog cleanup
-- MTTR falling + MOVA rising = optics improving while exposure worsens
-- 180+ rising = risk getting stranded in the tail
-:::
-
-::: notes
-Treat metrics as diagnostics, not verdicts.
-:::
-
-# One Live View {.center .section-slide}
-
-## Toggle the strategy
+```{python}
+#| echo: false
+ojs_define(
+    metrics_js=(
+        metrics_labeled
+        .select(
+            pl.col("strategy_label").alias("strategy"),
+            "month_index",
+            "month_label",
+            "mttr_days",
+            "mova_days",
+            "aged_over_180",
+        )
+        .to_dicts()
+    ),
+    summary_js=card_rows,
+)
+```
 
 ```{ojs}
 //| echo: false
@@ -803,43 +770,50 @@ viewof selected_strategy = Inputs.radio(
   ]
 
   return Plot.plot({
-    width: 860,
-    height: 320,
-    marginTop: 20,
-    marginRight: 30,
+    width: 900,
+    height: 330,
+    marginTop: 18,
+    marginRight: 24,
     color: {
       legend: true,
       domain: ["MTTR", "MOVA"],
-      range: ["#335C67", "#C94C1A"],
+      range: ["#1F6F78", "#C65A21"],
     },
     x: {label: "Month", ticks: [1, 6, 12, 18, 24]},
     y: {label: "Days", grid: true},
     style: {
       background: "#fffaf2",
       color: "#182126",
-      fontFamily: "Avenir Next, Franklin Gothic Medium, Trebuchet MS, sans-serif",
+      fontFamily: "Avenir Next, Segoe UI, Helvetica Neue, sans-serif",
       fontSize: "14px",
     },
     marks: [
       Plot.lineY(data, {x: "month", y: "days", stroke: "metric", strokeWidth: 4}),
       Plot.dot(data.filter((d) => d.month === 24), {x: "month", y: "days", fill: "metric", r: 5}),
-      Plot.ruleY([0], {stroke: "#d8cec0"}),
+      Plot.ruleY([0], {stroke: "#d9cfbf"}),
     ],
   })
 }
 ```
 
-::: notes
-Flip it once. This is a reinforcement slide, not a playground.
+---
+
+## Read the signals together
+
+::: {.incremental}
+- MTTR rising + MOVA falling = backlog cleanup
+- MTTR falling + MOVA rising = optics improving while exposure worsens
+- 180+ rising = risk getting stranded in the tail
 :::
 
 # Close {.center .section-slide}
 
-## MTTR alone can mislead {.center}
+## Keep both views in the room {.center}
 
 ::: {.metric-big .centered}
-MOVA shows whether
-exposure is actually shrinking.
+MTTR tells you how finished work moved.
+
+MOVA tells you how long risk stayed with you.
 :::
 
 ---
@@ -852,8 +826,4 @@ the right behavior,
 
 teams will optimize
 the wrong one.
-:::
-
-::: notes
-Pause after the last line and stop.
 :::
