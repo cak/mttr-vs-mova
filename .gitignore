@@ -212,3 +212,6 @@ index.html
 
 # Exlcude data files
 data/
+
+# Exclude rehersal files
+rehearsal/
