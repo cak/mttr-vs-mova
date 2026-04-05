@@ -223,13 +223,13 @@ This month
 ::::
 
 ::: {.shock-subtitle}
-Most dashboards would call this a problem before anyone asked a better question.
+Most dashboards would call this failure before asking a better question.
 :::
 ::::
 
 ---
 
-## Most dashboards translate that into panic
+## Why dashboards panic
 
 ::: {.incremental}
 - Something slowed down
@@ -240,7 +240,7 @@ Most dashboards would call this a problem before anyone asked a better question.
 
 ---
 
-## Here is the twist {.center .statement-slide}
+## The twist {.center .statement-slide}
 
 ::: {.metric-big .centered}
 MTTR can rise
@@ -254,27 +254,27 @@ Same team. Same capacity. Better prioritization.
 
 ---
 
-## Metrics decide what “good” looks like
+## Metrics shape behavior
 
 ::: {.callout}
 Dashboards do not lie. They omit professionally.
 :::
 
-If the only visible win is a lower MTTR, teams learn to chase a lower MTTR.
+If the only visible win is lower MTTR, teams will chase lower MTTR.
 
 # Start With MTTR {.center .section-slide}
 
-## MTTR is a flow metric
+## MTTR is flow
 
 Time to remediate **closed** vulnerabilities.
 
 ::: {.kicker}
-Closed work only. That word does most of the work.
+Closed work only.
 :::
 
 ---
 
-## MTTR answers one honest question
+## What MTTR answers
 
 ::: {.metric-mid}
 How long did the work we finished take?
@@ -284,7 +284,7 @@ It is useful for spotting friction in completed remediation work.
 
 ---
 
-## MTTR does not tell you current exposure
+## What MTTR misses
 
 ::: {.incremental}
 - What is still open
@@ -294,7 +294,7 @@ It is useful for spotting friction in completed remediation work.
 
 ---
 
-## Keep this sentence {.center}
+## Keep this line {.center}
 
 ::: {.metric-mid .centered}
 MTTR measures completed work,
@@ -304,7 +304,7 @@ not current exposure.
 
 # Add MOVA {.center .section-slide}
 
-## MOVA is the missing view
+## MOVA shows open risk
 
 ::: {.metric-mid}
 **Mean Open Vulnerability Age**
@@ -314,7 +314,7 @@ How old is the risk we still carry?
 
 ---
 
-## Flow and stock are different truths
+## Flow vs. stock
 
 ::: {.definition-grid}
 <div class="definition-card">
@@ -331,26 +331,26 @@ How old is the risk we still carry?
 
 ---
 
-## Means can hide an ugly tail
+## Averages hide the tail
 
 ::: {.tail-example-grid}
 <div class="tail-card">
   <div class="tail-number">95</div>
-  <div class="tail-text">findings are 7 days old</div>
+  <div class="tail-text">findings at 7 days</div>
 </div>
 <div class="tail-card">
   <div class="tail-number">5</div>
-  <div class="tail-text">findings are 400 days old</div>
+  <div class="tail-text">findings at 400 days</div>
 </div>
 <div class="tail-card emphasis">
-  <div class="tail-text strong">The average looks civilized.</div>
+  <div class="tail-text strong">The average looks fine.</div>
   <div class="tail-text">The tail does not.</div>
 </div>
 :::
 
 ---
 
-## Report a bundle, not a hero metric
+## Report the bundle
 
 ::: {.signal-grid}
 <div class="signal-card">
@@ -367,18 +367,17 @@ How old is the risk we still carry?
 </div>
 <div class="signal-card">
   <div class="signal-name">180+ Days</div>
-  <div class="signal-meaning">Risk stranded in the tail</div>
+  <div class="signal-meaning">Tail risk</div>
 </div>
 :::
 
 # Same Data, Different Question {.center .section-slide}
 
-## The data model is intentionally boring
+## The model is boring on purpose
 
 ```{python}
 #| echo: true
-import polars as pl
-from datetime import datetime
+#| eval: false
 
 vulns = pl.DataFrame({
     "id": [101, 102, 103],
@@ -397,10 +396,11 @@ vulns = pl.DataFrame({
 
 ---
 
-## Same data, first question {auto-animate="true"}
+## Same data: MTTR {auto-animate="true"}
 
 ```{python}
 #| echo: true
+#| eval: false
 mttr = (
     vulns
     .filter(pl.col("resolved_at").is_not_null())
@@ -415,10 +415,11 @@ mttr = (
 
 ---
 
-## Same data, second question {auto-animate="true"}
+## Same data: MOVA {auto-animate="true"}
 
 ```{python}
 #| echo: true
+#| eval: false
 as_of = datetime(2026, 4, 1)
 
 mova = (
@@ -435,7 +436,7 @@ mova = (
 
 ---
 
-## The deck is wired to the pipeline
+## Pipeline to deck
 
 ::: {.pipeline-grid}
 <div class="pipeline-card">
@@ -461,12 +462,12 @@ mova = (
 :::
 
 ::: {.kicker}
-Python writes parquet. Quarto executes charts and tables inline. Reveal.js handles pacing, auto-animate, and a small live view.
+Python writes parquet. Quarto renders charts inline. Reveal.js handles pacing. One live view is optional.
 :::
 
 # Hold Capacity Constant {.center .section-slide}
 
-## The simulation is deliberately boring
+## The setup is boring on purpose
 
 ::: {.simulation-grid}
 <div class="sim-card">
@@ -479,41 +480,42 @@ Python writes parquet. Quarto executes charts and tables inline. Reveal.js handl
 </div>
 <div class="sim-card">
   <div class="sim-number">60</div>
-  <div class="sim-label">new findings / month</div>
+  <div class="sim-label">new / month</div>
 </div>
 <div class="sim-card">
   <div class="sim-number">60</div>
-  <div class="sim-label">fixes / month</div>
+  <div class="sim-label">fixed / month</div>
 </div>
 :::
 
 ---
 
-## One choice changes everything
+## Only the order changes
 
 ::: {.strategy-grid}
 <div class="strategy-card">
   <div class="eyebrow">Strategy A</div>
   <h3>Newest-First</h3>
-  <p>Fix the most recently discovered findings first.</p>
+  <p>Fix newest findings first.</p>
 </div>
 <div class="strategy-card">
   <div class="eyebrow">Strategy B</div>
   <h3>Oldest-First</h3>
-  <p>Fix the longest-open findings first.</p>
+  <p>Fix oldest findings first.</p>
 </div>
 :::
 
 ::: {.kicker}
-Same arrivals. Same fix rate. Same backlog size. Different ordering. One optimizes optics. One cleans the basement.
+Same arrivals. Same fix rate. Same backlog size. Only the order changes.
 :::
 
 ---
 
-## The core loop is small enough to inspect
+## The loop is tiny
 
 ```{python}
 #| echo: true
+#| eval: false
 def simulate(strategy: str) -> pl.DataFrame:
     for as_of in months:
         current = active_vulns(backlog, as_of)
@@ -527,7 +529,7 @@ def simulate(strategy: str) -> pl.DataFrame:
 
 # What Happens {.center .section-slide}
 
-## Newest-First makes MTTR look excellent
+## Newest-First wins MTTR
 
 ```{python}
 #| echo: false
@@ -545,7 +547,7 @@ Fast closures. Old risk.
 
 ---
 
-## Oldest-First makes MTTR look worse
+## Oldest-First lowers exposure
 
 ```{python}
 #| echo: false
@@ -563,7 +565,7 @@ Slower closures. Lower exposure.
 
 ---
 
-## Compare them directly
+## Same work, different outcome
 
 ```{python}
 #| echo: false
@@ -588,7 +590,7 @@ Slower closures. Lower exposure.
 
 ---
 
-## The 180+ tail tells the truth MTTR cannot
+## The 180+ tail tells the truth
 
 ```{python}
 #| echo: false
@@ -646,12 +648,12 @@ print(
 ```
 
 ::: {.centered .muted}
-Newest-first ends with every open item already in the 180+ bucket.
+Under newest-first, every open item is older than 180 days.
 :::
 
 ---
 
-## If leadership sees MTTR alone {auto-animate="true"}
+## Leadership sees MTTR only {auto-animate="true"}
 
 ```{python}
 #| echo: false
@@ -679,7 +681,7 @@ This dashboard rewards the strategy that hides the backlog best.
 
 ---
 
-## If leadership sees the system {auto-animate="true"}
+## Leadership sees the full system {auto-animate="true"}
 
 ```{python}
 #| echo: false
@@ -723,7 +725,7 @@ MTTR still matters. It just stops being the only story.
 
 ---
 
-## One live view, not a playground
+## One live view
 
 ```{python}
 #| echo: false
@@ -748,7 +750,7 @@ ojs_define(
 //| echo: false
 viewof selected_strategy = Inputs.radio(
   ["Oldest-First", "Newest-First"],
-  {label: "Prioritization strategy", value: "Oldest-First"}
+  {label: "Strategy", value: "Oldest-First"}
 )
 ```
 
@@ -808,7 +810,7 @@ viewof selected_strategy = Inputs.radio(
 
 # Close {.center .section-slide}
 
-## Keep both views in the room {.center}
+## Keep both in the room {.center}
 
 ::: {.metric-big .centered}
 MTTR tells you how finished work moved.
