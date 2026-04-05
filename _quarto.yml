@@ -1,0 +1,28 @@
+project:
+  type: default
+  title: "Why MTTR Alone Misleads: Add MOVA to Measure Real Risk"
+  render:
+    - index.qmd
+  execute-dir: project
+
+execute:
+  freeze: false
+  warning: false
+  message: false
+  daemon: false
+
+format:
+  revealjs:
+    theme: simple
+    css: styles.css
+    slide-number: true
+    transition: fade
+    controls: true
+    progress: true
+    center: false
+    hash: true
+    embed-resources: true
+    code-copy: true
+    code-overflow: wrap
+    incremental: false
+    footer: "BSides Charm 2026 · Caleb Kinney"
