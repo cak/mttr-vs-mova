@@ -209,3 +209,6 @@ __marimo__/
 /.quarto/
 **/*.quarto_ipynb
 index.html
+
+# Exlcude data files
+data/
