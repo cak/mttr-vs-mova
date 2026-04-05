@@ -1,6 +1,6 @@
 project:
   type: default
-  title: "Why MTTR Alone Misleads: Add MOVA to Measure Real Risk"
+  title: "MTTR vs. MOVA"
   render:
     - index.qmd
   execute-dir: project
@@ -15,16 +15,20 @@ format:
   revealjs:
     theme: simple
     css: styles.css
+    highlight-style: github
     width: 1600
     height: 900
-    margin: 0.05
+    margin: 0.04
     slide-number: c/t
     transition: fade
+    transition-speed: fast
     background-transition: fade
     controls: true
+    controls-tutorial: false
     progress: true
     center: false
     hash: true
+    history: true
     embed-resources: true
     code-copy: true
     code-overflow: wrap
@@ -32,8 +36,10 @@ format:
     preview-links: false
     navigation-mode: linear
     controls-layout: edges
+    auto-stretch: false
     auto-animate-easing: ease-out
+    auto-animate-duration: 0.55
     title-slide-attributes:
-      data-background-color: "#f5efe4"
+      data-background-color: "#f6f0e5"
       class: "title-slide"
-    footer: "BSides Charm 2026 · Caleb Kinney"
+    footer: "BSides Charm 2026 · Caleb Kinney · MTTR vs. MOVA"
