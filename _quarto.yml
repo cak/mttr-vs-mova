@@ -23,23 +23,20 @@ format:
     transition: fade
     transition-speed: fast
     background-transition: fade
-    controls: true
-    controls-tutorial: false
+    controls: false
     progress: true
     center: false
     hash: true
     history: true
     embed-resources: true
-    code-copy: true
+    code-copy: false
     code-overflow: wrap
     incremental: false
     preview-links: false
     navigation-mode: linear
-    controls-layout: edges
     auto-stretch: false
     auto-animate-easing: ease-out
     auto-animate-duration: 0.55
     title-slide-attributes:
       data-background-color: "#f6f0e5"
       class: "title-slide"
-    footer: "BSides Charm 2026 · Caleb Kinney · MTTR vs. MOVA"
