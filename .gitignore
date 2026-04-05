@@ -210,8 +210,8 @@ __marimo__/
 **/*.quarto_ipynb
 index.html
 
-# Exlcude data files
+# Generated data files
 data/
 
-# Exclude rehersal files
+# Private rehearsal files
 rehearsal/
