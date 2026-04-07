@@ -556,6 +556,13 @@
   margin-top: 0.18rem;
 }
 
+.dashboard-detail .dashboard-stat p {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+}
+
 .dashboard-detail span {
   color: var(--ink-soft);
 }
@@ -591,6 +598,57 @@
 
 .tail-grid {
   margin-bottom: 0.75rem;
+}
+
+.sim-controls {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin: 0.45rem 0 0.8rem 0;
+  padding: 0.78rem 0.92rem;
+  border: 1px solid rgba(217, 207, 191, 0.92);
+  border-radius: 22px;
+  background: rgba(255, 250, 242, 0.9);
+  box-shadow: var(--shadow);
+}
+
+.sim-controls button {
+  min-width: 110px;
+  padding: 0.52rem 0.9rem;
+  border: none;
+  border-radius: 999px;
+  background: var(--teal);
+  color: #fffaf2;
+  font-size: 0.62em;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.sim-controls button:hover {
+  background: #185d65;
+}
+
+.sim-controls input[type="range"] {
+  flex: 1;
+  accent-color: var(--orange);
+}
+
+.sim-status {
+  color: var(--ink-soft);
+  font-size: 0.62em;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.sim-callout {
+  margin: 0 0 0.78rem 0;
+  padding: 0.72rem 0.9rem;
+  border-left: 6px solid var(--orange);
+  border-radius: 0 18px 18px 0;
+  background: var(--orange-soft);
+  font-size: 0.7em;
+  line-height: 1.35;
 }
 
 .reveal .cell-output-display {
@@ -652,5 +710,14 @@
   .score-grid,
   .tail-example-grid {
     grid-template-columns: 1fr;
+  }
+
+  .sim-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .sim-status {
+    white-space: normal;
   }
 }
