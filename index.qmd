@@ -14,6 +14,7 @@ jupyter: python3
 #| echo: false
 import pandas as pd
 import polars as pl
+from great_tables import GT
 from plotnine import (
     aes,
     coord_cartesian,
@@ -78,6 +79,26 @@ plot_metrics = pd.DataFrame(
 
 newest_plot = plot_metrics[plot_metrics["strategy"] == "Newest-First"].copy()
 oldest_plot = plot_metrics[plot_metrics["strategy"] == "Oldest-First"].copy()
+
+summary_table = (
+    pd.DataFrame(
+        summary
+        .with_columns(
+            pl.col("strategy").replace(STRATEGY_LABELS).alias("Strategy"),
+            pl.col("mttr_days").round(1).alias("MTTR (days)"),
+            pl.col("mova_days").round(1).alias("MOVA (days)"),
+            pl.col("open_count").alias("Open"),
+            pl.col("aged_over_180").alias("180+ days"),
+            pl.when(pl.col("strategy") == "newest_first")
+            .then(pl.lit(0))
+            .otherwise(pl.lit(1))
+            .alias("sort_order"),
+        )
+        .sort("sort_order")
+        .select("Strategy", "MTTR (days)", "MOVA (days)", "Open", "180+ days")
+        .to_dicts()
+    )
+)
 
 tail_plot = pd.DataFrame(
     metrics_labeled
@@ -1008,6 +1029,28 @@ findings older than 180 days
 
 ::: {.centered .muted}
 Under newest-first, every open item is older than 180 days.
+:::
+
+---
+
+## Same data, different story
+
+```{python}
+#| echo: false
+(
+    GT(summary_table)
+    .tab_header(
+        title="End state comparison",
+        subtitle="Same inputs. Only prioritization changed.",
+    )
+    .cols_align(align="center")
+    .fmt_number(columns=["MTTR (days)", "MOVA (days)"], decimals=1)
+    .fmt_number(columns=["Open", "180+ days"], decimals=0)
+)
+```
+
+::: {.kicker}
+If you only read MTTR, you pick the wrong winner.
 :::
 
 ---
