@@ -1,54 +1,147 @@
-# Why MTTR Alone Misleads: MTTR vs. MOVA
+# Why Vulnerability MTTR Alone Misleads: Add MOVA to Measure Real Risk
 
-This repository supports the BSides Charm 2026 talk **Why Vulnerability MTTR Alone Misleads: Add MOVA to Measure Real Risk**.
+This repository supports the BSides Charm 2026 talk
+**Why Vulnerability MTTR Alone Misleads: Add MOVA to Measure Real Risk**.
 
-It uses a simple, vendor-neutral, reproducible simulation to show why MTTR alone can misread vulnerability program health. When teams work down older backlog, MTTR often rises even as exposure falls. **Mean Open Vulnerability Age (MOVA)** adds the missing view by measuring the age of what is still open.
+It demonstrates a simple but common failure mode in vulnerability programs:
 
-- **MTTR = flow**
-- **MOVA = stock**
+> You can improve real risk while your MTTR gets worse.
 
-Used together, they show both how work is closing and whether backlog risk is actually improving.
+This project uses a small, reproducible simulation to show why that happens and how **Mean Open Vulnerability Age (MOVA)** fills the gap.
 
-## Why This Repository Exists
+- **MTTR = flow** (how fast work closes)
+- **MOVA = stock** (how old the remaining risk is)
+
+Used together, they show whether you are moving quickly and whether you are actually getting safer.
+
+The rendered deck now includes a real in-slide Observable JS simulation with month-by-month playback, so the MTTR/MOVA paradox is visible live instead of being implied by static screenshots.
+
+---
+
+## Quick Start
+
+If you just want to see the result:
+
+```bash
+uv sync
+uv run quarto render
+open index.html
+```
+
+Speaker notes for rehearsal live in `rehearsal/speaker-notes.md`.
+
+If you want to regenerate everything from scratch:
+
+```bash
+uv run python scripts/01_generate_data.py
+uv run python scripts/02_simulate_metrics.py
+uv run python scripts/03_build_outputs.py
+uv run quarto render
+```
+
+---
+
+## The Core Idea
 
 The talk centers on a practical paradox:
 
-> A team fixing older backlog can look worse on MTTR while reducing real exposure.
+> Fixing older vulnerabilities can increase MTTR while reducing exposure.
 
-This repository makes that argument concrete with a constrained simulation:
+Example:
+
+- You close a 300-day-old vulnerability
+- That raises your average remediation time
+- Your MTTR goes up
+- But your oldest risk just disappeared
+
+MTTR reports that as a regression
+Reality is that your risk posture improved
+
+This repository makes that behavior visible and reproducible.
+
+---
+
+## What The Simulation Does
+
+The model is intentionally constrained so the result is explainable:
 
 - Same incoming volume
 - Same remediation capacity
 - Same time horizon
 - Only prioritization changes
 
-That keeps the question narrow and useful. What changes when a team picks different work first?
+Two strategies run under identical conditions:
 
-## What The Simulation Shows
+- **Newest-first**
+  - Keeps MTTR low
+  - Leaves older risk aging in the backlog
 
-Two strategies run under the same conditions:
+- **Oldest-first**
+  - Raises MTTR
+  - Reduces the age of remaining vulnerabilities
 
-- **Newest-first** keeps MTTR low and allows older exposure to age in the backlog
-- **Oldest-first** raises MTTR and reduces the age of the remaining backlog
+Nothing else changes. That isolates the effect of prioritization.
 
-The point is not that MTTR is bad. The point is that MTTR measures completed work, not the health of what remains open. MOVA makes that backlog health visible.
+In the deck, the simulation is exposed two ways:
+
+- Static Python-generated figures for the clean narrative beats
+- A real Observable JS step-through with a month slider and play/pause controls
+
+---
+
+## What You Should See
+
+When you run the simulation:
+
+- MTTR looks better under newest-first
+- MOVA looks worse under newest-first
+- Oldest-first causes:
+  - MTTR to rise
+  - MOVA to fall
+
+That divergence is the point
+
+> MTTR describes completed work
+> MOVA describes remaining exposure
+
+---
 
 ## Why This Matters
 
-If you report MTTR alone, you can reward behavior that hides aging risk.
+If you report MTTR alone, you can reward the wrong behavior:
+
+- Teams optimize for fast closures
+- Older vulnerabilities linger
+- Exposure quietly increases
 
 If you report MTTR with MOVA, you can:
 
-- See whether backlog exposure is improving
-- Explain why MTTR sometimes rises during healthy cleanup work
-- Give leaders a better read on operational progress versus residual risk
-- Keep teams from optimizing for fast closures at the expense of older exposure
+- See whether backlog risk is improving
+- Explain MTTR increases during cleanup work
+- Align leadership on what “progress” actually means
+- Avoid optimizing for speed at the expense of exposure
+
+This is not about replacing MTTR.
+It is about making it interpretable.
+
+---
 
 ## What This Repository Is
 
-This repo is both a conference deck and a reproducible analysis workflow.
+This repo is both:
 
-The examples are intentionally simple. The data is synthetic, the assumptions are visible, and the outputs can be regenerated locally. That makes the argument easy to inspect, rerun, and adapt after the talk.
+1. A conference presentation (Quarto + Reveal.js)
+2. A reproducible analysis workflow
+
+The design is intentional:
+
+- Synthetic data
+- Explicit assumptions
+- Deterministic outputs
+
+You can inspect, rerun, and modify everything without needing production data.
+
+---
 
 ## Repository Layout
 
@@ -73,81 +166,79 @@ The examples are intentionally simple. The data is synthetic, the assumptions ar
 `-- LICENSE
 ```
 
+---
+
 ## Simulation Design
 
-The model is deliberately constrained:
+The model is deliberately simple:
 
 - 24-month window
 - 360-item starting backlog
 - 60 new vulnerabilities per month
 - 60 fixes per month
-- Two strategies: `newest_first`, `oldest_first`
+- Strategies:
+  - `newest_first`
+  - `oldest_first`
 
-No changes in capacity. Only prioritization changes.
+No changes in capacity
+No changes in volume
+Only prioritization changes
 
 This isolates the question:
 
-> What changes when you change how you choose what to fix?
+> What happens when you change what you fix first?
 
-## How To Run
-
-### Prerequisites
-
-- Python 3.11+
-- [uv](https://docs.astral.sh/uv/)
-- [Quarto CLI](https://quarto.org/)
-
-### Install
-
-```bash
-uv sync
-```
-
-### Generate Data
-
-```bash
-uv run python scripts/01_generate_data.py
-uv run python scripts/02_simulate_metrics.py
-uv run python scripts/03_build_outputs.py
-```
-
-### Render Presentation
-
-```bash
-uv run quarto render
-```
-
-Output:
-
-- `index.html` as a standalone Reveal.js deck
+---
 
 ## Why Quarto Fits This Project
 
-Quarto is central to the workflow. The deck source, code execution, and final presentation stay close together in one project.
+Quarto keeps the full workflow in one place:
 
-Python scripts generate the synthetic vulnerability data and simulation outputs. Those outputs are written to parquet, then read back into the Quarto presentation for charts and summary tables. That keeps the analysis path inspectable from raw inputs to rendered slides.
+- Python generates the data and metrics
+- Outputs are written to Parquet
+- Observable JS re-simulates the same base vulnerability records inside the deck
+- Reveal.js handles the presentation layer without a separate app
 
-This is the kind of workflow that fits well with reproducible analytical work in the Posit ecosystem. Code, data artifacts, and presentation stay in the same repository without turning the project into a custom app.
+That gives you:
 
-## Practical Use
+- Reproducibility
+- Inspectable data flow
+- No custom app or glue code
 
-If you run vulnerability management or report security metrics upward:
+This is a good pattern for security analytics work where the story and the data should stay close together.
 
-- Keep MTTR for flow
-- Add MOVA for backlog exposure
-- Track aged backlog explicitly
-- Read metric shifts in context instead of treating every MTTR increase as failure
+---
 
-This is not about replacing MTTR. It is about using it with the missing companion metric.
+## Adapting This To Your Environment
+
+You do not need to copy this model exactly. The useful parts are:
+
+- Track both:
+  - time-to-close (MTTR)
+  - age-of-open (MOVA)
+
+- Segment by:
+  - severity
+  - system or business unit
+
+- Track “aged backlog” explicitly (for example, > 90 or > 180 days)
+
+The key shift is conceptual:
+
+> Stop asking “how fast are we closing?”
+> Also ask “how old is what we have not closed?”
+
+---
 
 ## Technology Stack
 
-- **Quarto + Reveal.js** for the presentation
-- **Python + Polars** for synthetic data generation and simulation
-- **Plotnine + Great Tables** for charts and tables in the deck
-- **Parquet** for portable, reproducible intermediate outputs
+- **Quarto + Reveal.js** for presentation
+- **Python + Polars** for reproducible data and static figures
+- **Observable JS + Plot** for the live simulation
+- **Plotnine** for speaker-friendly narrative charts
+- **Parquet** for reproducible intermediate data
 
-The result is a compact workflow for data, analysis, and presentation in one place.
+---
 
 ## License
 
