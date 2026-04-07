@@ -86,6 +86,7 @@ In the deck, the simulation is exposed two ways:
 
 - Static Python-generated figures for the clean narrative beats
 - A real Observable JS step-through with a month slider and play/pause controls
+- A single Great Tables end-state comparison slide for leadership-style readout
 
 ---
 
@@ -232,11 +233,12 @@ The key shift is conceptual:
 
 ## Technology Stack
 
-- **Quarto + Reveal.js** for presentation
-- **Python + Polars** for reproducible data and static figures
-- **Observable JS + Plot** for the live simulation
-- **Plotnine** for speaker-friendly narrative charts
-- **Parquet** for reproducible intermediate data
+- **Quarto + Reveal.js** for the presentation
+- **Python + Polars** for reproducible data and simulation
+- **Observable JS + Plot** for the live, step-through simulation
+- **Plotnine** for narrative charts used in the talk
+- **Great Tables** for clean, presentation-ready summary tables
+- **Parquet** for portable, reproducible intermediate data
 
 ---
 
