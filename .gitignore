@@ -209,6 +209,7 @@ __marimo__/
 /.quarto/
 **/*.quarto_ipynb
 index.html
+index_files/
 
 # Generated data files
 data/
