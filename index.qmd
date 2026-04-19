@@ -847,3 +847,37 @@ but read it with context.
 Use reproducible analysis
 to tell the risk story clearly.
 :::
+
+---
+
+## MTTR alone drives the wrong call {.center .statement-slide}
+
+::: {.metric-big .centered}
+If you run the review on MTTR alone,
+
+you can tell leadership risk is down
+while the oldest risk is still sitting open.
+
+That is the wrong decision.
+:::
+
+---
+
+## Change the review
+
+::: {.incremental}
+- Report MTTR and MOVA side by side in every monthly review
+- Track `180+ days` open as a separate backlog line
+- Define both metrics in code before they reach the dashboard
+- Show one chart and one table that make aging risk visible
+:::
+
+---
+
+## Thank you {.center .statement-slide}
+
+::: {.metric-big .centered}
+Thank you.
+
+[github.com/cak/mttr-vs-mova](https://github.com/cak/mttr-vs-mova)
+:::
