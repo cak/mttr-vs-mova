@@ -39,7 +39,7 @@
 }
 
 .reveal .slides section {
-  padding: 0.12em 0;
+  padding: 0.16em 0;
 }
 
 .reveal h1,
@@ -51,6 +51,7 @@
   letter-spacing: -0.032em;
   line-height: 0.98;
   margin: 0 0 0.42em 0;
+  text-wrap: balance;
 }
 
 .reveal h1 {
@@ -74,11 +75,11 @@
 .reveal td,
 .reveal th {
   font-size: 0.95em;
-  line-height: 1.32;
+  line-height: 1.35;
 }
 
 .reveal p {
-  margin: 0.24em 0 0.58em 0;
+  margin: 0.22em 0 0.54em 0;
 }
 
 .reveal strong {
@@ -130,7 +131,7 @@
 .reveal pre code {
   max-height: 520px;
   padding: 1em 1.08em;
-  font-size: 0.78em;
+  font-size: 0.76em;
   line-height: 1.32;
 }
 
@@ -554,6 +555,7 @@
 .dashboard-detail .dashboard-stat {
   display: flex;
   justify-content: space-between;
+  align-items: baseline;
   gap: 1rem;
   padding: 0.46rem 0;
   border-top: 1px solid rgba(217, 207, 191, 0.86);
@@ -661,13 +663,16 @@
 }
 
 .reveal .cell-output-display {
-  margin-top: 0.35em;
+  margin-top: 0.45em;
 }
 
 .reveal .gt_table {
   background: transparent;
   font-size: 0.72em;
+  border: 1px solid rgba(217, 207, 191, 0.88);
   border-radius: var(--radius-callout);
+  box-shadow: var(--shadow);
+  overflow: hidden;
 }
 
 .reveal .gt_heading,
