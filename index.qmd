@@ -676,9 +676,9 @@ MTTR still matters. It just cannot stand alone.
 ## Read the signals together
 
 ::: {.incremental}
-- MTTR up + MOVA down = backlog cleanup
-- MTTR down + MOVA up = optics improve while exposure worsens
-- 180+ up = risk is getting stranded in the tail
+- MTTR up + MOVA down = cleanup work is landing
+- MTTR down + MOVA up = recent closures improve optics while exposure worsens
+- 180+ up = risk is getting stranded
 :::
 
 ---
@@ -686,10 +686,10 @@ MTTR still matters. It just cannot stand alone.
 ## What to report
 
 ::: {.incremental}
-- Put MTTR and MOVA on the same monthly dashboard
+- Put MTTR and MOVA on the same monthly view
 - Add open count and a threshold like 180+ days
 - Label the MTTR window before calling a regression
-- Use the bundle to explain backlog cleanup when old work closes
+- Use the bundle to explain cleanup work when old findings close
 :::
 
 ---
@@ -700,7 +700,7 @@ Most teams already have the data. It’s usually sitting in a CSV.
 
 ::: {.incremental}
 - CSVs are messy and unavoidable
-- Dashboards hide the logic
+- Dashboards hide the definition
 - Analysts need control of the definitions
 :::
 
@@ -758,13 +758,15 @@ vulns.group_by("severity").agg(
 
 ## Turn analysis into a story
 
+The point is a repeatable path from raw rows to a leadership-ready review.
+
 Charts help people see. Tables help people decide.
 
 ---
 
-## Plotnine for trends
+## Show the trend
 
-Show the pattern before you explain it.
+Use Plotnine to make the pattern visible before you explain it.
 
 ```{python}
 #| echo: true
@@ -778,9 +780,9 @@ Show the pattern before you explain it.
 
 ---
 
-## Great Tables for decisions
+## Summarize the decision
 
-Make the summary easy to read and hard to misread.
+Use Great Tables to make the summary easy to read and hard to misread.
 
 ```{python}
 #| echo: true
@@ -794,9 +796,9 @@ Make the summary easy to read and hard to misread.
 
 ---
 
-## Quarto for publishing
+## Publish the review
 
-Keep analysis, charts, and narrative together in one reproducible document.
+Quarto keeps analysis, charts, and narrative in one reviewable document.
 
 ````markdown
 ## Monthly Risk Review
@@ -808,9 +810,9 @@ build_mova_chart(vulns)
 
 ---
 
-## Positron for exploration
+## Inspect before you publish
 
-Inspect the rows behind the metric before you present it.
+Positron is useful for checking the rows behind the metric before you present it.
 
 ```{python}
 #| echo: true
@@ -827,19 +829,21 @@ Inspect the rows behind the metric before you present it.
 ## Can AI do this for me?
 
 ::: {.incremental}
-- AI can draft transforms, charts, and a first pass
-- You still define the metric
-- Use AI to move faster; use code to own it
+- AI can speed up transforms, charts, and first drafts
+- The metric definition and review still need an owner
+- Use AI to move faster; use code to keep the work auditable and repeatable
 :::
 
 ---
 
-## Report both {.center .statement-slide}
+## Add MOVA. Keep MTTR in context. {.center .statement-slide}
 
 ::: {.metric-big .centered}
-MTTR measures closure speed.
+Lead with MOVA for exposure.
 
-MOVA measures exposure remaining.
+Keep MTTR for flow,
+but read it with context.
 
-You need both.
+Use reproducible analysis
+to tell the risk story clearly.
 :::
