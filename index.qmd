@@ -408,6 +408,8 @@ mttr = (
 ```{python}
 #| echo: true
 #| eval: false
+from datetime import datetime
+
 as_of = datetime(2026, 4, 1)
 
 mova = (
@@ -585,28 +587,28 @@ Read only MTTR and you pick the wrong winner.
 
 ---
 
-## The same problem appears across teams
+## The paradox repeats across teams
 
 ::: {.incremental}
-- This is not only a newest-first vs oldest-first problem inside one queue
-- Team A: good hygiene, low backlog age, faster closures
-- Team B: weak hygiene, older backlog, slower closures
-- If the aging risk sits in Team B, that is where leadership should focus
+- The queue-level paradox also shows up across teams
+- Team A: cleaner backlog, faster closures
+- Team B: older backlog, slower closures
+- If the oldest risk sits in Team B, that is where leadership should focus
 :::
 
 ---
 
-## Shifting effort can raise MTTR and lower MOVA
+## Clean up the oldest backlog
 
 ::: {.incremental}
-- Leadership shifts remediation effort toward Team B
-- MTTR rises because older work is finally closing
+- Leadership shifts remediation effort to Team B
+- MTTR rises because old work is finally closing
 - MOVA falls because the oldest exposure is finally moving
-- The system improved even though the headline metric got worse
+- Real risk falls even though the headline metric gets worse
 :::
 
 ::: {.kicker}
-MTTR is locally useful. MOVA is what lets leadership steer the whole system.
+MTTR is locally useful. MOVA gives leadership system-level visibility.
 :::
 
 ---
@@ -640,7 +642,7 @@ MTTR
 :::
 
 ::: {.centered .muted}
-If this is the only KPI, leaders keep attention on teams that already look healthy.
+If this is the only KPI, leaders keep backing what already looks healthy.
 :::
 
 ---
@@ -702,10 +704,10 @@ MTTR still matters. It just cannot stand alone.
 ## Read the signals together
 
 ::: {.incremental}
-- MTTR up + MOVA down = cleanup work is landing
-- MTTR down + MOVA up = recent closures improve optics while exposure worsens
-- Across teams, MTTR up can mean effort moved to the oldest backlog
-- 180+ up = risk is getting stranded
+- MTTR up + MOVA down = old backlog is getting cleared
+- MTTR down + MOVA up = recent closures look better while exposure ages
+- Across teams, MTTR up = effort may have shifted to the oldest backlog
+- 180+ up = aging risk is getting stranded
 :::
 
 ---
@@ -722,6 +724,8 @@ MTTR still matters. It just cannot stand alone.
 ---
 
 ## Real data, not just dashboards
+
+You do not need a new platform for this.
 
 Most teams already have the data. It’s usually sitting in a CSV.
 
@@ -798,6 +802,8 @@ Use Plotnine to make the pattern visible before you explain it.
 ```{python}
 #| echo: true
 #| eval: false
+from plotnine import aes, geom_line, ggplot, labs
+
 (
     ggplot(vulns_by_month, aes("month", "mova_days", color="team"))
     + geom_line(size=2)
@@ -814,6 +820,8 @@ Use Great Tables to make the summary easy to read and hard to misread.
 ```{python}
 #| echo: true
 #| eval: false
+from great_tables import GT
+
 (
     GT(summary_table)
     .tab_header(title="Backlog summary")
@@ -868,11 +876,9 @@ Positron is useful for checking the rows behind the metric before you present it
 ::: {.metric-big .centered}
 Lead with MOVA for exposure.
 
-Keep MTTR for flow,
-but read it with context.
+Keep MTTR for flow.
 
-Use reproducible analysis
-to tell the risk story clearly.
+Read them together.
 :::
 
 ---
@@ -880,12 +886,12 @@ to tell the risk story clearly.
 ## MTTR alone drives the wrong call {.center .statement-slide}
 
 ::: {.metric-big .centered}
-If you run the review on MTTR alone,
+If you optimize for MTTR alone,
 
 you can keep investing in the teams
 that already look healthy,
 
-while the oldest risk sits elsewhere.
+while aging risk sits elsewhere.
 
 That is the wrong decision.
 :::
