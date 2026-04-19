@@ -33,7 +33,6 @@ from plotnine import (
     theme_minimal,
 )
 
-base_vulns = pl.read_parquet("data/base_vulns.parquet")
 metrics = pl.read_parquet("data/metrics.parquet")
 summary = pl.read_parquet("data/summary.parquet")
 
@@ -41,7 +40,6 @@ STRATEGY_LABELS = {
     "oldest_first": "Oldest-First",
     "newest_first": "Newest-First",
 }
-METRIC_COLORS = {"MTTR": "#1F6F78", "MOVA": "#C65A21"}
 STRATEGY_COLORS = {
     "Oldest-First": "#1F6F78",
     "Newest-First": "#8B1E3F",
@@ -57,34 +55,47 @@ def fmt_days(value: float) -> str:
 
 metrics_labeled = metrics.with_columns(
     pl.col("strategy").replace(STRATEGY_LABELS).alias("strategy_label"),
-    pl.col("month").dt.strftime("%b %Y").alias("month_label"),
 )
 
-plot_metrics = pd.DataFrame(
+mttr_compare = pd.DataFrame(
     metrics_labeled
     .select(
         pl.col("strategy_label").alias("strategy"),
         "month_index",
-        pl.col("mttr_days").alias("MTTR"),
-        pl.col("mova_days").alias("MOVA"),
-    )
-    .unpivot(
-        index=["strategy", "month_index"],
-        on=["MTTR", "MOVA"],
-        variable_name="metric",
-        value_name="days",
+        pl.col("mttr_days").alias("days"),
     )
     .to_dicts()
 )
 
-newest_plot = plot_metrics[plot_metrics["strategy"] == "Newest-First"].copy()
-oldest_plot = plot_metrics[plot_metrics["strategy"] == "Oldest-First"].copy()
+mova_compare = pd.DataFrame(
+    metrics_labeled
+    .select(
+        pl.col("strategy_label").alias("strategy"),
+        "month_index",
+        pl.col("mova_days").alias("days"),
+    )
+    .to_dicts()
+)
+
+tail_plot = pd.DataFrame(
+    metrics_labeled
+    .select(
+        pl.col("strategy_label").alias("strategy"),
+        "month_index",
+        "aged_over_180",
+    )
+    .to_dicts()
+)
+
+summary_named = summary.with_columns(
+    pl.col("strategy").replace(STRATEGY_LABELS).alias("strategy_label"),
+)
 
 summary_table = (
     pd.DataFrame(
-        summary
+        summary_named
         .with_columns(
-            pl.col("strategy").replace(STRATEGY_LABELS).alias("Strategy"),
+            pl.col("strategy_label").alias("Strategy"),
             pl.col("mttr_days").round(1).alias("MTTR (days)"),
             pl.col("mova_days").round(1).alias("MOVA (days)"),
             pl.col("open_count").alias("Open"),
@@ -100,29 +111,19 @@ summary_table = (
     )
 )
 
-tail_plot = pd.DataFrame(
-    metrics_labeled
+card_rows = (
+    summary_named
     .select(
-        pl.col("strategy_label").alias("strategy"),
-        "month_index",
+        "strategy_label",
+        pl.col("mttr_days").round(1).alias("mttr_days"),
+        pl.col("mova_days").round(1).alias("mova_days"),
+        "open_count",
         "aged_over_180",
     )
     .to_dicts()
 )
 
-card_rows = (
-    summary
-    .with_columns(
-        pl.col("strategy").replace(STRATEGY_LABELS).alias("strategy"),
-        pl.col("mttr_days").round(1),
-        pl.col("mova_days").round(1),
-    )
-    .sort("strategy", descending=True)
-    .select("strategy", "mttr_days", "mova_days", "open_count", "aged_over_180")
-    .to_dicts()
-)
-
-card_lookup = {row["strategy"]: row for row in card_rows}
+card_lookup = {row["strategy_label"]: row for row in card_rows}
 oldest = card_lookup["Oldest-First"]
 newest = card_lookup["Newest-First"]
 
@@ -140,7 +141,7 @@ shared_theme = (
     theme_minimal(base_size=22)
     + theme(
         figure_size=(11.2, 5.15),
-        legend_position="top",
+        legend_position="none",
         legend_title=element_blank(),
         panel_grid_minor=element_blank(),
         panel_grid_major_x=element_blank(),
@@ -157,26 +158,19 @@ shared_theme = (
 )
 
 chart_theme = shared_theme + theme(
-    legend_position="none",
-    axis_title_x=element_text(margin={"t": 10}),
-    axis_title_y=element_text(margin={"r": 10}),
-)
-
-tail_theme = shared_theme + theme(
-    legend_position="none",
     axis_title_x=element_text(margin={"t": 10}),
     axis_title_y=element_text(margin={"r": 10}),
 )
 
 
-def strategy_chart(source: pd.DataFrame, title: str, subtitle: str):
+def comparison_chart(source: pd.DataFrame, title: str, subtitle: str, y_label: str):
     labels = source[source["month_index"] == source["month_index"].max()].copy()
     labels["label"] = labels.apply(
-        lambda row: f'{row["metric"]} {row["days"]:.0f}d', axis=1
+        lambda row: f'{row["strategy"]} {row["days"]:.0f}d', axis=1
     )
 
     return (
-        ggplot(source, aes(x="month_index", y="days", color="metric"))
+        ggplot(source, aes(x="month_index", y="days", color="strategy"))
         + geom_line(size=2.35)
         + geom_point(data=labels, size=3.8)
         + geom_text(
@@ -186,10 +180,10 @@ def strategy_chart(source: pd.DataFrame, title: str, subtitle: str):
             nudge_x=0.45,
             size=10,
         )
-        + scale_color_manual(values=METRIC_COLORS)
+        + scale_color_manual(values=STRATEGY_COLORS)
         + scale_x_continuous(breaks=[1, 6, 12, 18, 24])
         + coord_cartesian(xlim=(1, 26))
-        + labs(title=title, subtitle=subtitle, x="Month", y="Days")
+        + labs(title=title, subtitle=subtitle, x="Month", y=y_label)
         + chart_theme
     )
 
@@ -198,30 +192,9 @@ tail_labels = tail_plot[tail_plot["month_index"] == tail_plot["month_index"].max
 tail_labels["label"] = tail_labels.apply(
     lambda row: f'{row["strategy"]} {row["aged_over_180"]}', axis=1
 )
-
-timeline_js = (
-    metrics_labeled
-    .filter(pl.col("strategy") == "oldest_first")
-    .select(
-        "month_index",
-        "month_label",
-        pl.col("month").dt.epoch(time_unit="ms").alias("month_ms"),
-    )
-    .sort("month_index")
-    .to_dicts()
-)
-
-base_vulns_js = (
-    base_vulns
-    .select(
-        "id",
-        pl.col("created_at").dt.epoch(time_unit="ms").alias("created_ms"),
-    )
-    .to_dicts()
-)
 ```
 
-## MTTR doubled {.center .hook-slide}
+## MTTR just doubled {.center .hook-slide}
 
 :::: {.shock-card}
 ::: {.shock-label}
@@ -253,7 +226,7 @@ This month
 ::::
 
 ::: {.shock-subtitle}
-Most dashboards call this failure before they ask a better question.
+Dashboards panic here. Better question: what happened to exposure?
 :::
 ::::
 
@@ -265,7 +238,7 @@ Most dashboards call this failure before they ask a better question.
 - Something slowed down
 - The team got worse
 - Leadership should worry
-- Somebody is about to schedule a meeting about the red number
+- Someone is already booking the meeting
 :::
 
 ---
@@ -275,14 +248,10 @@ Most dashboards call this failure before they ask a better question.
 ::: {.metric-big .centered}
 MTTR can rise
 
-while exposure drops
+while exposure falls
 :::
 
 ::: {.callout}
-Dashboards do not lie. They omit professionally.
-:::
-
-::: {.kicker .centered}
 Same team. Same capacity. Better prioritization.
 :::
 
@@ -293,7 +262,7 @@ Same team. Same capacity. Better prioritization.
 Time to remediate **closed** vulnerabilities.
 
 ::: {.kicker}
-Useful for understanding closure speed. Blind to what is still open.
+It measures closure speed, not the age of what remains open.
 :::
 
 ---
@@ -307,7 +276,7 @@ Useful for understanding closure speed. Blind to what is still open.
 How old is the risk we still carry?
 
 ::: {.kicker}
-MOVA measures the backlog that remains, not the work that already left the queue.
+It measures the backlog you still own today.
 :::
 
 ---
@@ -320,7 +289,7 @@ MOVA measures the backlog that remains, not the work that already left the queue
 Flow
 :::
 ### MTTR
-How fast are we closing finished work?
+How fast are we closing work?
 :::
 
 ::: {.definition-card}
@@ -328,7 +297,7 @@ How fast are we closing finished work?
 Stock
 :::
 ### MOVA
-How old is the backlog we still own?
+How old is the work still open?
 :::
 :::
 
@@ -384,7 +353,7 @@ Closure speed
 MOVA
 :::
 ::: {.signal-meaning}
-Current exposure age
+Exposure age
 :::
 :::
 
@@ -409,7 +378,7 @@ Tail risk
 
 ---
 
-## Same records, different filter
+## Same data, different question
 
 :::: {.columns}
 ::: {.column width="50%"}
@@ -456,514 +425,71 @@ mova = (
 ::::
 
 ::: {.kicker}
-Same dataset. Different question. MTTR looks backward at closed work. MOVA looks at current exposure.
+Same data. Different filter.
 :::
 
 ---
 
-## Quarto keeps the story reproducible
+## Why “did we fix it in time?” falls short
 
-::: {.pipeline-grid}
-::: {.pipeline-card}
-::: {.pipeline-step}
-01
-:::
-::: {.pipeline-title}
-Generate
-:::
-::: {.pipeline-text}
-`scripts/01_generate_data.py`
-:::
+::: {.incremental}
+- SLA views are useful
+- They are weak proxies for current exposure
+- They score risk after the window has passed
+- MOVA shows the risk you still own today
 :::
 
-::: {.pipeline-card}
-::: {.pipeline-step}
-02
-:::
-::: {.pipeline-title}
-Simulate
-:::
-::: {.pipeline-text}
-`scripts/02_simulate_metrics.py`
-:::
-:::
+---
 
-::: {.pipeline-card}
-::: {.pipeline-step}
-03
-:::
-::: {.pipeline-title}
-Build Outputs
-:::
-::: {.pipeline-text}
-`scripts/03_build_outputs.py`
-:::
-:::
+## Same capacity, different outcome
 
-::: {.pipeline-card}
-::: {.pipeline-step}
-04
-:::
-::: {.pipeline-title}
-Render Deck
-:::
-::: {.pipeline-text}
-`index.qmd` + Reveal.js + OJS
-:::
-:::
+::: {.incremental}
+- Same arrivals
+- Same fix rate
+- Same time horizon
+- Only prioritization changes
 :::
 
 ::: {.kicker}
-Python generates the reproducible figures. Observable JS handles the interactive simulation. Quarto keeps both in one file.
+Now watch what each metric rewards.
 :::
 
 ---
 
-## Hold capacity constant
-
-::: {.simulation-grid}
-::: {.sim-card}
-::: {.sim-number}
-24
-:::
-::: {.sim-label}
-months
-:::
-:::
-
-::: {.sim-card}
-::: {.sim-number}
-360
-:::
-::: {.sim-label}
-starting backlog
-:::
-:::
-
-::: {.sim-card}
-::: {.sim-number}
-60
-:::
-::: {.sim-label}
-new / month
-:::
-:::
-
-::: {.sim-card}
-::: {.sim-number}
-60
-:::
-::: {.sim-label}
-fixed / month
-:::
-:::
-:::
-
-::: {.kicker}
-Same arrivals. Same fix rate. Same time horizon. Only prioritization changes.
-:::
-
----
-
-## Only the order changes
-
-::: {.strategy-grid}
-::: {.strategy-card}
-::: {.eyebrow}
-Strategy A
-:::
-### Newest-First
-Fix newest findings first.
-:::
-
-::: {.strategy-card}
-::: {.eyebrow}
-Strategy B
-:::
-### Oldest-First
-Fix oldest findings first.
-:::
-:::
-
-::: {.kicker}
-MTTR in the simulation is cumulative average days-to-close for everything closed so far.
-:::
-
----
-
-## Step through the simulation
+## MTTR rewards recent closures
 
 ```{python}
 #| echo: false
-ojs_define(
-    base_vulns_js=base_vulns_js,
-    timeline_js=timeline_js,
-)
-```
-
-```{ojs}
-//| echo: false
-dayMs = 24 * 60 * 60 * 1000
-
-strategyMeta = [
-  {key: "oldest_first", label: "Oldest-First", color: "#1F6F78"},
-  {key: "newest_first", label: "Newest-First", color: "#8B1E3F"}
-]
-
-strategyLabel = new Map(strategyMeta.map((d) => [d.key, d.label]))
-
-monthTimeline = timeline_js.map((d) => ({
-  monthIndex: d.month_index,
-  monthLabel: d.month_label,
-  asOf: new Date(d.month_ms)
-}))
-
-baseRecords = base_vulns_js.map((d) => ({
-  id: d.id,
-  createdAt: new Date(d.created_ms),
-  resolvedAt: null
-}))
-
-mean = (values) =>
-  values.length
-    ? values.reduce((sum, value) => sum + value, 0) / values.length
-    : NaN
-
-daysBetween = (later, earlier) => (later - earlier) / dayMs
-
-activeVulns = (vulns, asOf) => vulns.filter((vuln) => vuln.createdAt <= asOf)
-
-selectToFix = (vulns, limit, strategy) =>
-  vulns
-    .filter((vuln) => vuln.resolvedAt === null)
-    .slice()
-    .sort((left, right) =>
-      strategy === "newest_first"
-        ? right.createdAt - left.createdAt
-        : left.createdAt - right.createdAt
-    )
-    .slice(0, limit)
-
-simulateStrategy = (strategy, monthlyFix = 60) => {
-  const backlog = baseRecords.map((vuln) => ({...vuln}))
-  const snapshots = []
-
-  for (const month of monthTimeline) {
-    const visible = activeVulns(backlog, month.asOf)
-    const selected = selectToFix(visible, monthlyFix, strategy)
-    const selectedIds = new Set(selected.map((vuln) => vuln.id))
-
-    for (const vuln of backlog) {
-      if (selectedIds.has(vuln.id) && vuln.resolvedAt === null) {
-        vuln.resolvedAt = month.asOf
-      }
-    }
-
-    const current = activeVulns(backlog, month.asOf)
-    const open = current.filter((vuln) => vuln.resolvedAt === null)
-    const closed = backlog.filter(
-      (vuln) => vuln.resolvedAt !== null && vuln.resolvedAt <= month.asOf
-    )
-
-    const openAges = open.map((vuln) => daysBetween(month.asOf, vuln.createdAt))
-    const closedDurations = closed.map((vuln) =>
-      daysBetween(vuln.resolvedAt, vuln.createdAt)
-    )
-
-    snapshots.push({
-      strategy,
-      strategyLabel: strategyLabel.get(strategy),
-      monthIndex: month.monthIndex,
-      monthLabel: month.monthLabel,
-      mttrDays: mean(closedDurations),
-      movaDays: mean(openAges),
-      openCount: open.length,
-      closedCount: closed.length,
-      agedOver180: openAges.filter((days) => days >= 180).length
-    })
-  }
-
-  return snapshots
-}
-
-simMetrics = strategyMeta.flatMap((strategy) => simulateStrategy(strategy.key))
-
-currentRows = (monthIndex) =>
-  simMetrics.filter((row) => row.monthIndex === monthIndex)
-
-currentLookup = (monthIndex) =>
-  new Map(currentRows(monthIndex).map((row) => [row.strategyLabel, row]))
-
-simCardHtml = (monthIndex) => {
-  const rows = currentLookup(monthIndex)
-  const newest = rows.get("Newest-First")
-  const oldest = rows.get("Oldest-First")
-
-  return html`
-    <div class="dashboard-grid">
-      <div class="dashboard-card dashboard-detail">
-        <div class="dashboard-title">Newest-First</div>
-        <div class="dashboard-stat"><span>MTTR</span><strong>${newest.mttrDays.toFixed(1)} days</strong></div>
-        <div class="dashboard-stat"><span>MOVA</span><strong>${newest.movaDays.toFixed(1)} days</strong></div>
-        <div class="dashboard-stat"><span>Open</span><strong>${newest.openCount}</strong></div>
-        <div class="dashboard-stat"><span>180+ days</span><strong>${newest.agedOver180}</strong></div>
-      </div>
-      <div class="dashboard-card dashboard-detail winner">
-        <div class="dashboard-title">Oldest-First</div>
-        <div class="dashboard-stat"><span>MTTR</span><strong>${oldest.mttrDays.toFixed(1)} days</strong></div>
-        <div class="dashboard-stat"><span>MOVA</span><strong>${oldest.movaDays.toFixed(1)} days</strong></div>
-        <div class="dashboard-stat"><span>Open</span><strong>${oldest.openCount}</strong></div>
-        <div class="dashboard-stat"><span>180+ days</span><strong>${oldest.agedOver180}</strong></div>
-      </div>
-    </div>
-  `
-}
-
-comparisonSentence = (monthIndex) => {
-  const rows = currentLookup(monthIndex)
-  const newest = rows.get("Newest-First")
-  const oldest = rows.get("Oldest-First")
-
-  return html`
-    <div class="sim-callout">
-      <strong>${monthTimeline[monthIndex - 1].monthLabel}:</strong>
-      Newest-First keeps MTTR lower at <strong>${newest.mttrDays.toFixed(1)} days</strong>,
-      but Oldest-First cuts MOVA to <strong>${oldest.movaDays.toFixed(1)} days</strong>
-      while Newest-First still carries <strong>${newest.agedOver180}</strong> findings older than 180 days.
-    </div>
-  `
-}
-
-metricPlot = ({metric, label, width = 430}) =>
-  Plot.plot({
-    width,
-    height: 255,
-    marginTop: 34,
-    marginRight: 18,
-    marginBottom: 44,
-    marginLeft: 64,
-    style: {
-      background: "#fffaf2",
-      color: "#182126",
-      fontFamily: "Avenir Next, Segoe UI, Helvetica Neue, sans-serif",
-      fontSize: "14px"
-    },
-    color: {
-      legend: true,
-      domain: strategyMeta.map((d) => d.label),
-      range: strategyMeta.map((d) => d.color)
-    },
-    x: {label: "Month", ticks: [1, 6, 12, 18, 24]},
-    y: {label, grid: true},
-    marks: [
-      Plot.ruleX([selectedMonth], {stroke: "#c65a21", strokeWidth: 2}),
-      Plot.lineY(simMetrics, {
-        x: "monthIndex",
-        y: metric,
-        stroke: "strategyLabel",
-        strokeWidth: 4
-      }),
-      Plot.dot(
-        simMetrics.filter((row) => row.monthIndex === selectedMonth),
-        {
-          x: "monthIndex",
-          y: metric,
-          fill: "strategyLabel",
-          r: 5
-        }
-      ),
-      Plot.ruleY([0], {stroke: "#d9cfbf"})
-    ]
-  })
-
-tailPlot = (width = 620) =>
-  Plot.plot({
-    width,
-    height: 305,
-    marginTop: 34,
-    marginRight: 18,
-    marginBottom: 44,
-    marginLeft: 64,
-    style: {
-      background: "#fffaf2",
-      color: "#182126",
-      fontFamily: "Avenir Next, Segoe UI, Helvetica Neue, sans-serif",
-      fontSize: "14px"
-    },
-    color: {
-      legend: true,
-      domain: strategyMeta.map((d) => d.label),
-      range: strategyMeta.map((d) => d.color)
-    },
-    x: {label: "Month", ticks: [1, 6, 12, 18, 24]},
-    y: {label: "Open vulnerabilities older than 180 days", grid: true},
-    marks: [
-      Plot.ruleX([selectedMonth], {stroke: "#c65a21", strokeWidth: 2}),
-      Plot.lineY(simMetrics, {
-        x: "monthIndex",
-        y: "agedOver180",
-        stroke: "strategyLabel",
-        strokeWidth: 4
-      }),
-      Plot.dot(
-        simMetrics.filter((row) => row.monthIndex === selectedMonth),
-        {
-          x: "monthIndex",
-          y: "agedOver180",
-          fill: "strategyLabel",
-          r: 5
-        }
-      ),
-      Plot.ruleY([0], {stroke: "#d9cfbf"})
-    ]
-  })
-
-simulationControl = ({labels, initialValue = 1}) => {
-  const form = html`
-    <form class="sim-controls">
-      <button type="button">Play</button>
-      <input type="range" min="1" max="${labels.length}" step="1" value="${initialValue}" />
-      <div class="sim-status"></div>
-    </form>
-  `
-
-  const button = form.querySelector("button")
-  const slider = form.querySelector("input")
-  const status = form.querySelector(".sim-status")
-  let timer = null
-
-  const stop = () => {
-    if (timer !== null) {
-      clearInterval(timer)
-      timer = null
-    }
-    button.textContent = "Play"
-  }
-
-  const update = (emit = true) => {
-    form.value = Number(slider.value)
-    status.textContent = `Month ${form.value} of ${labels.length} • ${labels[form.value - 1]}`
-    if (emit) {
-      form.dispatchEvent(new Event("input", {bubbles: true}))
-    }
-  }
-
-  slider.addEventListener("input", () => update())
-  button.addEventListener("click", (event) => {
-    event.preventDefault()
-    if (timer !== null) {
-      stop()
-      return
-    }
-
-    button.textContent = "Pause"
-    timer = setInterval(() => {
-      slider.value = Number(slider.value) >= labels.length ? 1 : Number(slider.value) + 1
-      update()
-    }, 1200)
-  })
-
-  update(false)
-  invalidation.then(stop)
-  return form
-}
-```
-
-```{ojs}
-//| echo: false
-viewof selectedMonth = simulationControl({
-  labels: monthTimeline.map((month) => month.monthLabel),
-  initialValue: 1
-})
-```
-
-```{ojs}
-//| echo: false
-comparisonSentence(selectedMonth)
-```
-
-:::: {.columns}
-::: {.column width="50%"}
-
-```{ojs}
-//| echo: false
-metricPlot({metric: "mttrDays", label: "MTTR (days)"})
-```
-:::
-
-::: {.column width="50%"}
-
-```{ojs}
-//| echo: false
-metricPlot({metric: "movaDays", label: "MOVA (days)"})
-```
-:::
-::::
-
-::: {.kicker}
-Use the slider or Play to watch the paradox emerge month by month.
-:::
-
----
-
-## The tail appears slowly
-
-:::: {.columns}
-::: {.column width="42%"}
-
-```{ojs}
-//| echo: false
-simCardHtml(selectedMonth)
-```
-:::
-
-::: {.column width="58%"}
-
-```{ojs}
-//| echo: false
-tailPlot()
-```
-:::
-::::
-
-::: {.kicker}
-Newest-First keeps the closure metric pretty. Oldest-First removes the long-lived exposure that leadership actually owns.
-:::
-
----
-
-## Newest-First wins MTTR
-
-```{python}
-#| echo: false
-#| fig-alt: "Line chart for newest-first prioritization. Cumulative MTTR stays low while MOVA climbs sharply over the 24-month period."
-strategy_chart(
-    newest_plot,
-    title="Newest-First",
-    subtitle="Cumulative MTTR stays low while the open backlog keeps aging",
+#| fig-alt: "Line chart comparing MTTR over time for newest-first and oldest-first prioritization. Newest-first stays lower because it closes recent work first."
+comparison_chart(
+    mttr_compare,
+    title="MTTR over time",
+    subtitle="Newest-First looks better because it closes newer work first",
+    y_label="MTTR (days)",
 )
 ```
 
 ::: {.centered .muted}
-Fast closures. Old risk.
+On MTTR, Newest-First wins.
 :::
 
 ---
 
-## Oldest-First lowers exposure
+## MOVA shows remaining exposure
 
 ```{python}
 #| echo: false
-#| fig-alt: "Line chart for oldest-first prioritization. MTTR rises because old work closes, while MOVA drops as old exposure leaves the backlog."
-strategy_chart(
-    oldest_plot,
-    title="Oldest-First",
-    subtitle="MTTR rises because old work closes; MOVA falls because old risk disappears",
+#| fig-alt: "Line chart comparing MOVA over time for newest-first and oldest-first prioritization. Oldest-first lowers exposure by removing old backlog first."
+comparison_chart(
+    mova_compare,
+    title="MOVA over time",
+    subtitle="Oldest-First lowers exposure because old backlog leaves first",
+    y_label="MOVA (days)",
 )
 ```
 
 ::: {.centered .muted}
-Higher MTTR. Lower exposure.
+On MOVA, Oldest-First wins.
 :::
 
 ---
@@ -993,13 +519,17 @@ Higher MTTR. Lower exposure.
         x="Month",
         y="Open vulnerabilities",
     )
-    + tail_theme
+    + chart_theme
 )
 ```
 
+::: {.centered .muted}
+This is the risk that stays stranded.
+:::
+
 ---
 
-## End state: the tail is the story
+## End state: the tail tells the story
 
 ::: {.score-grid .tail-grid}
 ::: {.score-card .score-good}
@@ -1028,12 +558,12 @@ findings older than 180 days
 :::
 
 ::: {.centered .muted}
-Under newest-first, every open item is older than 180 days.
+Under Newest-First, the old risk barely moves.
 :::
 
 ---
 
-## Same data, different story
+## Same data, wrong winner
 
 ```{python}
 #| echo: false
@@ -1050,12 +580,12 @@ Under newest-first, every open item is older than 180 days.
 ```
 
 ::: {.kicker}
-If you only read MTTR, you pick the wrong winner.
+Read only MTTR and you pick the wrong winner.
 :::
 
 ---
 
-## Leadership sees MTTR only {auto-animate="true"}
+## When leadership sees only MTTR {auto-animate="true"}
 
 ::: {.dashboard-grid}
 ::: {.dashboard-card .winner}
@@ -1084,12 +614,12 @@ MTTR
 :::
 
 ::: {.centered .muted}
-If this is the only KPI, teams will close tickets like it’s cardio.
+If this is the only KPI, teams optimize for optics.
 :::
 
 ---
 
-## Leadership sees the full system {auto-animate="true"}
+## When leadership sees the full system {auto-animate="true"}
 
 ::: {.dashboard-grid}
 ::: {.dashboard-card .dashboard-detail}
@@ -1138,7 +668,7 @@ Oldest-First
 :::
 
 ::: {.centered .muted}
-MTTR still matters. It just stops being the only story.
+MTTR still matters. It just cannot stand alone.
 :::
 
 ---
@@ -1146,25 +676,165 @@ MTTR still matters. It just stops being the only story.
 ## Read the signals together
 
 ::: {.incremental}
-- MTTR rising + MOVA falling = backlog cleanup
-- MTTR falling + MOVA rising = optics improving while exposure worsens
-- 180+ rising = risk is getting stranded in the tail
+- MTTR up + MOVA down = backlog cleanup
+- MTTR down + MOVA up = optics improve while exposure worsens
+- 180+ up = risk is getting stranded in the tail
 :::
 
 ---
 
-## Reporting guidance
+## What to report
 
 ::: {.incremental}
 - Put MTTR and MOVA on the same monthly dashboard
-- Add open count and an aged backlog threshold like 180+ days
-- Label the MTTR window clearly before you interpret a regression
-- Use the bundle to explain cleanup periods when old backlog finally gets closed
+- Add open count and a threshold like 180+ days
+- Label the MTTR window before calling a regression
+- Use the bundle to explain backlog cleanup when old work closes
 :::
 
 ---
 
-## Final line {.center .statement-slide}
+## Real data, not just dashboards
+
+Most teams already have the data. It’s usually sitting in a CSV.
+
+::: {.incremental}
+- CSVs are messy and unavoidable
+- Dashboards hide the logic
+- Analysts need control of the definitions
+:::
+
+---
+
+## Own the definition in Polars
+
+:::: {.columns}
+::: {.column width="52%"}
+
+```{python}
+#| echo: true
+#| eval: false
+import polars as pl
+
+vulns = pl.read_csv("vulnerabilities.csv", try_parse_dates=True)
+```
+
+```{python}
+#| echo: true
+#| eval: false
+from datetime import datetime
+
+as_of = datetime(2026, 4, 1)
+
+vulns = vulns.with_columns(
+    pl.when(pl.col("resolved_at").is_not_null())
+    .then((pl.col("resolved_at") - pl.col("created_at")).dt.total_days())
+    .otherwise(None)
+    .alias("days_to_fix"),
+    pl.when(pl.col("resolved_at").is_null())
+    .then((pl.lit(as_of) - pl.col("created_at")).dt.total_days())
+    .otherwise(None)
+    .alias("open_age_days"),
+)
+
+mttr = vulns.select(pl.col("days_to_fix").mean().alias("mttr_days"))
+mova = vulns.select(pl.col("open_age_days").mean().alias("mova_days"))
+```
+:::
+
+::: {.column width="48%"}
+
+```{python}
+#| echo: true
+#| eval: false
+vulns.group_by("severity").agg(
+    pl.col("open_age_days").mean().alias("mova_days")
+)
+```
+:::
+::::
+
+---
+
+## Turn analysis into a story
+
+Charts help people see. Tables help people decide.
+
+---
+
+## Plotnine for trends
+
+Show the pattern before you explain it.
+
+```{python}
+#| echo: true
+#| eval: false
+(
+    ggplot(vulns_by_month, aes("month", "mova_days", color="team"))
+    + geom_line(size=2)
+    + labs(x="Month", y="MOVA (days)")
+)
+```
+
+---
+
+## Great Tables for decisions
+
+Make the summary easy to read and hard to misread.
+
+```{python}
+#| echo: true
+#| eval: false
+(
+    GT(summary_table)
+    .tab_header(title="Backlog summary")
+    .fmt_number(columns=["MOVA (days)"], decimals=1)
+)
+```
+
+---
+
+## Quarto for publishing
+
+Keep analysis, charts, and narrative together in one reproducible document.
+
+````markdown
+## Monthly Risk Review
+
+```{{python}}
+build_mova_chart(vulns)
+```
+````
+
+---
+
+## Positron for exploration
+
+Inspect the rows behind the metric before you present it.
+
+```{python}
+#| echo: true
+#| eval: false
+(
+    vulns
+    .filter(pl.col("open_age_days") > 180)
+    .sort("open_age_days", descending=True)
+)
+```
+
+---
+
+## Can AI do this for me?
+
+::: {.incremental}
+- AI can draft transforms, charts, and a first pass
+- You still define the metric
+- Use AI to move faster; use code to own it
+:::
+
+---
+
+## Report both {.center .statement-slide}
 
 ::: {.metric-big .centered}
 MTTR measures closure speed.
