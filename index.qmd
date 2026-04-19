@@ -226,7 +226,7 @@ This month
 ::::
 
 ::: {.shock-subtitle}
-Dashboards panic here. Better question: what happened to exposure?
+Dashboards panic here. The better question is: what happened to exposure?
 :::
 ::::
 
@@ -252,7 +252,7 @@ while exposure falls
 :::
 
 ::: {.callout}
-Same team. Same capacity. Better prioritization.
+Same team. Same capacity. Different prioritization.
 :::
 
 ---
@@ -262,7 +262,7 @@ Same team. Same capacity. Better prioritization.
 Time to remediate **closed** vulnerabilities.
 
 ::: {.kicker}
-It measures closure speed, not the age of what remains open.
+It measures closure speed, not the age of the backlog that remains.
 :::
 
 ---
@@ -273,10 +273,10 @@ It measures closure speed, not the age of what remains open.
 **Mean Open Vulnerability Age**
 :::
 
-How old is the risk we still carry?
+How old is the vulnerability backlog we still carry?
 
 ::: {.kicker}
-It measures the backlog you still own today.
+It measures the age of the backlog you still own today.
 :::
 
 ---
@@ -336,7 +336,7 @@ The tail does not.
 
 ---
 
-## Report the bundle
+## Report the full picture
 
 ::: {.signal-grid}
 ::: {.signal-card}
@@ -436,9 +436,9 @@ Same data. Different filter.
 
 ::: {.incremental}
 - SLA views are useful
-- They are weak proxies for current exposure
-- They score risk after the window has passed
-- MOVA shows the risk you still own today
+- But they tell you whether you met a deadline
+- They say less about the exposure you still carry now
+- MOVA shows the age of the backlog still open today
 :::
 
 ---
@@ -449,7 +449,7 @@ Same data. Different filter.
 - Same arrivals
 - Same fix rate
 - Same time horizon
-- Only prioritization changes
+- Only the order of work changes
 :::
 
 ::: {.kicker}
@@ -466,7 +466,7 @@ Now watch what each metric rewards.
 comparison_chart(
     mttr_compare,
     title="MTTR over time",
-    subtitle="Newest-First looks better because it closes newer work first",
+    subtitle="Newest-First looks better because it closes recent work first",
     y_label="MTTR (days)",
 )
 ```
@@ -485,7 +485,7 @@ On MTTR, Newest-First wins.
 comparison_chart(
     mova_compare,
     title="MOVA over time",
-    subtitle="Oldest-First lowers exposure because old backlog leaves first",
+    subtitle="Oldest-First lowers backlog age because the oldest work leaves first",
     y_label="MOVA (days)",
 )
 ```
@@ -526,7 +526,7 @@ On MOVA, Oldest-First wins.
 ```
 
 ::: {.centered .muted}
-This is the risk that stays stranded.
+This is the backlog that stays stranded.
 :::
 
 ---
@@ -560,7 +560,7 @@ findings older than 180 days
 :::
 
 ::: {.centered .muted}
-Under Newest-First, the old risk barely moves.
+Under Newest-First, the old backlog barely moves.
 :::
 
 ---
@@ -590,10 +590,10 @@ Read only MTTR and you pick the wrong winner.
 ## The paradox repeats across teams
 
 ::: {.incremental}
-- The queue-level paradox also shows up across teams
-- Team A: cleaner backlog, faster closures
-- Team B: older backlog, slower closures
-- If the oldest risk sits in Team B, that is where leadership should focus
+- The same paradox appears across teams
+- Team A has a cleaner backlog and faster closures
+- Team B has an older backlog and slower closures
+- If the oldest backlog sits in Team B, leadership should focus there
 :::
 
 ---
@@ -602,13 +602,13 @@ Read only MTTR and you pick the wrong winner.
 
 ::: {.incremental}
 - Leadership shifts remediation effort to Team B
-- MTTR rises because old work is finally closing
-- MOVA falls because the oldest exposure is finally moving
-- Real risk falls even though the headline metric gets worse
+- MTTR rises because older work is finally closing
+- MOVA falls because the oldest backlog is finally shrinking
+- Exposure drops even though the headline metric looks worse
 :::
 
 ::: {.kicker}
-MTTR is locally useful. MOVA gives leadership system-level visibility.
+MTTR helps you read team flow. MOVA helps leadership see system health.
 :::
 
 ---
@@ -642,7 +642,7 @@ MTTR
 :::
 
 ::: {.centered .muted}
-If this is the only KPI, leaders keep backing what already looks healthy.
+If this is the only KPI, leaders keep rewarding what already looks healthy.
 :::
 
 ---
@@ -705,9 +705,9 @@ MTTR still matters. It just cannot stand alone.
 
 ::: {.incremental}
 - MTTR up + MOVA down = old backlog is getting cleared
-- MTTR down + MOVA up = recent closures look better while exposure ages
-- Across teams, MTTR up = effort may have shifted to the oldest backlog
-- 180+ up = aging risk is getting stranded
+- MTTR down + MOVA up = recent closures look better while backlog age worsens
+- Across teams, MTTR up can mean effort shifted to the oldest backlog
+- 180+ up = aging backlog is getting stranded
 :::
 
 ---
@@ -716,9 +716,9 @@ MTTR still matters. It just cannot stand alone.
 
 ::: {.incremental}
 - Put MTTR and MOVA on the same monthly view
-- Add open count and a threshold like 180+ days
-- Label the MTTR window before calling a regression
-- Use the bundle to explain cleanup work when old findings close
+- Add open count and a threshold such as 180+ days
+- Label the MTTR time window before calling a regression
+- Use the full set of metrics to explain cleanup work when old findings close
 :::
 
 ---
@@ -727,12 +727,12 @@ MTTR still matters. It just cannot stand alone.
 
 You do not need a new platform for this.
 
-Most teams already have the data. It’s usually sitting in a CSV.
+Most teams already have the raw data. It is usually sitting in a CSV.
 
 ::: {.incremental}
 - CSVs are messy and unavoidable
-- Dashboards hide the definition
-- Analysts need control of the definitions
+- Dashboards often hide the metric definition
+- Analysts need to own the definition in code
 :::
 
 ---
@@ -784,14 +784,6 @@ vulns.group_by("severity").agg(
 ```
 :::
 ::::
-
----
-
-## Turn analysis into a story
-
-The point is a repeatable path from raw rows to a leadership-ready review.
-
-Charts help people see. Tables help people decide.
 
 ---
 
@@ -866,7 +858,8 @@ Positron is useful for checking the rows behind the metric before you present it
 ::: {.incremental}
 - AI can speed up transforms, charts, and first drafts
 - The metric definition and review still need an owner
-- Use AI to move faster; use code to keep the work auditable and repeatable
+- Use AI to move faster
+- Use code to keep the work auditable and repeatable
 :::
 
 ---
@@ -878,7 +871,7 @@ Lead with MOVA for exposure.
 
 Keep MTTR for flow.
 
-Read them together.
+Read them together, not alone.
 :::
 
 ---
@@ -891,7 +884,7 @@ If you optimize for MTTR alone,
 you can keep investing in the teams
 that already look healthy,
 
-while aging risk sits elsewhere.
+while aging backlog sits elsewhere.
 
 That is the wrong decision.
 :::
