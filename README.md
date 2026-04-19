@@ -1,6 +1,6 @@
 # Why Vulnerability MTTR Alone Misleads
 
-This repository contains a Quarto presentation and supporting analysis that argues for pairing **MTTR** with **Mean Open Vulnerability Age (MOVA)** when communicating vulnerability risk.
+This repository contains a [Quarto](https://quarto.org/) presentation and supporting analysis code that argues for pairing **MTTR** with **Mean Open Vulnerability Age (MOVA)** when communicating vulnerability risk.
 
 - **MTTR = flow**: how fast closed work moved through the system
 - **MOVA = stock**: how old the remaining open exposure is
@@ -11,12 +11,18 @@ The talk is built as a reproducible, vendor-neutral, analysis-as-code workflow f
 
 ## What This Repo Contains
 
-- A Quarto / Reveal.js presentation in `index.qmd`
-- Python and Polars scripts that generate the synthetic data and metrics
-- Plotnine charts and Great Tables outputs used in the deck
+- A [Quarto](https://quarto.org/) / Reveal.js presentation in `index.qmd`
+- Python and [Polars](https://pola.rs/) scripts that generate the synthetic data and metrics
+- [Plotnine](https://plotnine.org/) charts and [Great Tables](https://posit-dev.github.io/great-tables/) outputs used in the deck
 - Parquet artifacts in `data/` for reproducible intermediate results
 
-Everything is designed to be inspectable, rerunnable, and easy to adapt.
+Everything is designed to be inspectable, rerunnable, and easy to adapt or challenge.
+
+## Tools & Approach
+
+- [Quarto](https://quarto.org/) keeps the deck, narrative, and outputs in one reproducible workflow.
+- [Positron](https://positron.posit.co/) is a practical place to explore the data and iterate on the analysis before rendering outputs.
+- [Polars](https://pola.rs/) handles the metric logic; [Plotnine](https://plotnine.org/) and [Great Tables](https://posit-dev.github.io/great-tables/) keep charts and tables in code, so the analysis stays inspectable and rerunnable.
 
 ## Quick Start
 
@@ -61,7 +67,7 @@ If you report MTTR alone, you can reward fast closure while older risk keeps agi
 ## Repository Layout
 
 - `index.qmd`: the presentation and argument
-- `scripts/`: synthetic data generation, simulation, and output builds
+- `scripts/`: synthetic data generation, simulation, and metric builds
 - `data/`: generated Parquet artifacts
 - `_quarto.yml` and `pyproject.toml`: render and environment configuration
 - `rehearsal/speaker-notes.md`: rehearsal notes
@@ -71,10 +77,14 @@ If you report MTTR alone, you can reward fast closure while older risk keeps agi
 The repo stays intentionally simple:
 
 - synthetic data instead of production data
-- explicit assumptions instead of hidden dashboard logic
-- code-based analysis instead of ad hoc one-off interpretation
+- explicit assumptions instead of hidden dashboard defaults
+- code-based analysis instead of ad hoc interpretation
 
-That makes the workflow auditable, repeatable, and cheaper to rerun when questions change.
+That keeps the workflow auditable, repeatable, and cheap to rerun when the question changes.
+
+## Further Reading
+
+For learning Polars, *[Python Polars: The Definitive Guide](https://polarsguide.com/)* by Jeroen Janssens and Thijs Nieuwdorp is a practical recommendation.
 
 ## License
 
