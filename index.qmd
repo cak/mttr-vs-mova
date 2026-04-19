@@ -585,6 +585,32 @@ Read only MTTR and you pick the wrong winner.
 
 ---
 
+## The same problem appears across teams
+
+::: {.incremental}
+- This is not only a newest-first vs oldest-first problem inside one queue
+- Team A: good hygiene, low backlog age, faster closures
+- Team B: weak hygiene, older backlog, slower closures
+- If the aging risk sits in Team B, that is where leadership should focus
+:::
+
+---
+
+## Shifting effort can raise MTTR and lower MOVA
+
+::: {.incremental}
+- Leadership shifts remediation effort toward Team B
+- MTTR rises because older work is finally closing
+- MOVA falls because the oldest exposure is finally moving
+- The system improved even though the headline metric got worse
+:::
+
+::: {.kicker}
+MTTR is locally useful. MOVA is what lets leadership steer the whole system.
+:::
+
+---
+
 ## When leadership sees only MTTR {auto-animate="true"}
 
 ::: {.dashboard-grid}
@@ -614,7 +640,7 @@ MTTR
 :::
 
 ::: {.centered .muted}
-If this is the only KPI, teams optimize for optics.
+If this is the only KPI, leaders keep attention on teams that already look healthy.
 :::
 
 ---
@@ -678,6 +704,7 @@ MTTR still matters. It just cannot stand alone.
 ::: {.incremental}
 - MTTR up + MOVA down = cleanup work is landing
 - MTTR down + MOVA up = recent closures improve optics while exposure worsens
+- Across teams, MTTR up can mean effort moved to the oldest backlog
 - 180+ up = risk is getting stranded
 :::
 
@@ -855,8 +882,10 @@ to tell the risk story clearly.
 ::: {.metric-big .centered}
 If you run the review on MTTR alone,
 
-you can tell leadership risk is down
-while the oldest risk is still sitting open.
+you can keep investing in the teams
+that already look healthy,
+
+while the oldest risk sits elsewhere.
 
 That is the wrong decision.
 :::
