@@ -158,7 +158,7 @@ Dashboards signal failure here. The better question is: what happened to exposur
 ::: {.metric-big .centered}
 MTTR can rise
 
-while exposure falls
+while backlog age falls
 :::
 
 ::: {.callout}
@@ -263,7 +263,7 @@ Closure speed
 MOVA
 :::
 ::: {.signal-meaning}
-Exposure age
+Backlog age
 :::
 :::
 
@@ -281,7 +281,7 @@ Backlog size
 180+ Days
 :::
 ::: {.signal-meaning}
-Tail risk
+Aging tail
 :::
 :::
 :::
@@ -450,7 +450,7 @@ On MTTR, Newest-First wins.
 
 ---
 
-## MOVA shows remaining exposure
+## MOVA shows backlog age
 
 ```{python}
 #| echo: false
@@ -494,7 +494,7 @@ mova_labels = (
     + scale_x_continuous(breaks=MONTH_BREAKS)
     + coord_cartesian(xlim=(1, 27))
     + labs(
-        title="Oldest-First lowers exposure age",
+        title="Oldest-First lowers backlog age",
         subtitle="Working the oldest backlog first lowers the age still carried.",
         x="Month",
         y="MOVA (days)",
@@ -609,7 +609,7 @@ Under Newest-First, the old backlog barely moves.
 decision_table = (
     summary.with_columns(
         pl.when(pl.col("strategy") == "oldest_first")
-        .then(pl.lit("Stronger exposure outcome"))
+        .then(pl.lit("Stronger backlog outcome"))
         .otherwise(pl.lit("Wins on MTTR only"))
         .alias("decision"),
         pl.when(pl.col("strategy") == "oldest_first")
@@ -632,16 +632,16 @@ decision_table = (
     GT(decision_table, rowname_col="strategy_label")
     .tab_header(
         title="Same data, different winner",
-        subtitle="Newest-First wins on flow. Oldest-First wins on exposure age.",
+        subtitle="Newest-First wins on flow. Oldest-First wins on backlog age.",
     )
     .tab_spanner(label="Flow", columns="mttr_days")
-    .tab_spanner(label="Exposure Age", columns=["mova_days", "aged_over_180"])
+    .tab_spanner(label="Backlog Age", columns=["mova_days", "aged_over_180"])
     .tab_spanner(label="Backlog", columns="open_count")
     .tab_spanner(label="Interpretation", columns="decision")
     .cols_label(
         mttr_days="MTTR",
         mova_days="MOVA",
-        open_count="Open",
+        open_count="Open count",
         aged_over_180="180+ tail",
         decision="Decision",
     )
@@ -708,7 +708,7 @@ Read only MTTR and you pick the wrong winner.
 :::
 
 ::: {.kicker}
-MTTR shows flow. MOVA shows exposure.
+MTTR shows flow. MOVA reveals aging exposure.
 :::
 
 ---
@@ -763,7 +763,7 @@ Newest-First
 <strong>`{python} newest_mova` days</strong>
 :::
 ::: {.dashboard-stat}
-<span>Open</span>
+<span>Open count</span>
 <strong>`{python} newest_open`</strong>
 :::
 ::: {.dashboard-stat}
@@ -785,7 +785,7 @@ Oldest-First
 <strong>`{python} oldest_mova` days</strong>
 :::
 ::: {.dashboard-stat}
-<span>Open</span>
+<span>Open count</span>
 <strong>`{python} oldest_open`</strong>
 :::
 ::: {.dashboard-stat}
@@ -880,7 +880,7 @@ Lead with MOVA for exposure.
 
 Use MTTR for flow.
 
-Read them together.
+Read them together, not alone.
 :::
 
 ---
@@ -906,7 +906,7 @@ That is the wrong decision.
 - Report MTTR and MOVA side by side
 - Track `180+ days open` as a separate backlog line
 - Define both metrics in code before they reach the dashboard
-- Show one chart and one table that make aging risk visible
+- Show one chart and one table that make exposure visible
 :::
 
 ---
