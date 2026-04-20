@@ -1,6 +1,6 @@
 # Why Vulnerability MTTR Alone Misleads
 
-This repository contains a [Quarto](https://quarto.org/) / Reveal.js talk and the supporting analysis code. The deck argues that vulnerability programs should read **MTTR** and **Mean Open Vulnerability Age (MOVA)** together, not as standalone signals.
+This repository contains a [Quarto](https://quarto.org/) / Reveal.js talk and the supporting analysis code. The deck argues that vulnerability programs should read **MTTR** and **Mean Open Vulnerability Age (MOVA)** together because they answer different questions.
 
 - **MTTR = flow**: how long closed work took to remediate
 - **MOVA = stock**: how old the open backlog is right now
@@ -9,11 +9,11 @@ The examples are vendor-neutral, use synthetic data, and are fully inspectable. 
 
 ## Talk Summary
 
-The talk centers on a simple operational paradox: **MTTR can get worse while exposure is going down**.
+The talk centers on a simple operational paradox: **MTTR can get worse while exposure is improving**.
 
-When a team prioritizes older findings, the work it closes is older, so MTTR rises. Dashboards signal failure, even as the backlog becomes healthier.
+When a team prioritizes older findings, the work it closes is older, so MTTR rises. Dashboards signal failure, even as exposure is going down.
 
-MOVA fills that gap by measuring the age of the vulnerabilities still open. This repo demonstrates the difference with a reproducible simulation that holds arrivals, capacity, and time horizon constant while comparing two strategies:
+MOVA fills that gap by measuring the age of the backlog still open. This repo demonstrates the difference with a reproducible simulation that holds arrivals, capacity, and time horizon constant while comparing two strategies:
 
 - **Newest-First**: keeps MTTR low by closing recent work first
 - **Oldest-First**: raises MTTR while reducing backlog age and the `180+ days` tail
@@ -25,8 +25,8 @@ The point is not to replace MTTR, but to keep it in context with the exposure th
 The deck makes five claims:
 
 - MTTR tells you about completed work, not the backlog that remains.
-- MOVA shows whether the exposure you still carry is getting older or younger.
-- Open count and the `180+ days` tail help explain whether aging risk is actually being reduced.
+- MOVA shows whether the open backlog is getting older or younger.
+- Open count and the `180+ days` tail help explain whether the aging backlog is actually shrinking.
 - The metrics should be defined in code and reviewed together, not inherited from a dashboard.
 - MTTR describes flow. MOVA describes stock. Both are required to understand the system.
 
@@ -67,18 +67,18 @@ The simulation holds the system constant and changes only prioritization.
 - **Oldest-First** closes the aging backlog first, which lowers MOVA and reduces the `180+ days` tail.
 - Both strategies run with the same arrivals, the same monthly remediation capacity, and the same time horizon.
 
-The headline MTTR winner is not necessarily the exposure winner.
+The headline MTTR winner is not necessarily the backlog winner.
 
 ## Why It Matters
 
-Read alone, MTTR rewards recent closure while older backlog can remain stranded.
+Read alone, MTTR rewards recent closure while older exposure can remain stranded.
 
-Read with MOVA, open count, and the `180+ days` tail, it becomes clearer whether the system is getting safer or just moving faster.
+Read with MOVA, open count, and the `180+ days` tail, it becomes clearer whether exposure is improving or work is just moving faster.
 
 This is also an argument for analysis-as-code. Most teams already have the underlying data. A CSV export is often enough. The harder problem is owning the metric definition rather than accepting whatever the dashboard reports.
 
 MTTR shows flow.
-MOVA shows exposure.
+MOVA reveals exposure through backlog age.
 
 ## Repository Layout
 
