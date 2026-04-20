@@ -668,7 +668,7 @@ decision_table = (
     )
     .tab_style(
         style=style.text(weight="bold"),
-        locations=loc.stub_cells(),
+        locations=loc.stub(),
     )
     .tab_style(
         style=style.text(weight="bold"),
