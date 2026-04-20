@@ -1,32 +1,40 @@
 # Why Vulnerability MTTR Alone Misleads
 
-This repository contains a [Quarto](https://quarto.org/) presentation and supporting analysis code that argues for pairing **MTTR** with **Mean Open Vulnerability Age (MOVA)** when communicating vulnerability risk.
+This repository contains a [Quarto](https://quarto.org/) / Reveal.js talk and the supporting analysis code behind it. The deck argues that vulnerability programs should read **MTTR** and **Mean Open Vulnerability Age (MOVA)** together:
 
-- **MTTR = flow**: how fast closed work moved through the system
-- **MOVA = stock**: how old the remaining open exposure is
+- **MTTR = flow**: how long closed work took to remediate
+- **MOVA = stock**: how old the open backlog is right now
 
-The core point is simple: MTTR is useful, but it can mislead when reported alone. A team can close older vulnerabilities, improve its actual risk posture, and still watch MTTR get worse. MOVA makes that behavior visible.
+The examples are vendor-neutral, built from synthetic data, and fully inspectable. Nothing depends on a platform screenshot or a hidden dashboard definition.
 
-The talk is built as a reproducible, vendor-neutral, analysis-as-code workflow for security leaders who need to explain real exposure, not just ticket movement.
+## Talk Summary
+
+The talk centers on a simple operational paradox: MTTR can get worse while exposure is actually going down. If a team spends time clearing older findings, the age of the work it closes rises, so MTTR rises too. That can look like regression even when the backlog is getting healthier.
+
+MOVA fills that gap by measuring the age of the vulnerabilities still open. This repo demonstrates the difference with a reproducible simulation that holds arrivals, capacity, and time horizon constant, then compares two strategies: **Newest-First** and **Oldest-First**. The point is not to replace MTTR, but to keep it in context.
+
+## Core Idea
+
+The deck makes four claims:
+
+- MTTR tells you about completed work, not the backlog that remains.
+- MOVA shows whether the exposure you still carry is getting older or younger.
+- Open count and the `180+ days` tail help explain whether aging risk is actually being reduced.
+- The metrics should be defined in code and reviewed together, not inherited blindly from a dashboard.
 
 ## What This Repo Contains
 
-- A [Quarto](https://quarto.org/) / Reveal.js presentation in `index.qmd`
-- Python and [Polars](https://pola.rs/) scripts that generate the synthetic data and metrics
-- [Plotnine](https://plotnine.org/) charts and [Great Tables](https://posit-dev.github.io/great-tables/) outputs used in the deck
-- Parquet artifacts in `data/` for reproducible intermediate results
+- `index.qmd`: the presentation source and narrative
+- `scripts/`: synthetic data generation, strategy simulation, and summary build steps
+- `data/`: generated Parquet files used by the deck
+- `_quarto.yml` and `styles.css`: deck configuration and presentation styling
+- `pyproject.toml` and `uv.lock`: Python environment and dependency lockfile
 
-Everything is designed to be inspectable, rerunnable, and easy to adapt or challenge.
-
-## Tools & Approach
-
-- [Quarto](https://quarto.org/) keeps the deck, narrative, and outputs in one reproducible workflow.
-- [Positron](https://positron.posit.co/) is a practical place to explore the data and iterate on the analysis before rendering outputs.
-- [Polars](https://pola.rs/) handles the metric logic; [Plotnine](https://plotnine.org/) and [Great Tables](https://posit-dev.github.io/great-tables/) keep charts and tables in code, so the analysis stays inspectable and rerunnable.
+The analysis pipeline is small by design. It generates a synthetic backlog, simulates monthly remediation under two prioritization strategies, writes the metric outputs to Parquet, and renders the deck from those artifacts.
 
 ## Quick Start
 
-Render the deck:
+Render the current deck:
 
 ```bash
 uv sync
@@ -34,7 +42,7 @@ uv run quarto render
 open index.html
 ```
 
-Regenerate the analysis artifacts and render from scratch:
+Rebuild the synthetic data and metrics first:
 
 ```bash
 uv run python scripts/01_generate_data.py
@@ -43,48 +51,46 @@ uv run python scripts/03_build_outputs.py
 uv run quarto render
 ```
 
-## What The Deck Shows
+## What the Deck Shows
 
-The simulation holds volume, capacity, and time horizon constant and changes only prioritization.
+The simulation keeps the system constant and changes only prioritization.
 
-- **Newest-First** keeps MTTR lower by closing newer work first
-- **Oldest-First** raises MTTR while reducing the age of the remaining backlog
+- **Newest-First** closes recent findings first, which keeps MTTR lower.
+- **Oldest-First** closes the aging backlog first, which lowers MOVA and reduces the `180+ days` tail.
+- Both strategies run with the same arrivals, the same monthly remediation capacity, and the same time horizon.
 
-That is the point of the talk:
-
-> MTTR describes completed work. MOVA describes remaining exposure.
-
-Used together, they help security leaders see whether operations are moving and whether the system is actually getting safer.
+That is the core read: the headline MTTR winner is not necessarily the exposure winner.
 
 ## Why It Matters
 
-If you report MTTR alone, you can reward fast closure while older risk keeps aging in place. Pairing MTTR with MOVA makes it easier to:
+Read alone, MTTR can reward recent closure while older backlog remains stranded. Read with MOVA, open count, and the `180+ days` tail, it becomes easier to distinguish faster throughput from actual backlog cleanup.
 
-- explain why MTTR can rise during meaningful cleanup work
-- show whether backlog exposure is getting older or younger
-- communicate risk to leadership in terms of current exposure, not dashboard optics
+This is also a practical argument for analysis-as-code. Most teams already have the underlying data. A CSV export is often enough. The harder problem is owning the metric definition instead of accepting whatever the dashboard happens to calculate.
 
 ## Repository Layout
 
-- `index.qmd`: the presentation and argument
-- `scripts/`: synthetic data generation, simulation, and metric builds
-- `data/`: generated Parquet artifacts
-- `_quarto.yml` and `pyproject.toml`: render and environment configuration
-- `rehearsal/speaker-notes.md`: rehearsal notes
+- `index.qmd`: slide content, charts, tables, and embedded code examples
+- `scripts/01_generate_data.py`: builds the synthetic vulnerability dataset
+- `scripts/02_simulate_metrics.py`: runs the newest-first vs. oldest-first simulation
+- `scripts/03_build_outputs.py`: writes the final comparison summary used in the deck
+- `data/base_vulns.parquet`: synthetic starting dataset
+- `data/metrics.parquet`: monthly MTTR, MOVA, open count, and `aged_over_180`
+- `data/summary.parquet`: final-state comparison for the two strategies
+- `rehearsal/speaker-notes.md`: talk notes used for delivery prep
 
-## Working Approach
+## Tools & Approach
 
-The repo stays intentionally simple:
+- [Quarto](https://quarto.org/) keeps the deck, narrative, and rendered outputs in one reproducible workflow.
+- [Positron](https://positron.posit.co/) is a practical place to inspect the data and iterate on the analysis before rendering, though the workflow is not tied to any particular IDE.
+- [Polars](https://pola.rs/) handles the metric logic, while [Plotnine](https://plotnine.org/) and [Great Tables](https://posit-dev.github.io/great-tables/) keep charts and tables in code so the analysis stays inspectable and rerunnable.
 
-- synthetic data instead of production data
-- explicit assumptions instead of hidden dashboard defaults
-- code-based analysis instead of ad hoc interpretation
+## Speaker
 
-That keeps the workflow auditable, repeatable, and cheap to rerun when the question changes.
+The talk and repository are by Caleb Kinney. More background and writing: [derail.net](https://derail.net).
 
 ## Further Reading
 
-For learning Polars, *[Python Polars: The Definitive Guide](https://polarsguide.com/)* by Jeroen Janssens and Thijs Nieuwdorp is a practical recommendation.
+For learning Polars, *[Python Polars: The Definitive Guide](https://polarsguide.com/)* by Jeroen Janssens and Thijs Nieuwdorp is a practical reference.
 
 ## License
 
