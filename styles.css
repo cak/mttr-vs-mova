@@ -441,6 +441,7 @@
   border: 1px solid var(--line);
   border-radius: var(--radius-panel);
   background: rgba(255, 253, 248, 0.78);
+  overflow: hidden;
 }
 
 .tail-visual-caption {
@@ -450,22 +451,41 @@
 }
 
 .tail-strip {
-  display: flex;
-  justify-content: space-between;
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 1rem;
+  gap: 1.4rem;
+  padding: 0.12rem 0;
+}
+
+.tail-strip::before {
+  content: "";
+  position: absolute;
+  left: 0.35rem;
+  right: 0.35rem;
+  top: 50%;
+  border-top: 2px dashed rgba(72, 83, 93, 0.26);
+  transform: translateY(-50%);
+  z-index: 0;
 }
 
 .tail-cluster {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.24rem;
-  max-width: 300px;
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 14px));
+  gap: 0.3rem;
+  width: max-content;
+  max-width: 100%;
+  padding-right: 0.55rem;
+  background: rgba(255, 253, 248, 0.94);
 }
 
 .tail-cluster-outlier {
-  justify-content: flex-end;
-  min-width: 72px;
+  justify-self: end;
+  min-width: auto;
+  padding-left: 0.55rem;
 }
 
 .tail-dot {
@@ -488,6 +508,10 @@
   font-size: 0.48em;
   text-transform: uppercase;
   letter-spacing: 0.08em;
+}
+
+.tail-axis span:last-child {
+  text-align: right;
 }
 
 .tail-number {
@@ -621,7 +645,21 @@
 
 /* Quarto output */
 .reveal .cell-output-display {
-  margin-top: 0.45em;
+  margin: 0.4em auto 0;
+  padding: 0 0.28rem;
+}
+
+.reveal .cell-output-display > div,
+.reveal .cell-output-display figure,
+.reveal .cell-output-display p {
+  margin: 0;
+}
+
+.reveal .cell-output-display img {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0 auto;
 }
 
 .reveal .gt_table {
