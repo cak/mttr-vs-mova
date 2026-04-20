@@ -47,7 +47,7 @@ Render the deck:
 ```bash
 uv sync
 uv run quarto render
-open index.html
+open _output/index.html
 ```
 
 Rebuild the synthetic data and metrics first:
@@ -57,6 +57,7 @@ uv run python scripts/01_generate_data.py
 uv run python scripts/02_simulate_metrics.py
 uv run python scripts/03_build_outputs.py
 uv run quarto render
+open _output/index.html
 ```
 
 ## What the Deck Shows
