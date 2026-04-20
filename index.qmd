@@ -600,11 +600,11 @@ Under Newest-First, the old backlog barely moves.
 #| echo: false
 decision_table = (
     summary.with_columns(
-        pl.when(pl.col("strategy") == "newest_first")
-        .then(pl.lit("Wins on MTTR only"))
-        .otherwise(pl.lit("Stronger exposure outcome"))
+        pl.when(pl.col("strategy") == "oldest_first")
+        .then(pl.lit("Stronger exposure outcome"))
+        .otherwise(pl.lit("Wins on MTTR only"))
         .alias("decision"),
-        pl.when(pl.col("strategy") == "newest_first")
+        pl.when(pl.col("strategy") == "oldest_first")
         .then(pl.lit(0))
         .otherwise(pl.lit(1))
         .alias("sort_order"),
@@ -614,47 +614,62 @@ decision_table = (
         "strategy_label",
         pl.col("mttr_days").round(1).alias("mttr_days"),
         pl.col("mova_days").round(1).alias("mova_days"),
+        "open_count",
         "aged_over_180",
         "decision",
     )
 )
 
 (
-    GT(decision_table)
+    GT(decision_table, rowname_col="strategy_label")
     .tab_header(
         title="Same data, different winner",
         subtitle="Newest-First wins on flow. Oldest-First wins on exposure age.",
     )
     .tab_spanner(label="Flow", columns="mttr_days")
     .tab_spanner(label="Exposure Age", columns=["mova_days", "aged_over_180"])
+    .tab_spanner(label="Backlog", columns="open_count")
     .tab_spanner(label="Read", columns="decision")
     .cols_label(
-        strategy_label="Strategy",
         mttr_days="MTTR",
         mova_days="MOVA",
+        open_count="Open",
         aged_over_180="180+ tail",
         decision="Decision",
     )
-    .cols_align(align="left", columns=["strategy_label", "decision"])
-    .cols_align(align="center", columns=["mttr_days", "mova_days", "aged_over_180"])
+    .cols_align(align="left", columns=["decision"])
+    .cols_align(
+        align="center",
+        columns=["mttr_days", "mova_days", "open_count", "aged_over_180"],
+    )
     .fmt_number(columns=["mttr_days", "mova_days"], decimals=1)
-    .fmt_number(columns=["aged_over_180"], decimals=0)
+    .fmt_number(columns=["open_count", "aged_over_180"], decimals=0)
     .tab_style(
         style=[style.fill("#f7e7ec"), style.text(color="#6b1230", weight="bold")],
-        locations=loc.body(columns="mttr_days", rows=[0]),
+        locations=loc.body(
+            columns="mttr_days",
+            rows=pl.col("strategy_label") == "Newest-First",
+        ),
     )
     .tab_style(
         style=[style.fill("#e4f0ee"), style.text(color="#134b52", weight="bold")],
-        locations=loc.body(columns=["mova_days", "aged_over_180", "decision"], rows=[1]),
+        locations=loc.body(
+            columns=["mova_days", "aged_over_180", "decision"],
+            rows=pl.col("strategy_label") == "Oldest-First",
+        ),
     )
     .tab_style(
         style=style.text(weight="bold"),
-        locations=loc.body(columns="strategy_label"),
+        locations=loc.stub(),
     )
     .tab_style(
         style=style.text(weight="bold"),
         locations=loc.column_labels(),
     )
+    .opt_align_table_header(align="left")
+    .opt_row_striping()
+    .opt_vertical_padding(scale=1.1)
+    .opt_horizontal_padding(scale=1.0)
 )
 ```
 
