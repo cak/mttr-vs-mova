@@ -12,9 +12,8 @@ jupyter: python3
 
 ```{python}
 #| echo: false
-import pandas as pd
 import polars as pl
-from great_tables import GT
+from great_tables import GT, loc, style
 from plotnine import (
     aes,
     coord_cartesian,
@@ -33,116 +32,41 @@ from plotnine import (
     theme_minimal,
 )
 
-metrics = pl.read_parquet("data/metrics.parquet")
-summary = pl.read_parquet("data/summary.parquet")
+metrics = pl.read_parquet("data/metrics.parquet").with_columns(
+    pl.col("strategy")
+    .replace(
+        {
+            "oldest_first": "Oldest-First",
+            "newest_first": "Newest-First",
+        }
+    )
+    .alias("strategy_label")
+)
+summary = pl.read_parquet("data/summary.parquet").with_columns(
+    pl.col("strategy")
+    .replace(
+        {
+            "oldest_first": "Oldest-First",
+            "newest_first": "Newest-First",
+        }
+    )
+    .alias("strategy_label")
+)
 
-STRATEGY_LABELS = {
-    "oldest_first": "Oldest-First",
-    "newest_first": "Newest-First",
-}
 STRATEGY_COLORS = {
     "Oldest-First": "#1F6F78",
     "Newest-First": "#8B1E3F",
 }
+MONTH_BREAKS = [1, 6, 12, 18, 24]
+LAST_MONTH = metrics.select(pl.col("month_index").max()).item()
 ROOM_BG = "#f6f0e5"
 PANEL_BG = "#fffaf2"
 GRID_COLOR = "#d9cfbf"
-
-
-def fmt_days(value: float) -> str:
-    return f"{value:.1f}"
-
-
-metrics_labeled = metrics.with_columns(
-    pl.col("strategy").replace(STRATEGY_LABELS).alias("strategy_label"),
-)
-
-mttr_compare = pd.DataFrame(
-    metrics_labeled
-    .select(
-        pl.col("strategy_label").alias("strategy"),
-        "month_index",
-        pl.col("mttr_days").alias("days"),
-    )
-    .to_dicts()
-)
-
-mova_compare = pd.DataFrame(
-    metrics_labeled
-    .select(
-        pl.col("strategy_label").alias("strategy"),
-        "month_index",
-        pl.col("mova_days").alias("days"),
-    )
-    .to_dicts()
-)
-
-tail_plot = pd.DataFrame(
-    metrics_labeled
-    .select(
-        pl.col("strategy_label").alias("strategy"),
-        "month_index",
-        "aged_over_180",
-    )
-    .to_dicts()
-)
-
-summary_named = summary.with_columns(
-    pl.col("strategy").replace(STRATEGY_LABELS).alias("strategy_label"),
-)
-
-summary_table = (
-    pd.DataFrame(
-        summary_named
-        .with_columns(
-            pl.col("strategy_label").alias("Strategy"),
-            pl.col("mttr_days").round(1).alias("MTTR (days)"),
-            pl.col("mova_days").round(1).alias("MOVA (days)"),
-            pl.col("open_count").alias("Open"),
-            pl.col("aged_over_180").alias("180+ days"),
-            pl.when(pl.col("strategy") == "newest_first")
-            .then(pl.lit(0))
-            .otherwise(pl.lit(1))
-            .alias("sort_order"),
-        )
-        .sort("sort_order")
-        .select("Strategy", "MTTR (days)", "MOVA (days)", "Open", "180+ days")
-        .to_dicts()
-    )
-)
-
-card_rows = (
-    summary_named
-    .select(
-        "strategy_label",
-        pl.col("mttr_days").round(1).alias("mttr_days"),
-        pl.col("mova_days").round(1).alias("mova_days"),
-        "open_count",
-        "aged_over_180",
-    )
-    .to_dicts()
-)
-
-card_lookup = {row["strategy_label"]: row for row in card_rows}
-oldest = card_lookup["Oldest-First"]
-newest = card_lookup["Newest-First"]
-
-oldest_mttr = fmt_days(oldest["mttr_days"])
-oldest_mova = fmt_days(oldest["mova_days"])
-oldest_open = int(oldest["open_count"])
-oldest_tail = int(oldest["aged_over_180"])
-
-newest_mttr = fmt_days(newest["mttr_days"])
-newest_mova = fmt_days(newest["mova_days"])
-newest_open = int(newest["open_count"])
-newest_tail = int(newest["aged_over_180"])
-
-shared_theme = (
+chart_theme = (
     theme_minimal(base_size=22)
     + theme(
         figure_size=(11.2, 5.15),
         legend_position="none",
-        legend_title=element_blank(),
         panel_grid_minor=element_blank(),
         panel_grid_major_x=element_blank(),
         panel_grid_major_y=element_line(color=GRID_COLOR, size=0.55),
@@ -154,44 +78,31 @@ shared_theme = (
         plot_subtitle=element_text(color="#55606B", margin={"b": 10}),
         legend_text=element_text(color="#26333A"),
         plot_margin=0.16,
+        axis_title_x=element_text(margin={"t": 10}),
+        axis_title_y=element_text(margin={"r": 10}),
     )
 )
 
-chart_theme = shared_theme + theme(
-    axis_title_x=element_text(margin={"t": 10}),
-    axis_title_y=element_text(margin={"r": 10}),
-)
+card_lookup = {
+    row["strategy_label"]: row
+    for row in summary.select(
+        "strategy_label",
+        pl.col("mttr_days").round(1).alias("mttr_days"),
+        pl.col("mova_days").round(1).alias("mova_days"),
+        "open_count",
+        "aged_over_180",
+    ).to_dicts()
+}
 
+oldest_mttr = f'{card_lookup["Oldest-First"]["mttr_days"]:.1f}'
+oldest_mova = f'{card_lookup["Oldest-First"]["mova_days"]:.1f}'
+oldest_open = int(card_lookup["Oldest-First"]["open_count"])
+oldest_tail = int(card_lookup["Oldest-First"]["aged_over_180"])
 
-def comparison_chart(source: pd.DataFrame, title: str, subtitle: str, y_label: str):
-    labels = source[source["month_index"] == source["month_index"].max()].copy()
-    labels["label"] = labels.apply(
-        lambda row: f'{row["strategy"]} {row["days"]:.0f}d', axis=1
-    )
-
-    return (
-        ggplot(source, aes(x="month_index", y="days", color="strategy"))
-        + geom_line(size=2.35)
-        + geom_point(data=labels, size=3.8)
-        + geom_text(
-            data=labels,
-            mapping=aes(label="label"),
-            ha="left",
-            nudge_x=0.45,
-            size=10,
-        )
-        + scale_color_manual(values=STRATEGY_COLORS)
-        + scale_x_continuous(breaks=[1, 6, 12, 18, 24])
-        + coord_cartesian(xlim=(1, 26))
-        + labs(title=title, subtitle=subtitle, x="Month", y=y_label)
-        + chart_theme
-    )
-
-
-tail_labels = tail_plot[tail_plot["month_index"] == tail_plot["month_index"].max()].copy()
-tail_labels["label"] = tail_labels.apply(
-    lambda row: f'{row["strategy"]} {row["aged_over_180"]}', axis=1
-)
+newest_mttr = f'{card_lookup["Newest-First"]["mttr_days"]:.1f}'
+newest_mova = f'{card_lookup["Newest-First"]["mova_days"]:.1f}'
+newest_open = int(card_lookup["Newest-First"]["open_count"])
+newest_tail = int(card_lookup["Newest-First"]["aged_over_180"])
 ```
 
 ## MTTR just doubled {.center .hook-slide}
@@ -226,7 +137,7 @@ This month
 ::::
 
 ::: {.shock-subtitle}
-Dashboards panic here. The better question is: what happened to exposure?
+Dashboards signal failure here. The better question is: what happened to exposure?
 :::
 ::::
 
@@ -424,6 +335,22 @@ Open work. Current age. Age still carried today.
 
 ---
 
+## You already have the data
+
+::: {.incremental}
+- MTTR comes from your tools
+- MOVA uses the same data
+- For open findings, age = today minus created date
+- Take the average across open findings
+- A CSV export is usually enough
+:::
+
+::: {.kicker}
+Same data. Different population. Different age.
+:::
+
+---
+
 ## Why “did we fix it in time?” falls short
 
 ::: {.incremental}
@@ -450,16 +377,68 @@ Now watch what each metric rewards.
 
 ---
 
+## A simple simulation
+
+::: {.incremental}
+- Start with the same backlog
+- Add the same incoming vulnerabilities each month
+- Apply the same remediation capacity each month
+- Change only the order of work: newest-first vs. oldest-first
+:::
+
+::: {.kicker}
+This isolates how prioritization changes the metrics.
+:::
+
+---
+
 ## MTTR rewards recent closures
 
 ```{python}
 #| echo: false
-#| fig-alt: "Line chart comparing MTTR over time for newest-first and oldest-first prioritization. Newest-first stays lower because it closes recent work first."
-comparison_chart(
-    mttr_compare,
-    title="MTTR over time",
-    subtitle="Newest-First looks better because it closes recent work first",
-    y_label="MTTR (days)",
+#| fig-alt: "Line chart of MTTR over time under two prioritization strategies. Newest-First is highlighted and finishes with the lower MTTR because it closes recent findings first."
+mttr_plot = metrics.select(
+    "month_index",
+    "strategy_label",
+    pl.col("mttr_days").alias("days"),
+)
+mttr_labels = (
+    mttr_plot.filter(pl.col("month_index") == LAST_MONTH)
+    .with_columns(
+        pl.format(
+            "{} {}d",
+            pl.col("strategy_label"),
+            pl.col("days").round(0).cast(pl.Int64),
+        ).alias("label")
+    )
+)
+
+(
+    ggplot(mttr_plot, aes(x="month_index", y="days", color="strategy_label"))
+    + geom_line(size=2.35)
+    + geom_point(data=mttr_labels, size=3.8)
+    + geom_text(
+        data=mttr_labels,
+        mapping=aes(label="label"),
+        ha="left",
+        nudge_x=0.45,
+        size=10,
+    )
+    + scale_color_manual(
+        values={
+            "Newest-First": STRATEGY_COLORS["Newest-First"],
+            "Oldest-First": "#b9c8ca",
+        }
+    )
+    + scale_x_continuous(breaks=MONTH_BREAKS)
+    + coord_cartesian(xlim=(1, 26))
+    + labs(
+        title="Newest-First wins on MTTR",
+        subtitle="Closing recent findings first keeps closure age low.",
+        x="Month",
+        y="MTTR (days)",
+    )
+    + chart_theme
 )
 ```
 
@@ -473,12 +452,49 @@ On MTTR, Newest-First wins.
 
 ```{python}
 #| echo: false
-#| fig-alt: "Line chart comparing MOVA over time for newest-first and oldest-first prioritization. Oldest-first lowers exposure by removing old backlog first."
-comparison_chart(
-    mova_compare,
-    title="MOVA over time",
-    subtitle="Oldest-First lowers backlog age because the oldest work leaves first",
-    y_label="MOVA (days)",
+#| fig-alt: "Line chart of MOVA over time under two prioritization strategies. Oldest-First is highlighted and finishes with the lower open-backlog age because it removes older findings first."
+mova_plot = metrics.select(
+    "month_index",
+    "strategy_label",
+    pl.col("mova_days").alias("days"),
+)
+mova_labels = (
+    mova_plot.filter(pl.col("month_index") == LAST_MONTH)
+    .with_columns(
+        pl.format(
+            "{} {}d",
+            pl.col("strategy_label"),
+            pl.col("days").round(0).cast(pl.Int64),
+        ).alias("label")
+    )
+)
+
+(
+    ggplot(mova_plot, aes(x="month_index", y="days", color="strategy_label"))
+    + geom_line(size=2.35)
+    + geom_point(data=mova_labels, size=3.8)
+    + geom_text(
+        data=mova_labels,
+        mapping=aes(label="label"),
+        ha="left",
+        nudge_x=0.45,
+        size=10,
+    )
+    + scale_color_manual(
+        values={
+            "Oldest-First": STRATEGY_COLORS["Oldest-First"],
+            "Newest-First": "#d7b6c0",
+        }
+    )
+    + scale_x_continuous(breaks=MONTH_BREAKS)
+    + coord_cartesian(xlim=(1, 26))
+    + labs(
+        title="Oldest-First wins on exposure age",
+        subtitle="Working the oldest backlog first lowers the age still carried.",
+        x="Month",
+        y="MOVA (days)",
+    )
+    + chart_theme
 )
 ```
 
@@ -492,9 +508,25 @@ On MOVA, Oldest-First wins.
 
 ```{python}
 #| echo: false
-#| fig-alt: "Line chart comparing the count of open vulnerabilities older than 180 days for oldest-first and newest-first prioritization."
+#| fig-alt: "Line chart of open vulnerabilities older than 180 days under two prioritization strategies. Oldest-First is highlighted and collapses the tail, while Newest-First leaves the old backlog stranded."
+tail_plot = metrics.select(
+    "month_index",
+    "strategy_label",
+    "aged_over_180",
+)
+tail_labels = (
+    tail_plot.filter(pl.col("month_index") == LAST_MONTH)
+    .with_columns(
+        pl.format(
+            "{} {}",
+            pl.col("strategy_label"),
+            pl.col("aged_over_180"),
+        ).alias("label")
+    )
+)
+
 (
-    ggplot(tail_plot, aes(x="month_index", y="aged_over_180", color="strategy"))
+    ggplot(tail_plot, aes(x="month_index", y="aged_over_180", color="strategy_label"))
     + geom_line(size=2.35)
     + geom_point(data=tail_labels, size=3.8)
     + geom_text(
@@ -504,14 +536,19 @@ On MOVA, Oldest-First wins.
         nudge_x=0.45,
         size=10,
     )
-    + scale_color_manual(values=STRATEGY_COLORS)
-    + scale_x_continuous(breaks=[1, 6, 12, 18, 24])
+    + scale_color_manual(
+        values={
+            "Oldest-First": STRATEGY_COLORS["Oldest-First"],
+            "Newest-First": "#d7b6c0",
+        }
+    )
+    + scale_x_continuous(breaks=MONTH_BREAKS)
     + coord_cartesian(xlim=(1, 26))
     + labs(
-        title="180+ day backlog",
-        subtitle="Newest-First keeps the tail alive",
+        title="Oldest-First collapses the 180+ tail",
+        subtitle="Newest-First keeps almost the entire old backlog alive.",
         x="Month",
-        y="Open vulnerabilities",
+        y="Open findings over 180 days",
     )
     + chart_theme
 )
@@ -561,15 +598,63 @@ Under Newest-First, the old backlog barely moves.
 
 ```{python}
 #| echo: false
-(
-    GT(summary_table)
-    .tab_header(
-        title="End state comparison",
-        subtitle="Same inputs. Only prioritization changed.",
+decision_table = (
+    summary.with_columns(
+        pl.when(pl.col("strategy") == "newest_first")
+        .then(pl.lit("Wins on MTTR only"))
+        .otherwise(pl.lit("Stronger exposure outcome"))
+        .alias("decision"),
+        pl.when(pl.col("strategy") == "newest_first")
+        .then(pl.lit(0))
+        .otherwise(pl.lit(1))
+        .alias("sort_order"),
     )
-    .cols_align(align="center")
-    .fmt_number(columns=["MTTR (days)", "MOVA (days)"], decimals=1)
-    .fmt_number(columns=["Open", "180+ days"], decimals=0)
+    .sort("sort_order")
+    .select(
+        "strategy_label",
+        pl.col("mttr_days").round(1).alias("mttr_days"),
+        pl.col("mova_days").round(1).alias("mova_days"),
+        "aged_over_180",
+        "decision",
+    )
+)
+
+(
+    GT(decision_table)
+    .tab_header(
+        title="Same data, different winner",
+        subtitle="Newest-First wins on flow. Oldest-First wins on exposure age.",
+    )
+    .tab_spanner(label="Flow", columns="mttr_days")
+    .tab_spanner(label="Exposure Age", columns=["mova_days", "aged_over_180"])
+    .tab_spanner(label="Read", columns="decision")
+    .cols_label(
+        strategy_label="Strategy",
+        mttr_days="MTTR",
+        mova_days="MOVA",
+        aged_over_180="180+ tail",
+        decision="Decision",
+    )
+    .cols_align(align="left", columns=["strategy_label", "decision"])
+    .cols_align(align="center", columns=["mttr_days", "mova_days", "aged_over_180"])
+    .fmt_number(columns=["mttr_days", "mova_days"], decimals=1)
+    .fmt_number(columns=["aged_over_180"], decimals=0)
+    .tab_style(
+        style=[style.fill("#f7e7ec"), style.text(color="#6b1230", weight="bold")],
+        locations=loc.body(columns="mttr_days", rows=[0]),
+    )
+    .tab_style(
+        style=[style.fill("#e4f0ee"), style.text(color="#134b52", weight="bold")],
+        locations=loc.body(columns=["mova_days", "aged_over_180", "decision"], rows=[1]),
+    )
+    .tab_style(
+        style=style.text(weight="bold"),
+        locations=loc.body(columns="strategy_label"),
+    )
+    .tab_style(
+        style=style.text(weight="bold"),
+        locations=loc.column_labels(),
+    )
 )
 ```
 
@@ -698,7 +783,7 @@ MTTR still matters. It cannot stand alone.
 ::: {.incremental}
 - MTTR up + MOVA down = old backlog is getting cleared
 - MTTR down + MOVA up = recent closures look better while backlog age worsens
-- Across teams, MTTR up can mean effort shifted to the oldest backlog
+- Across teams, MTTR up can mean effort shifted to older backlog
 - 180+ up = aging backlog is getting stranded
 :::
 
@@ -719,9 +804,10 @@ MTTR still matters. It cannot stand alone.
 
 You do not need a new platform for this.
 
-Most teams already have the raw data. It is usually sitting in a CSV.
+Most teams already have the data. It is usually sitting in a CSV.
 
 ::: {.incremental}
+- A simple export is enough
 - CSVs are messy and unavoidable
 - Dashboards often hide the metric definition
 - Analysts need to own the definition in code
@@ -744,7 +830,7 @@ Most teams already have the raw data. It is usually sitting in a CSV.
   _Quarto for reviewable reports_
 
 - Explore the data behind the metric
-  _Positron as your working environment_
+  _Positron or your preferred IDE_
 
 ::: {.kicker}
 This is data storytelling for security.
