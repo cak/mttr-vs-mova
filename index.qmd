@@ -665,8 +665,8 @@ decision_table = (
 (
     GT(decision_table, rowname_col="strategy_label")
     .tab_header(
-        title="Same data, different winner",
-        subtitle="Newest-First wins on flow. Oldest-First wins on backlog age.",
+        title="Same data, wrong winner",
+        subtitle="Newest-First wins on MTTR. Oldest-First wins on backlog age.",
     )
     .tab_spanner(label="Flow", columns="mttr_days")
     .tab_spanner(label="Backlog Age", columns=["mova_days", "aged_over_180"])
