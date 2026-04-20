@@ -21,9 +21,9 @@ from plotnine import (
     element_line,
     element_rect,
     element_text,
+    geom_label,
     geom_line,
     geom_point,
-    geom_text,
     ggplot,
     labs,
     scale_color_manual,
@@ -72,11 +72,10 @@ chart_theme = (
         panel_grid_major_y=element_line(color=GRID_COLOR, size=0.55),
         panel_background=element_rect(fill=PANEL_BG, color=None),
         plot_background=element_rect(fill=ROOM_BG, color=None),
-        axis_title=element_text(color="#26333A"),
-        axis_text=element_text(color="#26333A"),
-        plot_title=element_text(weight="bold", color="#101828"),
-        plot_subtitle=element_text(color="#55606B", margin={"b": 10}),
-        legend_text=element_text(color="#26333A"),
+        axis_title=element_text(color="#26333A", size=18),
+        axis_text=element_text(color="#26333A", size=14),
+        plot_title=element_text(weight="bold", color="#101828", size=24),
+        plot_subtitle=element_text(color="#55606B", size=15, margin={"b": 10}),
         plot_margin=0.16,
         axis_title_x=element_text(margin={"t": 10}),
         axis_title_y=element_text(margin={"r": 10}),
@@ -417,12 +416,15 @@ mttr_labels = (
     ggplot(mttr_plot, aes(x="month_index", y="days", color="strategy_label"))
     + geom_line(size=2.35)
     + geom_point(data=mttr_labels, size=3.8)
-    + geom_text(
+    + geom_label(
         data=mttr_labels,
         mapping=aes(label="label"),
         ha="left",
         nudge_x=0.45,
         size=10,
+        fill=PANEL_BG,
+        label_padding=0.15,
+        label_r=0.12,
     )
     + scale_color_manual(
         values={
@@ -431,7 +433,7 @@ mttr_labels = (
         }
     )
     + scale_x_continuous(breaks=MONTH_BREAKS)
-    + coord_cartesian(xlim=(1, 26))
+    + coord_cartesian(xlim=(1, 27))
     + labs(
         title="Newest-First wins on MTTR",
         subtitle="Closing recent findings first keeps closure age low.",
@@ -473,12 +475,15 @@ mova_labels = (
     ggplot(mova_plot, aes(x="month_index", y="days", color="strategy_label"))
     + geom_line(size=2.35)
     + geom_point(data=mova_labels, size=3.8)
-    + geom_text(
+    + geom_label(
         data=mova_labels,
         mapping=aes(label="label"),
         ha="left",
         nudge_x=0.45,
         size=10,
+        fill=PANEL_BG,
+        label_padding=0.15,
+        label_r=0.12,
     )
     + scale_color_manual(
         values={
@@ -487,9 +492,9 @@ mova_labels = (
         }
     )
     + scale_x_continuous(breaks=MONTH_BREAKS)
-    + coord_cartesian(xlim=(1, 26))
+    + coord_cartesian(xlim=(1, 27))
     + labs(
-        title="Oldest-First wins on exposure age",
+        title="Oldest-First lowers exposure age",
         subtitle="Working the oldest backlog first lowers the age still carried.",
         x="Month",
         y="MOVA (days)",
@@ -508,7 +513,7 @@ On MOVA, Oldest-First wins.
 
 ```{python}
 #| echo: false
-#| fig-alt: "Line chart of open vulnerabilities older than 180 days under two prioritization strategies. Oldest-First is highlighted and collapses the tail, while Newest-First leaves the old backlog stranded."
+#| fig-alt: "Line chart of open vulnerabilities older than 180 days under two prioritization strategies. Oldest-First is highlighted and reduces the tail, while Newest-First leaves the old backlog stranded."
 tail_plot = metrics.select(
     "month_index",
     "strategy_label",
@@ -529,12 +534,15 @@ tail_labels = (
     ggplot(tail_plot, aes(x="month_index", y="aged_over_180", color="strategy_label"))
     + geom_line(size=2.35)
     + geom_point(data=tail_labels, size=3.8)
-    + geom_text(
+    + geom_label(
         data=tail_labels,
         mapping=aes(label="label"),
         ha="left",
         nudge_x=0.45,
         size=10,
+        fill=PANEL_BG,
+        label_padding=0.15,
+        label_r=0.12,
     )
     + scale_color_manual(
         values={
@@ -543,9 +551,9 @@ tail_labels = (
         }
     )
     + scale_x_continuous(breaks=MONTH_BREAKS)
-    + coord_cartesian(xlim=(1, 26))
+    + coord_cartesian(xlim=(1, 27))
     + labs(
-        title="Oldest-First collapses the 180+ tail",
+        title="Oldest-First reduces the 180+ tail",
         subtitle="Newest-First keeps almost the entire old backlog alive.",
         x="Month",
         y="Open findings over 180 days",
