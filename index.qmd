@@ -67,7 +67,7 @@ MUTED_ROSE = "#b58a96"
 chart_theme = (
     theme_minimal(base_size=22)
     + theme(
-        figure_size=(11.2, 5.15),
+        figure_size=(11.35, 5.25),
         legend_position="none",
         panel_grid_minor=element_blank(),
         panel_grid_major_x=element_blank(),
@@ -76,11 +76,13 @@ chart_theme = (
         plot_background=element_rect(fill=ROOM_BG, color=None),
         axis_title=element_text(color="#26333A", size=18),
         axis_text=element_text(color="#26333A", size=14),
+        axis_text_x=element_text(margin={"t": 6}),
+        axis_text_y=element_text(margin={"r": 6}),
         plot_title=element_text(weight="bold", color="#101828", size=24),
         plot_subtitle=element_text(color="#55606B", size=15, margin={"b": 10}),
-        plot_margin=0.16,
-        axis_title_x=element_text(margin={"t": 10}),
-        axis_title_y=element_text(margin={"r": 10}),
+        plot_margin=0.22,
+        axis_title_x=element_text(margin={"t": 14}),
+        axis_title_y=element_text(margin={"r": 14}),
     )
 )
 
@@ -454,7 +456,7 @@ mttr_labels = (
         data=mttr_labels,
         mapping=aes(label="label"),
         ha="left",
-        nudge_x=0.45,
+        nudge_x=0.6,
         size=10,
         fill=PANEL_BG,
         label_padding=0.15,
@@ -467,7 +469,7 @@ mttr_labels = (
         }
     )
     + scale_x_continuous(breaks=MONTH_BREAKS)
-    + coord_cartesian(xlim=(1, 27))
+    + coord_cartesian(xlim=(1, 28.6))
     + labs(
         title="Newest-First wins on MTTR",
         subtitle="Closing recent findings first keeps closure age low.",
@@ -513,7 +515,7 @@ mova_labels = (
         data=mova_labels,
         mapping=aes(label="label"),
         ha="left",
-        nudge_x=0.45,
+        nudge_x=0.6,
         size=10,
         fill=PANEL_BG,
         label_padding=0.15,
@@ -526,7 +528,7 @@ mova_labels = (
         }
     )
     + scale_x_continuous(breaks=MONTH_BREAKS)
-    + coord_cartesian(xlim=(1, 27))
+    + coord_cartesian(xlim=(1, 28.6))
     + labs(
         title="Oldest-First lowers backlog age",
         subtitle="Working the oldest backlog first lowers the age still carried.",
@@ -572,7 +574,7 @@ tail_labels = (
         data=tail_labels,
         mapping=aes(label="label"),
         ha="left",
-        nudge_x=0.45,
+        nudge_x=0.6,
         size=10,
         fill=PANEL_BG,
         label_padding=0.15,
@@ -585,7 +587,7 @@ tail_labels = (
         }
     )
     + scale_x_continuous(breaks=MONTH_BREAKS)
-    + coord_cartesian(xlim=(1, 27))
+    + coord_cartesian(xlim=(1, 28.6))
     + labs(
         title="Oldest-First reduces the 180+ tail",
         subtitle="Newest-First keeps almost the entire old backlog alive.",
