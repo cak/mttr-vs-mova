@@ -5,9 +5,9 @@ project:
   execute-dir: project
   output-dir: _output
   pre-render:
-    - python scripts/01_generate_data.py
-    - python scripts/02_simulate_metrics.py
-    - python scripts/03_build_outputs.py
+    - uv run python scripts/01_generate_data.py
+    - uv run python scripts/02_simulate_metrics.py
+    - uv run python scripts/03_build_outputs.py
   preview:
     port: 4200
 
