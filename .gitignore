@@ -216,3 +216,4 @@ data/
 
 # Private rehearsal files
 rehearsal/
+index.quarto_ipynb_*
