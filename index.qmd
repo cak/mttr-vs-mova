@@ -232,13 +232,13 @@ Dashboards panic here. The better question is: what happened to exposure?
 
 ---
 
-## Why dashboards panic
+## Why this looks like failure
 
 ::: {.incremental}
-- Something slowed down
-- The team got worse
-- Leadership should worry
-- Someone is already booking the meeting
+- MTTR increased
+- Longer time to remediate closed work
+- Interpreted as slower performance
+- Interpreted as declining team effectiveness
 :::
 
 ---
@@ -329,7 +329,7 @@ findings at 400 days
 The average looks fine.
 :::
 ::: {.tail-text}
-The tail does not.
+The oldest findings are not moving.
 :::
 :::
 :::
@@ -378,56 +378,48 @@ Tail risk
 
 ---
 
-## Same data, different question
-
-:::: {.columns}
-::: {.column width="50%"}
+## MTTR measures closed work {auto-animate="true"}
 
 **MTTR**
 
 ```{python}
 #| echo: true
 #| eval: false
+#| code-line-numbers: "2|3-5|6"
 mttr = (
-    vulns
-    .filter(pl.col("resolved_at").is_not_null())
+    vulns.filter(pl.col("resolved_at").is_not_null())
     .with_columns(
-        (pl.col("resolved_at") - pl.col("created_at"))
-        .dt.total_days()
-        .alias("days_to_fix")
+        (pl.col("resolved_at") - pl.col("created_at")).dt.total_days().alias("age_days")
     )
-    .select(pl.col("days_to_fix").mean().alias("mttr_days"))
+    .select(pl.col("age_days").mean().alias("mttr_days"))
 )
 ```
+
+::: {.kicker}
+Closed work. Time to remediate. Age at closure.
 :::
 
-::: {.column width="50%"}
+---
+
+## MOVA measures open work {auto-animate="true"}
 
 **MOVA**
 
 ```{python}
 #| echo: true
 #| eval: false
-from datetime import datetime
-
-as_of = datetime(2026, 4, 1)
-
+#| code-line-numbers: "2|3-5|6"
 mova = (
-    vulns
-    .filter(pl.col("resolved_at").is_null())
+    vulns.filter(pl.col("resolved_at").is_null())
     .with_columns(
-        (pl.lit(as_of) - pl.col("created_at"))
-        .dt.total_days()
-        .alias("open_age_days")
+        (pl.datetime_now() - pl.col("created_at")).dt.total_days().alias("age_days")
     )
-    .select(pl.col("open_age_days").mean().alias("mova_days"))
+    .select(pl.col("age_days").mean().alias("mova_days"))
 )
 ```
-:::
-::::
 
 ::: {.kicker}
-Same data. Different filter.
+Open work. Current age. Age still carried today.
 :::
 
 ---
@@ -590,10 +582,10 @@ Read only MTTR and you pick the wrong winner.
 ## The paradox repeats across teams
 
 ::: {.incremental}
-- The same paradox appears across teams
+- The same pattern appears across teams
 - Team A has a cleaner backlog and faster closures
 - Team B has an older backlog and slower closures
-- If the oldest backlog sits in Team B, leadership should focus there
+- If the oldest backlog sits in Team B, effort should shift there
 :::
 
 ---
@@ -601,19 +593,19 @@ Read only MTTR and you pick the wrong winner.
 ## Clean up the oldest backlog
 
 ::: {.incremental}
-- Leadership shifts remediation effort to Team B
+- Remediation effort shifts to Team B
 - MTTR rises because older work is finally closing
 - MOVA falls because the oldest backlog is finally shrinking
 - Exposure drops even though the headline metric looks worse
 :::
 
 ::: {.kicker}
-MTTR helps you read team flow. MOVA helps leadership see system health.
+MTTR shows flow. MOVA shows exposure.
 :::
 
 ---
 
-## When leadership sees only MTTR {auto-animate="true"}
+## When leaders see only MTTR {auto-animate="true"}
 
 ::: {.dashboard-grid}
 ::: {.dashboard-card .winner}
@@ -642,12 +634,12 @@ MTTR
 :::
 
 ::: {.centered .muted}
-If this is the only KPI, leaders keep rewarding what already looks healthy.
+If this is the only KPI, leaders reward the strategy that closes recent work fastest.
 :::
 
 ---
 
-## When leadership sees the full system {auto-animate="true"}
+## When leaders see the full system {auto-animate="true"}
 
 ::: {.dashboard-grid}
 ::: {.dashboard-card .dashboard-detail}
@@ -696,7 +688,7 @@ Oldest-First
 :::
 
 ::: {.centered .muted}
-MTTR still matters. It just cannot stand alone.
+MTTR still matters. It cannot stand alone.
 :::
 
 ---
@@ -737,119 +729,27 @@ Most teams already have the raw data. It is usually sitting in a CSV.
 
 ---
 
-## Own the definition in Polars
+## Add data science to your toolbox
 
-:::: {.columns}
-::: {.column width="52%"}
+- Define metrics in code, not dashboards
+  _Python with Polars_
 
-```{python}
-#| echo: true
-#| eval: false
-import polars as pl
+- Show how risk changes over time
+  _Plotnine for clear charts_
 
-vulns = pl.read_csv("vulnerabilities.csv", try_parse_dates=True)
-```
+- Make backlog state obvious at a glance
+  _Great Tables for summaries_
 
-```{python}
-#| echo: true
-#| eval: false
-from datetime import datetime
+- Keep analysis and narrative together
+  _Quarto for reviewable reports_
 
-as_of = datetime(2026, 4, 1)
+- Explore the data behind the metric
+  _Positron as your working environment_
 
-vulns = vulns.with_columns(
-    pl.when(pl.col("resolved_at").is_not_null())
-    .then((pl.col("resolved_at") - pl.col("created_at")).dt.total_days())
-    .otherwise(None)
-    .alias("days_to_fix"),
-    pl.when(pl.col("resolved_at").is_null())
-    .then((pl.lit(as_of) - pl.col("created_at")).dt.total_days())
-    .otherwise(None)
-    .alias("open_age_days"),
-)
-
-mttr = vulns.select(pl.col("days_to_fix").mean().alias("mttr_days"))
-mova = vulns.select(pl.col("open_age_days").mean().alias("mova_days"))
-```
+::: {.kicker}
+This is data storytelling for security.
+If you do not define the metric, the dashboard will.
 :::
-
-::: {.column width="48%"}
-
-```{python}
-#| echo: true
-#| eval: false
-vulns.group_by("severity").agg(
-    pl.col("open_age_days").mean().alias("mova_days")
-)
-```
-:::
-::::
-
----
-
-## Show the trend
-
-Use Plotnine to make the pattern visible before you explain it.
-
-```{python}
-#| echo: true
-#| eval: false
-from plotnine import aes, geom_line, ggplot, labs
-
-(
-    ggplot(vulns_by_month, aes("month", "mova_days", color="team"))
-    + geom_line(size=2)
-    + labs(x="Month", y="MOVA (days)")
-)
-```
-
----
-
-## Summarize the decision
-
-Use Great Tables to make the summary easy to read and hard to misread.
-
-```{python}
-#| echo: true
-#| eval: false
-from great_tables import GT
-
-(
-    GT(summary_table)
-    .tab_header(title="Backlog summary")
-    .fmt_number(columns=["MOVA (days)"], decimals=1)
-)
-```
-
----
-
-## Publish the review
-
-Quarto keeps analysis, charts, and narrative in one reviewable document.
-
-````markdown
-## Monthly Risk Review
-
-```{{python}}
-build_mova_chart(vulns)
-```
-````
-
----
-
-## Inspect before you publish
-
-Positron is useful for checking the rows behind the metric before you present it.
-
-```{python}
-#| echo: true
-#| eval: false
-(
-    vulns
-    .filter(pl.col("open_age_days") > 180)
-    .sort("open_age_days", descending=True)
-)
-```
 
 ---
 
@@ -857,9 +757,9 @@ Positron is useful for checking the rows behind the metric before you present it
 
 ::: {.incremental}
 - AI can speed up transforms, charts, and first drafts
-- The metric definition and review still need an owner
+- The metric definition still needs an owner
 - Use AI to move faster
-- Use code to keep the work auditable and repeatable
+- Keep the work in code so it stays auditable and repeatable
 :::
 
 ---
@@ -869,9 +769,9 @@ Positron is useful for checking the rows behind the metric before you present it
 ::: {.metric-big .centered}
 Lead with MOVA for exposure.
 
-Keep MTTR for flow.
+Use MTTR for flow.
 
-Read them together, not alone.
+Read them together.
 :::
 
 ---
@@ -881,10 +781,10 @@ Read them together, not alone.
 ::: {.metric-big .centered}
 If you optimize for MTTR alone,
 
-you can keep investing in the teams
+you keep investing in teams
 that already look healthy,
 
-while aging backlog sits elsewhere.
+while aging backlog remains elsewhere.
 
 That is the wrong decision.
 :::
@@ -894,18 +794,22 @@ That is the wrong decision.
 ## Change the review
 
 ::: {.incremental}
-- Report MTTR and MOVA side by side in every monthly review
-- Track `180+ days` open as a separate backlog line
+- Report MTTR and MOVA side by side
+- Track `180+ days open` as a separate backlog line
 - Define both metrics in code before they reach the dashboard
 - Show one chart and one table that make aging risk visible
 :::
 
 ---
 
-## Thank you {.center .statement-slide}
+## Read the system, not just the metric {.center .statement-slide}
 
 ::: {.metric-big .centered}
-Thank you.
+MTTR shows flow.
 
-[github.com/cak/mttr-vs-mova](https://github.com/cak/mttr-vs-mova)
+MOVA shows exposure.
+
+<br>
+
+github.com/cak/mttr-vs-mova
 :::
