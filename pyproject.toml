@@ -8,7 +8,6 @@ dependencies = [
     "great-tables>=0.21.0",
     "plotnine>=0.15.3",
     "polars>=1.39.3",
-    "pandas>=2.2.0",
     "pyarrow>=23.0.1",
 ]
 
