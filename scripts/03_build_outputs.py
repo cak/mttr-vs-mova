@@ -12,6 +12,16 @@ DATA_DIR = ROOT / "data"
 METRICS_PATH = DATA_DIR / "metrics.parquet"
 SUMMARY_PATH = DATA_DIR / "summary.parquet"
 
+
+def format_output_path(path: Path) -> str:
+    """Return a stable display path for logs inside or outside the repo."""
+
+    try:
+        return str(path.relative_to(ROOT))
+    except ValueError:
+        return str(path)
+
+
 def parse_args() -> argparse.Namespace:
     """Parse lightweight CLI arguments for summary output generation."""
 
@@ -61,12 +71,12 @@ def write_outputs(df: pl.DataFrame, parquet_path: Path, csv_path: Path | None) -
 
     parquet_path.parent.mkdir(parents=True, exist_ok=True)
     df.write_parquet(parquet_path)
-    print(f"Wrote {parquet_path.relative_to(ROOT)} ({df.height} rows)")
+    print(f"Wrote {format_output_path(parquet_path)} ({df.height} rows)")
 
     if csv_path is not None:
         csv_path.parent.mkdir(parents=True, exist_ok=True)
         df.write_csv(csv_path)
-        print(f"Wrote {csv_path.relative_to(ROOT)}")
+        print(f"Wrote {format_output_path(csv_path)}")
 
 
 def main() -> None:
