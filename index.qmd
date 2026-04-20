@@ -59,9 +59,11 @@ STRATEGY_COLORS = {
 }
 MONTH_BREAKS = [1, 6, 12, 18, 24]
 LAST_MONTH = metrics.select(pl.col("month_index").max()).item()
-ROOM_BG = "#f6f0e5"
-PANEL_BG = "#fffaf2"
-GRID_COLOR = "#d9cfbf"
+ROOM_BG = "#f3ebde"
+PANEL_BG = "#fffdf8"
+GRID_COLOR = "#c8baa5"
+MUTED_TEAL = "#8ea1a4"
+MUTED_ROSE = "#b58a96"
 chart_theme = (
     theme_minimal(base_size=22)
     + theme(
@@ -69,7 +71,7 @@ chart_theme = (
         legend_position="none",
         panel_grid_minor=element_blank(),
         panel_grid_major_x=element_blank(),
-        panel_grid_major_y=element_line(color=GRID_COLOR, size=0.55),
+        panel_grid_major_y=element_line(color=GRID_COLOR, size=0.7),
         panel_background=element_rect(fill=PANEL_BG, color=None),
         plot_background=element_rect(fill=ROOM_BG, color=None),
         axis_title=element_text(color="#26333A", size=18),
@@ -161,6 +163,20 @@ MTTR can rise
 while backlog age falls
 :::
 
+::: {.paradox-cue}
+::: {.paradox-pill}
+<span class="paradox-name">MTTR</span>
+<span class="paradox-trend">↑</span>
+:::
+::: {.paradox-connector}
+while
+:::
+::: {.paradox-pill}
+<span class="paradox-name">MOVA</span>
+<span class="paradox-trend paradox-trend-down">↓</span>
+:::
+:::
+
 ::: {.callout}
 Same team. Same capacity. Different prioritization.
 :::
@@ -214,6 +230,24 @@ How old is the work still open?
 ---
 
 ## Averages hide the tail
+
+::: {.tail-visual}
+::: {.tail-visual-caption}
+Most findings stay young. A small tail gets very old.
+:::
+<div class="tail-strip" role="img" aria-label="A tight cluster of younger findings on the left, with a small number of very old findings separated on the right.">
+  <div class="tail-cluster">
+    <span class="tail-dot"></span><span class="tail-dot"></span><span class="tail-dot"></span><span class="tail-dot"></span><span class="tail-dot"></span><span class="tail-dot"></span><span class="tail-dot"></span><span class="tail-dot"></span><span class="tail-dot"></span><span class="tail-dot"></span><span class="tail-dot"></span><span class="tail-dot"></span><span class="tail-dot"></span><span class="tail-dot"></span><span class="tail-dot"></span><span class="tail-dot"></span><span class="tail-dot"></span><span class="tail-dot"></span><span class="tail-dot"></span>
+  </div>
+  <div class="tail-cluster tail-cluster-outlier">
+    <span class="tail-dot tail-dot-outlier"></span>
+  </div>
+</div>
+<div class="tail-axis">
+  <span>Low age</span>
+  <span>Very high age</span>
+</div>
+:::
 
 ::: {.tail-example-grid}
 ::: {.tail-card}
@@ -429,7 +463,7 @@ mttr_labels = (
     + scale_color_manual(
         values={
             "Newest-First": STRATEGY_COLORS["Newest-First"],
-            "Oldest-First": "#b9c8ca",
+            "Oldest-First": MUTED_TEAL,
         }
     )
     + scale_x_continuous(breaks=MONTH_BREAKS)
@@ -488,7 +522,7 @@ mova_labels = (
     + scale_color_manual(
         values={
             "Oldest-First": STRATEGY_COLORS["Oldest-First"],
-            "Newest-First": "#d7b6c0",
+            "Newest-First": MUTED_ROSE,
         }
     )
     + scale_x_continuous(breaks=MONTH_BREAKS)
@@ -547,7 +581,7 @@ tail_labels = (
     + scale_color_manual(
         values={
             "Oldest-First": STRATEGY_COLORS["Oldest-First"],
-            "Newest-First": "#d7b6c0",
+            "Newest-First": MUTED_ROSE,
         }
     )
     + scale_x_continuous(breaks=MONTH_BREAKS)
@@ -609,8 +643,8 @@ Under Newest-First, the old backlog barely moves.
 decision_table = (
     summary.with_columns(
         pl.when(pl.col("strategy") == "oldest_first")
-        .then(pl.lit("Stronger backlog outcome"))
-        .otherwise(pl.lit("Wins on MTTR only"))
+        .then(pl.lit("Recommended: best backlog outcome"))
+        .otherwise(pl.lit("MTTR-only winner"))
         .alias("decision"),
         pl.when(pl.col("strategy") == "oldest_first")
         .then(pl.lit(0))
@@ -643,7 +677,7 @@ decision_table = (
         mova_days="MOVA",
         open_count="Open count",
         aged_over_180="180+ tail",
-        decision="Decision",
+        decision="Interpretation",
     )
     .cols_align(align="left", columns=["decision"])
     .cols_align(
@@ -656,6 +690,13 @@ decision_table = (
         style=[style.fill("#f7e7ec"), style.text(color="#6b1230", weight="bold")],
         locations=loc.body(
             columns="mttr_days",
+            rows=pl.col("strategy_label") == "Newest-First",
+        ),
+    )
+    .tab_style(
+        style=[style.fill("#fbf0f4"), style.text(color="#7a2941", weight="bold")],
+        locations=loc.body(
+            columns="decision",
             rows=pl.col("strategy_label") == "Newest-First",
         ),
     )

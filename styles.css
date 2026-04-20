@@ -1,12 +1,12 @@
 :root {
-  --bg: #f6f0e5;
-  --panel: #fffaf2;
+  --bg: #f3ebde;
+  --panel: #fffdf8;
   --headline: #0f1720;
   --ink: #182126;
-  --ink-soft: #55606b;
+  --ink-soft: #48535d;
   --teal: #1f6f78;
   --orange: #c65a21;
-  --line: #d9cfbf;
+  --line: #c8baa5;
   --shadow: 0 14px 36px rgba(56, 40, 22, 0.07);
   --shadow-strong: 0 22px 54px rgba(56, 40, 22, 0.1);
   --radius-card: 24px;
@@ -117,7 +117,7 @@
 .reveal pre {
   width: 100%;
   margin: 0.58em 0 0.8em 0;
-  border: 1px solid rgba(217, 207, 191, 0.9);
+  border: 1px solid var(--line);
   border-radius: var(--radius-card);
   background: rgba(255, 250, 242, 0.96);
   box-shadow: var(--shadow);
@@ -145,7 +145,7 @@
   max-width: 1160px;
   padding: 2.8rem 3rem 2.55rem;
   background: rgba(255, 250, 242, 0.84);
-  border: 1px solid rgba(217, 207, 191, 0.92);
+  border: 1px solid var(--line);
   border-radius: 30px;
   box-shadow: var(--shadow-strong);
   backdrop-filter: blur(3px);
@@ -266,6 +266,51 @@
   margin-bottom: 0.72em;
 }
 
+.paradox-cue {
+  display: inline-grid;
+  grid-template-columns: auto auto auto;
+  gap: 0.7rem;
+  align-items: center;
+  justify-content: center;
+  margin: 0.55rem auto 0.25rem;
+}
+
+.paradox-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.45rem 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 253, 248, 0.92);
+  box-shadow: var(--shadow);
+}
+
+.paradox-name {
+  color: var(--headline);
+  font-size: 0.68em;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.paradox-trend {
+  color: var(--orange);
+  font-size: 0.94em;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.paradox-trend-down {
+  color: var(--teal);
+}
+
+.paradox-connector {
+  color: var(--ink-soft);
+  font-size: 0.54em;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 /* Shared component shells */
 .shock-card,
 .definition-card,
@@ -274,7 +319,7 @@
 .score-card,
 .tail-card {
   background: linear-gradient(180deg, rgba(255, 252, 247, 0.97), rgba(255, 249, 241, 0.93));
-  border: 1px solid rgba(217, 207, 191, 0.92);
+  border: 1px solid var(--line);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow);
 }
@@ -389,6 +434,62 @@
   padding: 1rem 0.95rem 0.9rem;
 }
 
+.tail-visual {
+  max-width: 980px;
+  margin: 0.1rem 0 0.95rem;
+  padding: 0.8rem 0.95rem 0.72rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-panel);
+  background: rgba(255, 253, 248, 0.78);
+}
+
+.tail-visual-caption {
+  color: var(--ink-soft);
+  font-size: 0.56em;
+  margin-bottom: 0.42rem;
+}
+
+.tail-strip {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.tail-cluster {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.24rem;
+  max-width: 300px;
+}
+
+.tail-cluster-outlier {
+  justify-content: flex-end;
+  min-width: 72px;
+}
+
+.tail-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: rgba(31, 111, 120, 0.68);
+}
+
+.tail-dot-outlier {
+  background: rgba(198, 90, 33, 0.84);
+}
+
+.tail-axis {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 0.34rem;
+  color: var(--ink-soft);
+  font-size: 0.48em;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
 .tail-number {
   font-size: 1.9em;
   line-height: 1;
@@ -467,7 +568,7 @@
   align-items: baseline;
   gap: 1rem;
   padding: 0.46rem 0;
-  border-top: 1px solid rgba(217, 207, 191, 0.86);
+  border-top: 1px solid var(--line);
   font-size: 0.78em;
 }
 
@@ -526,10 +627,15 @@
 .reveal .gt_table {
   background: transparent;
   font-size: 0.72em;
-  border: 1px solid rgba(217, 207, 191, 0.88);
+  border: 1px solid var(--line);
   border-radius: var(--radius-callout);
   box-shadow: var(--shadow);
   overflow: hidden;
+}
+
+.reveal .gt_table th,
+.reveal .gt_table td {
+  border-color: var(--line) !important;
 }
 
 .reveal .gt_heading,
@@ -565,6 +671,10 @@
 }
 
 @media (max-width: 900px) {
+  .paradox-cue {
+    grid-template-columns: 1fr;
+  }
+
   .shock-row,
   .definition-grid,
   .signal-grid,
