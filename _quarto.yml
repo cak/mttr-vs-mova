@@ -1,15 +1,15 @@
 project:
   type: default
-  title: "MTTR vs. MOVA"
   render:
     - index.qmd
   execute-dir: project
-
-execute:
-  freeze: false
-  warning: false
-  message: false
-  daemon: false
+  output-dir: _output
+  pre-render:
+    - python scripts/01_generate_data.py
+    - python scripts/02_simulate_metrics.py
+    - python scripts/03_build_outputs.py
+  preview:
+    port: 4200
 
 format:
   revealjs:
@@ -26,17 +26,13 @@ format:
     controls: false
     progress: true
     center: false
+    center-title-slide: true
     hash: true
-    history: true
+    history: false
     embed-resources: true
-    code-copy: false
     code-overflow: wrap
-    incremental: false
-    preview-links: false
-    navigation-mode: linear
     auto-stretch: false
     auto-animate-easing: ease-out
     auto-animate-duration: 0.55
     title-slide-attributes:
       data-background-color: "#f6f0e5"
-      class: "title-slide"
