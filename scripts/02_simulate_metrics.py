@@ -1,7 +1,16 @@
+"""Simulate month-end vulnerability metrics under different work-ordering rules.
+
+MTTR is computed from vulnerabilities resolved within each month. MOVA, open
+count, and 180+ tail are month-end snapshots after that month's remediation
+work is applied.
+"""
+
 from __future__ import annotations
 
+import argparse
 import calendar
-from datetime import datetime
+from dataclasses import dataclass
+from datetime import date, datetime
 from pathlib import Path
 
 import polars as pl
@@ -10,125 +19,237 @@ ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = ROOT / "data"
 BASE_PATH = DATA_DIR / "base_vulns.parquet"
 METRICS_PATH = DATA_DIR / "metrics.parquet"
-SIMULATION_START_YEAR = 2024
-SIMULATION_START_MONTH = 1
-SIMULATION_MONTHS = 24
-MONTHLY_FIX = 60
+
+DEFAULT_START = date(2024, 1, 1)
+DEFAULT_MONTHS = 24
+DEFAULT_MONTHLY_CAPACITY = 60
+DEFAULT_TAIL_DAYS = 180
+STRATEGIES: tuple[str, ...] = ("oldest_first", "newest_first")
 
 
-def month_end(value: datetime) -> datetime:
-    last_day = calendar.monthrange(value.year, value.month)[1]
-    return datetime(value.year, value.month, last_day, 23, 59, 59)
+@dataclass(frozen=True)
+class MonthWindow:
+    """A single simulation month."""
+
+    index: int
+    start: datetime
+    end: datetime
 
 
-def add_month(year: int, month: int, delta: int = 1) -> tuple[int, int]:
-    month += delta
-    year += (month - 1) // 12
-    month = (month - 1) % 12 + 1
-    return year, month
+@dataclass(frozen=True)
+class SimulationConfig:
+    """Parameters controlling the simulation horizon and remediation rate."""
+
+    start_month: date = DEFAULT_START
+    months: int = DEFAULT_MONTHS
+    monthly_capacity: int = DEFAULT_MONTHLY_CAPACITY
+    tail_days: int = DEFAULT_TAIL_DAYS
 
 
-def simulation_months() -> list[datetime]:
-    year = SIMULATION_START_YEAR
-    month = SIMULATION_START_MONTH
-    months = []
+def parse_args() -> argparse.Namespace:
+    """Parse lightweight CLI arguments for the simulation."""
 
-    for _ in range(SIMULATION_MONTHS):
-        months.append(month_end(datetime(year, month, 1)))
-        year, month = add_month(year, month)
-
-    return months
-
-
-def active_vulns(vulns: pl.DataFrame, as_of: datetime) -> pl.DataFrame:
-    return vulns.filter(pl.col("created_at") <= as_of)
-
-
-def select_to_fix(vulns: pl.DataFrame, n: int, strategy: str) -> pl.DataFrame:
-    if vulns.is_empty():
-        return vulns
-
-    desc = strategy == "newest_first"
-
-    return vulns.filter(pl.col("resolved_at").is_null()).sort(
-        "created_at", descending=desc
-    ).head(n)
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--base", type=Path, default=BASE_PATH, help="Input base dataset.")
+    parser.add_argument("--out", type=Path, default=METRICS_PATH, help="Parquet output path.")
+    parser.add_argument(
+        "--csv-out",
+        type=Path,
+        default=None,
+        help="Optional CSV export for presentation demos.",
+    )
+    parser.add_argument("--months", type=int, default=DEFAULT_MONTHS)
+    parser.add_argument("--monthly-capacity", type=int, default=DEFAULT_MONTHLY_CAPACITY)
+    parser.add_argument("--tail-days", type=int, default=DEFAULT_TAIL_DAYS)
+    return parser.parse_args()
 
 
-def resolve_vulns(vulns: pl.DataFrame, ids: list[int], as_of: datetime) -> pl.DataFrame:
-    if not ids:
+def validate_config(config: SimulationConfig) -> None:
+    """Fail fast on invalid simulation settings."""
+
+    if config.months <= 0:
+        raise ValueError("months must be positive")
+    if config.monthly_capacity <= 0:
+        raise ValueError("monthly_capacity must be positive")
+    if config.tail_days <= 0:
+        raise ValueError("tail_days must be positive")
+
+
+def add_months(value: date, delta: int) -> date:
+    """Return the first day of the month shifted by `delta` months."""
+
+    month_index = (value.year * 12 + value.month - 1) + delta
+    year, month_offset = divmod(month_index, 12)
+    return date(year, month_offset + 1, 1)
+
+
+def month_window(start_month: date, month_index: int) -> MonthWindow:
+    """Build a month window with inclusive start and end timestamps."""
+
+    month_anchor = add_months(start_month, month_index - 1)
+    start = datetime(month_anchor.year, month_anchor.month, 1)
+    last_day = calendar.monthrange(month_anchor.year, month_anchor.month)[1]
+    end = datetime(month_anchor.year, month_anchor.month, last_day, 23, 59, 59)
+    return MonthWindow(index=month_index, start=start, end=end)
+
+
+def simulation_windows(config: SimulationConfig) -> list[MonthWindow]:
+    """Construct the sequence of month windows used for snapshots."""
+
+    return [month_window(config.start_month, month_index) for month_index in range(1, config.months + 1)]
+
+
+def load_base_vulnerabilities(path: Path) -> pl.DataFrame:
+    """Read the base dataset with the columns needed for the simulation."""
+
+    return (
+        pl.read_parquet(path)
+        .select("id", "created_at", "resolved_at", "severity", "created_month", "source_cohort", "is_initial_backlog")
+        .with_columns(
+            pl.col("created_at").cast(pl.Datetime("us")),
+            pl.col("resolved_at").cast(pl.Datetime("us")),
+        )
+        .sort(["created_at", "id"])
+    )
+
+
+def open_vulnerabilities(vulns: pl.DataFrame, as_of: datetime) -> pl.DataFrame:
+    """Return findings created by `as_of` that are still open at that point."""
+
+    return vulns.filter(
+        (pl.col("created_at") <= pl.lit(as_of))
+        & (pl.col("resolved_at").is_null() | (pl.col("resolved_at") > pl.lit(as_of)))
+    )
+
+
+def select_to_resolve(open_vulns: pl.DataFrame, strategy: str, monthly_capacity: int) -> list[int]:
+    """Choose which open findings to close this month.
+
+    Only the ordering rule changes by strategy. Capacity and the candidate
+    population are otherwise identical.
+    """
+
+    if open_vulns.is_empty():
+        return []
+
+    descending = strategy == "newest_first"
+    return (
+        open_vulns.sort(["created_at", "id"], descending=[descending, False])
+        .head(monthly_capacity)
+        .get_column("id")
+        .to_list()
+    )
+
+
+def resolve_vulnerabilities(vulns: pl.DataFrame, vuln_ids: list[int], resolved_at: datetime) -> pl.DataFrame:
+    """Mark a set of vulnerabilities as resolved at the month-end timestamp."""
+
+    if not vuln_ids:
         return vulns
 
     return vulns.with_columns(
-        pl.when(pl.col("id").is_in(ids))
-        .then(pl.lit(as_of))
+        pl.when(pl.col("id").is_in(vuln_ids))
+        .then(pl.lit(resolved_at))
         .otherwise(pl.col("resolved_at"))
         .alias("resolved_at")
     )
 
 
-def compute_mttr(vulns: pl.DataFrame, as_of: datetime) -> float | None:
-    closed = vulns.filter(
-        pl.col("resolved_at").is_not_null() & (pl.col("resolved_at") <= as_of)
-    ).with_columns(
-        (pl.col("resolved_at") - pl.col("created_at")).dt.total_days().alias("days")
+def compute_monthly_metrics(
+    vulns: pl.DataFrame,
+    strategy: str,
+    window: MonthWindow,
+    tail_days: int,
+) -> dict[str, object]:
+    """Compute the flow and stock metrics for one month window."""
+
+    closed_this_month = vulns.filter(
+        pl.col("resolved_at").is_not_null()
+        & (pl.col("resolved_at") >= pl.lit(window.start))
+        & (pl.col("resolved_at") <= pl.lit(window.end))
     )
-    return None if closed.is_empty() else closed.select(pl.col("days").mean()).item()
+    open_as_of_month_end = open_vulnerabilities(vulns, window.end)
 
-
-def compute_mova(vulns: pl.DataFrame, as_of: datetime) -> float | None:
-    open_vulns = active_vulns(vulns, as_of).filter(pl.col("resolved_at").is_null())
-    aged = open_vulns.with_columns(
-        (pl.lit(as_of) - pl.col("created_at")).dt.total_days().alias("age")
+    closed_with_age = closed_this_month.with_columns(
+        (pl.col("resolved_at") - pl.col("created_at")).dt.total_days().alias("age_days")
     )
-    return None if aged.is_empty() else aged.select(pl.col("age").mean()).item()
-
-
-def aged_backlog_count(vulns: pl.DataFrame, as_of: datetime, days: int = 180) -> int:
-    return (
-        active_vulns(vulns, as_of)
-        .filter(pl.col("resolved_at").is_null())
-        .with_columns((pl.lit(as_of) - pl.col("created_at")).dt.total_days().alias("age"))
-        .filter(pl.col("age") >= days)
-        .height
+    open_with_age = open_as_of_month_end.with_columns(
+        (pl.lit(window.end) - pl.col("created_at")).dt.total_days().alias("age_days")
     )
 
+    mttr_days = (
+        None
+        if closed_with_age.is_empty()
+        else closed_with_age.select(pl.col("age_days").mean()).item()
+    )
+    mova_days = (
+        None if open_with_age.is_empty() else open_with_age.select(pl.col("age_days").mean()).item()
+    )
+    aged_over_tail = (
+        0
+        if open_with_age.is_empty()
+        else open_with_age.filter(pl.col("age_days") >= tail_days).height
+    )
 
-def simulate(strategy: str, monthly_fix: int = MONTHLY_FIX) -> pl.DataFrame:
-    base = pl.read_parquet(BASE_PATH)
-    backlog = base.clone()
-    rows = []
+    return {
+        "strategy": strategy,
+        "month_index": window.index,
+        "month": window.end,
+        "resolved_count": closed_this_month.height,
+        "mttr_days": mttr_days,
+        "mova_days": mova_days,
+        "open_count": open_as_of_month_end.height,
+        "aged_over_180": aged_over_tail,
+    }
 
-    for month_index, as_of in enumerate(simulation_months(), start=1):
-        current = active_vulns(backlog, as_of)
-        to_fix = select_to_fix(current, monthly_fix, strategy)
-        backlog = resolve_vulns(backlog, to_fix.get_column("id").to_list(), as_of)
 
-        current = active_vulns(backlog, as_of)
-        mttr = compute_mttr(backlog, as_of)
-        mova = compute_mova(backlog, as_of)
+def simulate_strategy(base_vulns: pl.DataFrame, strategy: str, config: SimulationConfig) -> pl.DataFrame:
+    """Run the month-by-month simulation for a single prioritization strategy."""
 
-        rows.append(
-            {
-                "strategy": strategy,
-                "month_index": month_index,
-                "month": as_of,
-                "mttr_days": mttr,
-                "mova_days": mova,
-                "open_count": current.filter(pl.col("resolved_at").is_null()).height,
-                "aged_over_180": aged_backlog_count(backlog, as_of),
-            }
-        )
+    if strategy not in STRATEGIES:
+        raise ValueError(f"Unsupported strategy: {strategy}")
 
-    return pl.DataFrame(rows)
+    working = base_vulns.clone()
+    rows: list[dict[str, object]] = []
+
+    for window in simulation_windows(config):
+        available_open = open_vulnerabilities(working, window.end)
+        to_resolve = select_to_resolve(available_open, strategy, config.monthly_capacity)
+        working = resolve_vulnerabilities(working, to_resolve, window.end)
+        rows.append(compute_monthly_metrics(working, strategy, window, config.tail_days))
+
+    return pl.DataFrame(rows).sort(["strategy", "month_index"])
+
+
+def write_outputs(df: pl.DataFrame, parquet_path: Path, csv_path: Path | None) -> None:
+    """Write the primary metrics dataset and optional CSV export."""
+
+    parquet_path.parent.mkdir(parents=True, exist_ok=True)
+    df.write_parquet(parquet_path)
+    print(f"Wrote {parquet_path.relative_to(ROOT)} ({df.height} rows)")
+
+    if csv_path is not None:
+        csv_path.parent.mkdir(parents=True, exist_ok=True)
+        df.write_csv(csv_path)
+        print(f"Wrote {csv_path.relative_to(ROOT)}")
 
 
 def main() -> None:
-    newest = simulate("newest_first")
-    oldest = simulate("oldest_first")
-    metrics = pl.concat([oldest, newest]).sort(["strategy", "month_index"])
-    metrics.write_parquet(METRICS_PATH)
-    print(f"Wrote {METRICS_PATH.relative_to(ROOT)}")
+    """Run both strategy simulations and persist the monthly metrics."""
+
+    args = parse_args()
+    config = SimulationConfig(
+        months=args.months,
+        monthly_capacity=args.monthly_capacity,
+        tail_days=args.tail_days,
+    )
+    validate_config(config)
+
+    base_vulns = load_base_vulnerabilities(args.base)
+    metrics = pl.concat(
+        [simulate_strategy(base_vulns, strategy, config) for strategy in STRATEGIES]
+    ).sort(["strategy", "month_index"])
+    write_outputs(metrics, args.out, args.csv_out)
 
 
 if __name__ == "__main__":
