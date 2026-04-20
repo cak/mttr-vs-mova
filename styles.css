@@ -437,9 +437,9 @@
 }
 
 .tail-card.emphasis {
+  grid-column: 1 / -1;
   background:
-    linear-gradient(180deg, rgba(198, 90, 33, 0.08), rgba(198, 90, 33, 0.02)),
-    var(--panel);
+    linear-gradient(180deg, rgba(198, 90, 33, 0.08), rgba(198, 90, 33, 0.02)), var(--panel);
 }
 
 .tail-text.strong {
@@ -523,8 +523,7 @@
 .dashboard-card.winner {
   border-color: rgba(31, 111, 120, 0.62);
   background:
-    linear-gradient(180deg, rgba(31, 111, 120, 0.08), rgba(31, 111, 120, 0.025)),
-    var(--panel);
+    linear-gradient(180deg, rgba(31, 111, 120, 0.08), rgba(31, 111, 120, 0.025)), var(--panel);
 }
 
 .dashboard-title,
@@ -590,14 +589,12 @@
 
 .score-good {
   background:
-    linear-gradient(180deg, rgba(31, 111, 120, 0.1), rgba(31, 111, 120, 0.03)),
-    var(--panel);
+    linear-gradient(180deg, rgba(31, 111, 120, 0.1), rgba(31, 111, 120, 0.03)), var(--panel);
 }
 
 .score-bad {
   background:
-    linear-gradient(180deg, rgba(139, 30, 63, 0.12), rgba(139, 30, 63, 0.03)),
-    var(--panel);
+    linear-gradient(180deg, rgba(139, 30, 63, 0.12), rgba(139, 30, 63, 0.03)), var(--panel);
 }
 
 .score-metric {
