@@ -1,7 +1,7 @@
 [project]
 name = "mttr-vs-mova"
 version = "0.1.0"
-description = "BSides Charm 2026 — Why MTTR Alone Misleads: Add MOVA to Measure Real Risk"
+description = "BSides Charm 2026 — Why Vulnerability MTTR Alone Misleads: Add MOVA to Measure Real Risk"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
