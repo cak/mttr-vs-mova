@@ -140,7 +140,7 @@ This month
 ::::
 
 ::: {.shock-subtitle}
-Dashboards signal failure here. The better question is: what happened to exposure?
+Dashboards signal failure here. The better question is: what happened to exposure, the aging risk still sitting open?
 :::
 ::::
 
@@ -174,6 +174,10 @@ We were closing older backlog that had been sitting for a long time.
 - Interpreted as declining team effectiveness
 :::
 
+::: {.kicker}
+The mistake is assuming one closure metric describes the whole backlog.
+:::
+
 ---
 
 ## The paradox {.center .statement-slide}
@@ -204,25 +208,35 @@ Same team. Same capacity. Different prioritization.
 
 ---
 
-## MTTR is flow
+## Flow vs. stock
+
+::: {.definition-grid}
+::: {.definition-card}
+::: {.eyebrow}
+Flow
+:::
+### MTTR
+How fast are we closing work?
 
 Time to remediate **closed** vulnerabilities.
+:::
+
+::: {.definition-card}
+::: {.eyebrow}
+Stock
+:::
+### MOVA
+How old is the work still open?
+
+**Mean Open Vulnerability Age**
+
+How old is the vulnerability backlog we still carry?
+:::
+:::
 
 ::: {.kicker}
 It measures closure speed, not the age of the backlog that remains.
-:::
 
----
-
-## MOVA is stock
-
-::: {.metric-mid}
-**Mean Open Vulnerability Age**
-:::
-
-How old is the vulnerability backlog we still carry?
-
-::: {.kicker}
 It measures the age of the backlog you still own today.
 :::
 
@@ -238,28 +252,8 @@ It measures the age of the backlog you still own today.
 
 ::: {.kicker}
 Age is not just time. It is unaddressed risk.
-:::
 
----
-
-## Flow vs. stock
-
-::: {.definition-grid}
-::: {.definition-card}
-::: {.eyebrow}
-Flow
-:::
-### MTTR
-How fast are we closing work?
-:::
-
-::: {.definition-card}
-::: {.eyebrow}
-Stock
-:::
-### MOVA
-How old is the work still open?
-:::
+Once closed work and open work are separated, the exposure question becomes much easier to see.
 :::
 
 ---
@@ -430,24 +424,12 @@ Same data. Different population. Different age.
 
 ---
 
-## Same capacity, different outcome
+## A simple simulation
 
 ::: {.incremental}
 - Same arrivals
 - Same fix rate
 - Same time horizon
-- Only the order of work changes
-:::
-
-::: {.kicker}
-Now watch what each metric rewards.
-:::
-
----
-
-## A simple simulation
-
-::: {.incremental}
 - Start with the same backlog
 - Add the same incoming vulnerabilities each month
 - Apply the same remediation capacity each month
@@ -455,7 +437,9 @@ Now watch what each metric rewards.
 :::
 
 ::: {.kicker}
-This isolates how prioritization changes the metrics.
+To isolate that effect, keep capacity constant and change only prioritization.
+
+Now watch what each metric rewards.
 :::
 
 ---
@@ -911,6 +895,18 @@ MTTR still matters. It cannot stand alone.
 - Add open count and a threshold such as 180+ days
 - Label the MTTR time window before calling a regression
 - Use the full set of metrics to explain cleanup work when old findings close
+- Define both metrics in code before they reach the dashboard
+- Show one chart and one table that make exposure visible
+:::
+
+---
+
+## Change the review
+
+::: {.incremental}
+- Report MTTR and MOVA side by side
+- Track `180+ days open` as a separate backlog line
+- Change the review so exposure is visible before a judgment call is made
 :::
 
 ---
@@ -926,6 +922,10 @@ Most teams already have the data. It is usually sitting in a CSV.
 - CSVs are messy and unavoidable
 - Dashboards often hide the metric definition
 - Analysts need to own the definition in code
+:::
+
+::: {.kicker}
+This is not a tooling problem first. It is a definition problem first.
 :::
 
 ---
@@ -963,6 +963,24 @@ If you do not define the metric, the dashboard will.
 - Keep the work in code so it stays auditable and repeatable
 :::
 
+::: {.kicker}
+The implementation details matter less than changing what gets reviewed.
+:::
+
+---
+
+## A simple policy
+
+::: {.metric-mid}
+Track MTTR and MOVA together.
+
+Prioritize reducing the oldest backlog.
+:::
+
+::: {.kicker}
+Do not reward teams for keeping MTTR low while backlog ages.
+:::
+
 ---
 
 ## Add MOVA. Keep MTTR in context. {.center .statement-slide}
@@ -988,31 +1006,6 @@ that already look healthy,
 while aging backlog remains elsewhere.
 
 That is the wrong decision.
-:::
-
----
-
-## Change the review
-
-::: {.incremental}
-- Report MTTR and MOVA side by side
-- Track `180+ days open` as a separate backlog line
-- Define both metrics in code before they reach the dashboard
-- Show one chart and one table that make exposure visible
-:::
-
----
-
-## A simple policy
-
-::: {.metric-mid}
-Track MTTR and MOVA together.
-
-Prioritize reducing the oldest backlog.
-:::
-
-::: {.kicker}
-Do not reward teams for keeping MTTR low while backlog ages.
 :::
 
 ---
