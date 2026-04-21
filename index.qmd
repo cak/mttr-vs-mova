@@ -2,7 +2,11 @@
 title: "Why Vulnerability MTTR Alone Misleads"
 subtitle: "Add MOVA to Measure Real Risk"
 author: "Caleb Kinney"
-date: ""
+format:
+  revealjs:
+    include-in-header:
+      text: |
+        <link rel="stylesheet" href="/Applications/quarto/share/formats/html/bootstrap/dist/bootstrap-icons.css">
 execute:
   echo: false
   warning: false
@@ -108,6 +112,21 @@ newest_open = int(card_lookup["Newest-First"]["open_count"])
 newest_tail = int(card_lookup["Newest-First"]["aged_over_180"])
 ```
 
+## Opening {.hero-slide}
+
+::: {.hero-block}
+::: {.hero-eyebrow}
+Security Metrics / BSides Charm
+:::
+
+<div class="hero-title">Why Vulnerability<br>MTTR Alone<br>Misleads</div>
+<div class="hero-subtitle">Add MOVA to Measure Real Risk</div>
+<div class="hero-divider" aria-hidden="true"></div>
+<div class="hero-author">Caleb Kinney</div>
+:::
+
+---
+
 ## MTTR just doubled {.center .hook-slide}
 
 :::: {.shock-card}
@@ -146,7 +165,7 @@ Dashboards signal failure here. The better question is: what happened to exposur
 
 ---
 
-## This actually happened
+## This actually happened {.top-loaded}
 
 ::: {.line-anchor}
 MTTR increased after we launched a program.
@@ -258,24 +277,30 @@ Once closed work and open work are separated, the exposure question becomes much
 
 ---
 
-## Averages hide the tail
+## Averages hide the tail {.center}
 
 ::: {.tail-example-grid}
 ::: {.tail-card}
+::: {.eyebrow}
+Most findings
+:::
 ::: {.tail-number}
 95
 :::
 ::: {.tail-text}
-findings at 7 days
+at 7 days
 :::
 :::
 
 ::: {.tail-card}
+::: {.eyebrow}
+Old tail
+:::
 ::: {.tail-number}
 5
 :::
 ::: {.tail-text}
-findings at 400 days
+at 400 days
 :::
 :::
 
@@ -291,43 +316,43 @@ The oldest findings are not moving.
 
 ---
 
-## Report the full picture
+## Report the full picture {.center}
 
 ::: {.signal-grid}
-::: {.signal-card}
-::: {.signal-name}
-MTTR
-:::
-::: {.signal-meaning}
-Closure speed
-:::
-:::
-
-::: {.signal-card}
-::: {.signal-name}
-MOVA
-:::
-::: {.signal-meaning}
-Backlog age
-:::
+::: {.signal-card .signal-flow}
+<div class="signal-head">
+<div class="signal-icon" aria-hidden="true"><i class="bi bi-stopwatch"></i></div>
+<div class="signal-name">MTTR</div>
+</div>
+<div class="signal-meaning">Closure speed</div>
+<div class="signal-support">Time to remediate closed findings</div>
 :::
 
-::: {.signal-card}
-::: {.signal-name}
-Open Count
-:::
-::: {.signal-meaning}
-Backlog size
-:::
+::: {.signal-card .signal-age}
+<div class="signal-head">
+<div class="signal-icon" aria-hidden="true"><i class="bi bi-hourglass-split"></i></div>
+<div class="signal-name">MOVA</div>
+</div>
+<div class="signal-meaning">Backlog age</div>
+<div class="signal-support">Mean age of open vulnerabilities</div>
 :::
 
-::: {.signal-card}
-::: {.signal-name}
-180+ Days
+::: {.signal-card .signal-count}
+<div class="signal-head">
+<div class="signal-icon" aria-hidden="true"><i class="bi bi-collection"></i></div>
+<div class="signal-name">Open Count</div>
+</div>
+<div class="signal-meaning">Backlog size</div>
+<div class="signal-support">Total open findings</div>
 :::
-::: {.signal-meaning}
-Aging tail
-:::
+
+::: {.signal-card .signal-tail}
+<div class="signal-head">
+<div class="signal-icon" aria-hidden="true"><i class="bi bi-exclamation-diamond"></i></div>
+<div class="signal-name">180+ Days</div>
+</div>
+<div class="signal-meaning">Aging tail</div>
+<div class="signal-support">Findings older than 180 days</div>
 :::
 :::
 
@@ -965,30 +990,59 @@ This is not a tooling problem first. It is a definition problem first.
 
 ---
 
-## Add data science to your toolbox
+## Add data science to your toolbox {.toolbox-slide}
 
-::: {.tool-list}
-
-- Define metrics in code, not dashboards
-  _Python with Polars_
-
-- Show how risk changes over time
-  _Plotnine for clear charts_
-
-- Make backlog state obvious at a glance
-  _Great Tables for summaries_
-
-- Keep analysis and narrative together
-  _Quarto for reviewable reports_
-
-- Explore the data behind the metric
-  _Positron or your preferred IDE_
-
+::: {.tool-grid}
+::: {.tool-card .tool-define}
+<div class="tool-head">
+<div class="tool-icon" aria-hidden="true"><i class="bi bi-code-slash"></i></div>
+<div class="tool-title">Define metrics in code</div>
+</div>
+<div class="tool-note">Own the calculation before it hits the dashboard</div>
+<div class="tool-method">Python + Polars</div>
 :::
 
-::: {.kicker}
-This is data storytelling for security.
-If you do not define the metric, the dashboard will.
+::: {.tool-card .tool-show}
+<div class="tool-head">
+<div class="tool-icon" aria-hidden="true"><i class="bi bi-graph-up"></i></div>
+<div class="tool-title">Show risk over time</div>
+</div>
+<div class="tool-note">Track flow and exposure month by month</div>
+<div class="tool-method">Plotnine charts</div>
+:::
+
+::: {.tool-card .tool-summarize}
+<div class="tool-head">
+<div class="tool-icon" aria-hidden="true"><i class="bi bi-table"></i></div>
+<div class="tool-title">Summarize backlog state</div>
+</div>
+<div class="tool-note">Make count, age, and tail visible at a glance</div>
+<div class="tool-method">Great Tables outputs</div>
+:::
+
+::: {.tool-card .tool-report}
+<div class="tool-head">
+<div class="tool-icon" aria-hidden="true"><i class="bi bi-journal-text"></i></div>
+<div class="tool-title">Keep analysis with the story</div>
+</div>
+<div class="tool-note">Put code, charts, and narrative in one reviewable artifact</div>
+<div class="tool-method">Quarto reports</div>
+:::
+
+::: {.tool-card .tool-explore .tool-card-wide}
+<div class="tool-card-body">
+<div class="tool-head">
+<div class="tool-icon" aria-hidden="true"><i class="bi bi-search"></i></div>
+<div class="tool-title">Explore the raw data</div>
+</div>
+<div class="tool-note">Inspect exports, joins, and edge cases before you explain the number</div>
+</div>
+<div class="tool-method">Positron or your IDE</div>
+:::
+:::
+
+::: {.toolbox-takeaway}
+Define the metric first. Then visualize it.
 :::
 
 ---
@@ -1008,27 +1062,53 @@ The implementation details matter less than changing what gets reviewed.
 
 ---
 
-## A simple policy
+## A simple policy {.center}
 
-::: {.metric-mid}
-Track MTTR and MOVA together.
-
-Prioritize reducing the oldest backlog.
+::: {.definition-grid .narrow-grid}
+::: {.definition-card}
+::: {.eyebrow}
+Track together
+:::
+### MTTR + MOVA
+Read flow and exposure together.
 :::
 
-::: {.kicker}
-Do not reward teams for keeping MTTR low while backlog ages.
+::: {.definition-card}
+::: {.eyebrow}
+Prioritize age
+:::
+### Oldest backlog first
+Reduce the oldest open work first.
+:::
+:::
+
+::: {.line-anchor .line-anchor-subtle .centered}
+Do not reward low MTTR while backlog ages.
 :::
 
 ---
 
 ## Add MOVA. Keep MTTR in context. {.center .statement-slide}
 
-::: {.metric-big .centered}
-Lead with MOVA for exposure.
+::: {.definition-grid .narrow-grid}
+::: {.definition-card .centered}
+::: {.eyebrow}
+MOVA
+:::
+### Exposure
+Age still carried today.
+:::
 
-Use MTTR for flow.
+::: {.definition-card .centered}
+::: {.eyebrow}
+MTTR
+:::
+### Flow
+Speed of closed work.
+:::
+:::
 
+::: {.line-anchor .line-anchor-subtle .centered}
 Read them together, not alone.
 :::
 
@@ -1036,14 +1116,25 @@ Read them together, not alone.
 
 ## MTTR alone drives the wrong call {.center .statement-slide}
 
-::: {.metric-big .centered}
-If you optimize for MTTR alone,
+::: {.definition-grid .narrow-grid .decision-grid}
+::: {.definition-card .decision-card .decision-card-wrong}
+::: {.eyebrow}
+Dashboard says
+:::
+### Low MTTR
+This team looks healthiest.
+:::
 
-you keep investing in teams
-that already look healthy,
+::: {.definition-card .decision-card .decision-card-right}
+::: {.eyebrow}
+What is true
+:::
+### Aging backlog elsewhere
+Exposure needs effort in another queue.
+:::
+:::
 
-while aging backlog remains elsewhere.
-
+::: {.line-anchor .centered .decision-close}
 That is the wrong decision.
 :::
 
