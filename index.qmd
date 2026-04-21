@@ -148,7 +148,7 @@ Dashboards signal failure here. The better question is: what happened to exposur
 
 ## This actually happened
 
-::: {.callout .callout-important}
+::: {.callout}
 MTTR increased after we launched a program.
 :::
 
@@ -426,7 +426,7 @@ Same data. Different population. Different age.
 
 ## A simple simulation
 
-::: {.incremental}
+::: {.compact-list}
 - Same arrivals
 - Same fix rate
 - Same time horizon
@@ -890,7 +890,7 @@ MTTR still matters. It cannot stand alone.
 
 ## What to report
 
-::: {.incremental}
+::: {.compact-list}
 - Put MTTR and MOVA on the same monthly view
 - Add open count and a threshold such as 180+ days
 - Label the MTTR time window before calling a regression
@@ -932,6 +932,8 @@ This is not a tooling problem first. It is a definition problem first.
 
 ## Add data science to your toolbox
 
+::: {.tool-list}
+
 - Define metrics in code, not dashboards
   _Python with Polars_
 
@@ -946,6 +948,8 @@ This is not a tooling problem first. It is a definition problem first.
 
 - Explore the data behind the metric
   _Positron or your preferred IDE_
+
+:::
 
 ::: {.kicker}
 This is data storytelling for security.
