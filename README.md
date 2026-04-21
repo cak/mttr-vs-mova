@@ -1,106 +1,76 @@
 # Why Vulnerability MTTR Alone Misleads
 
-This repository contains a [Quarto](https://quarto.org/) / Reveal.js talk and the supporting analysis code. The deck argues that vulnerability programs should read **MTTR** and **Mean Open Vulnerability Age (MOVA)** together because they answer different questions.
+This repository contains the [Quarto](https://quarto.org/) / Reveal.js deck and supporting analysis for the talk **Why Vulnerability MTTR Alone Misleads**.
 
-- **MTTR = flow**: how long closed work took to remediate
-- **MOVA = stock**: how old the open backlog is right now
+The central claim is simple: **MTTR can rise while exposure falls**. When a team finally closes older backlog, the age of the work it closes goes up, so MTTR looks worse even while the open backlog is getting healthier. **MOVA** (Mean Open Vulnerability Age) complements MTTR by showing how old the backlog still open is right now.
 
-The examples are vendor-neutral, use synthetic data, and are fully inspectable. Nothing depends on a platform screenshot or a hidden dashboard definition.
+The talk is grounded in a real operational pattern, but the repo stays vendor-neutral and reproducible: the examples use deterministic synthetic data, and the metric definitions, charts, and tables all live in code rather than in dashboard screenshots or hidden platform logic.
 
-## Talk Summary
+## What The Talk Argues
 
-The talk centers on a simple operational paradox: **MTTR can get worse while exposure is improving**.
-
-When a team prioritizes older findings, the work it closes is older, so MTTR rises. Dashboards signal failure, even as exposure is going down.
-
-MOVA fills that gap by measuring the age of the backlog still open. This repo demonstrates the difference with a reproducible simulation that holds arrivals, capacity, and time horizon constant while comparing two strategies:
-
-- **Newest-First**: keeps MTTR low by closing recent work first
-- **Oldest-First**: raises MTTR while reducing backlog age and the `180+ days` tail
-
-The point is not to replace MTTR, but to keep it in context with the exposure that remains.
-
-## Core Idea
-
-The deck makes five claims:
-
-- MTTR tells you about completed work, not the backlog that remains.
-- MOVA shows whether the open backlog is getting older or younger.
-- Open count and the `180+ days` tail help explain whether the aging backlog is actually shrinking.
-- The metrics should be defined in code and reviewed together, not inherited from a dashboard.
-- MTTR describes flow. MOVA describes stock. Both are required to understand the system.
+- **MTTR measures flow**: the age of work that got closed.
+- **MOVA measures stock**: the age of work that is still open.
+- MTTR alone can make leaders reward the wrong outcome: fast recent closures while older exposure stays stranded.
+- Open count and `180+ days open` help show whether the aging tail is actually shrinking.
+- The point is not to replace MTTR. It is to stop using MTTR alone.
 
 ## What This Repo Contains
 
-- `index.qmd`: the presentation source and narrative
-- `scripts/`: synthetic data generation, strategy simulation, and summary build steps
-- `data/`: generated Parquet files used by the deck
+- `index.qmd`: the talk deck source
+- `scripts/01_generate_data.py`: builds the deterministic synthetic backlog and arrivals
+- `scripts/02_simulate_metrics.py`: simulates monthly metrics for `oldest_first` and `newest_first`
+- `scripts/03_build_outputs.py`: writes the end-state comparison used in the deck
 - `_quarto.yml` and `styles.css`: deck configuration and presentation styling
-- `pyproject.toml` and `uv.lock`: Python environment and dependency lockfile
+- `pyproject.toml` and `uv.lock`: Python dependencies for the analysis pipeline
 
-The analysis pipeline is intentionally small. It generates a synthetic backlog, simulates monthly remediation under two prioritization strategies, writes the metric outputs to Parquet, and renders the deck from those artifacts.
+Generated artifacts are created during render under `data/` and `_output/`.
 
-## Quick Start
+## The Simulation
 
-Render the deck:
+The deck uses a small reproducible simulation to isolate prioritization:
+
+- same starting backlog
+- same incoming vulnerabilities each month
+- same monthly remediation capacity
+- same 24-month horizon
+- only the work order changes: `newest_first` vs. `oldest_first`
+
+That makes the tradeoff explicit:
+
+- **Newest-First** keeps MTTR lower by closing newer findings first.
+- **Oldest-First** raises MTTR while lowering MOVA and shrinking the `180+ days` tail.
+- If you look only at MTTR, you pick the wrong winner.
+
+## Practical Takeaways
+
+- Report MTTR and MOVA side by side.
+- Add open count and a backlog-age threshold such as `180+ days`.
+- Define the metrics in code from exported vulnerability data; a CSV is usually enough.
+- Use MTTR to understand flow, and MOVA to understand exposure.
+- Do not reward teams for keeping MTTR low while backlog age worsens.
+
+## Render The Deck
+
+Prerequisites: [uv](https://docs.astral.sh/uv/) and [Quarto](https://quarto.org/).
 
 ```bash
 uv sync
 uv run quarto render
-open _output/index.html
 ```
 
-Rebuild the synthetic data and metrics first:
+`uv run quarto render` runs the pre-render scripts in `_quarto.yml`, regenerates the synthetic data and comparison outputs, and writes the deck to `_output/index.html`.
+
+For live preview while editing:
 
 ```bash
-uv run python scripts/01_generate_data.py
-uv run python scripts/02_simulate_metrics.py
-uv run python scripts/03_build_outputs.py
-uv run quarto render
-open _output/index.html
+uv run quarto preview
 ```
-
-## What the Deck Shows
-
-The simulation holds the system constant and changes only prioritization.
-
-- **Newest-First** closes recent findings first, which keeps MTTR lower.
-- **Oldest-First** closes the aging backlog first, which lowers MOVA and reduces the `180+ days` tail.
-- Both strategies run with the same arrivals, the same monthly remediation capacity, and the same time horizon.
-
-The headline MTTR winner is not necessarily the backlog winner.
-
-## Why It Matters
-
-Read alone, MTTR rewards recent closure while older exposure can remain stranded.
-
-Read with MOVA, open count, and the `180+ days` tail, it becomes clearer whether exposure is improving or work is just moving faster.
-
-This is also an argument for analysis-as-code. Most teams already have the underlying data. A CSV export is often enough. The harder problem is owning the metric definition rather than accepting whatever the dashboard reports.
-
-MTTR shows flow.
-MOVA reveals exposure through backlog age.
-
-## Repository Layout
-
-- `index.qmd`: slide content, charts, tables, and embedded code examples
-- `scripts/01_generate_data.py`: builds the synthetic vulnerability dataset
-- `scripts/02_simulate_metrics.py`: runs the newest-first vs. oldest-first simulation
-- `scripts/03_build_outputs.py`: writes the final comparison summary used in the deck
-- `data/base_vulns.parquet`: synthetic starting dataset
-- `data/metrics.parquet`: monthly MTTR, MOVA, open count, and `aged_over_180`
-- `data/summary.parquet`: final-state comparison for the two strategies
-- `rehearsal/speaker-notes.md`: talk notes used for delivery prep
 
 ## Tools & Approach
 
 - [Quarto](https://quarto.org/) keeps the deck, narrative, and rendered outputs in one reproducible workflow.
 - [Positron](https://positron.posit.co/) is a practical place to inspect the data and iterate on the analysis before rendering, though the workflow is not tied to any particular IDE.
 - [Polars](https://pola.rs/) handles the metric logic, while [Plotnine](https://plotnine.org/) and [Great Tables](https://posit-dev.github.io/great-tables/) keep charts and tables in code so the analysis stays inspectable and rerunnable.
-
-## Speaker
-
-The talk and repository are by Caleb Kinney. More background and writing: [derail.net](https://derail.net).
 
 ## Further Reading
 
