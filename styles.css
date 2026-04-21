@@ -226,6 +226,23 @@
   max-width: 1050px;
 }
 
+.reveal .kicker p,
+.reveal .metric-big p,
+.reveal .metric-mid p,
+.paradox-pill p,
+.paradox-connector p {
+  margin: 0;
+}
+
+.reveal .kicker p + p {
+  margin-top: 0.28em;
+}
+
+.reveal .metric-big p + p,
+.reveal .metric-mid p + p {
+  margin-top: 0.16em;
+}
+
 .reveal .metric-big {
   font-size: 1.96em;
   font-weight: 700;
@@ -248,6 +265,12 @@
   border-radius: 0 var(--radius-callout) var(--radius-callout) 0;
   background: rgba(31, 111, 120, 0.08);
   line-height: 1.32;
+}
+
+.reveal .callout .callout-body,
+.reveal .callout .callout-content,
+.reveal .callout p:last-child {
+  margin: 0;
 }
 
 .reveal .fragment {
@@ -352,6 +375,40 @@
 
 .signal-grid {
   grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.tool-list ul {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+  margin: 0.36rem 0 0.28rem;
+  padding: 0;
+  list-style: none;
+}
+
+.tool-list li {
+  margin: 0;
+  padding: 0.9rem 1rem 0.82rem;
+  background: linear-gradient(180deg, rgba(255, 252, 247, 0.97), rgba(255, 249, 241, 0.93));
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow);
+}
+
+.tool-list li:last-child {
+  grid-column: 1 / -1;
+}
+
+.tool-list li p {
+  margin: 0;
+}
+
+.tool-list li em {
+  display: block;
+  margin-top: 0.32rem;
+  color: var(--ink-soft);
+  font-size: 0.78em;
+  font-style: normal;
 }
 
 .shock-value,
@@ -554,6 +611,15 @@
   margin: 0.9rem 0 0.3rem;
 }
 
+.compact-list ul {
+  max-width: 1200px;
+}
+
+.compact-list li {
+  margin: 0.08em 0 0.2em;
+  line-height: 1.28;
+}
+
 .dashboard-card {
   padding: 1.15rem 1.15rem 1.05rem;
 }
@@ -655,16 +721,23 @@
   margin: 0;
 }
 
+.reveal .cell-output-display figure {
+  display: flex;
+  justify-content: center;
+}
+
 .reveal .cell-output-display img {
   display: block;
-  width: 100%;
+  width: auto;
+  max-width: 100%;
   height: auto;
+  max-height: 58vh;
   margin: 0 auto;
 }
 
 .reveal .gt_table {
   background: transparent;
-  font-size: 0.72em;
+  font-size: 0.68em;
   border: 1px solid var(--line);
   border-radius: var(--radius-callout);
   box-shadow: var(--shadow);
@@ -674,6 +747,7 @@
 .reveal .gt_table th,
 .reveal .gt_table td {
   border-color: var(--line) !important;
+  white-space: normal;
 }
 
 .reveal .gt_heading,
@@ -718,7 +792,12 @@
   .signal-grid,
   .dashboard-grid,
   .score-grid,
-  .tail-example-grid {
+  .tail-example-grid,
+  .tool-list ul {
     grid-template-columns: 1fr;
+  }
+
+  .tool-list li:last-child {
+    grid-column: auto;
   }
 }
