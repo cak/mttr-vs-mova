@@ -146,6 +146,25 @@ Dashboards signal failure here. The better question is: what happened to exposur
 
 ---
 
+## This actually happened
+
+::: {.callout .callout-important}
+MTTR increased after we launched a program.
+:::
+
+::: {.incremental}
+- MTTR was baselined as a KPI
+- The number went up
+- Leadership asked: “What changed?”
+- From the dashboard, it looked like we got worse
+:::
+
+::: {.kicker}
+We were closing older backlog that had been sitting for a long time.
+:::
+
+---
+
 ## Why this looks like failure
 
 ::: {.incremental}
@@ -205,6 +224,20 @@ How old is the vulnerability backlog we still carry?
 
 ::: {.kicker}
 It measures the age of the backlog you still own today.
+:::
+
+---
+
+## What do we mean by exposure?
+
+::: {.incremental}
+- Older vulnerabilities tend to carry more risk over time
+- Long-lived backlog increases uncertainty and attack surface
+- Reducing the age of the backlog reduces accumulated exposure
+:::
+
+::: {.kicker}
+Age is not just time. It is unaddressed risk.
 :::
 
 ---
@@ -730,6 +763,22 @@ Read only MTTR and you pick the wrong winner.
 
 ---
 
+## This is not anti-MTTR
+
+::: {.incremental}
+- MTTR is still useful
+- It shows how efficiently work is completed
+- It helps identify process friction
+:::
+
+::: {.kicker}
+The problem is not MTTR.
+
+It is using MTTR alone.
+:::
+
+---
+
 ## The paradox repeats across teams
 
 ::: {.incremental}
@@ -950,6 +999,20 @@ That is the wrong decision.
 - Track `180+ days open` as a separate backlog line
 - Define both metrics in code before they reach the dashboard
 - Show one chart and one table that make exposure visible
+:::
+
+---
+
+## A simple policy
+
+::: {.metric-mid}
+Track MTTR and MOVA together.
+
+Prioritize reducing the oldest backlog.
+:::
+
+::: {.kicker}
+Do not reward teams for keeping MTTR low while backlog ages.
 :::
 
 ---
