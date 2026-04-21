@@ -426,20 +426,30 @@ Same data. Different population. Different age.
 
 ## A simple simulation
 
-::: {.compact-list}
-- Same arrivals
-- Same fix rate
-- Same time horizon
-- Start with the same backlog
-- Add the same incoming vulnerabilities each month
-- Apply the same remediation capacity each month
-- Change only the order of work: newest-first vs. oldest-first
+::: {.definition-grid}
+::: {.definition-card}
+::: {.eyebrow}
+Hold constant
+:::
+### Same system
+Start with the same backlog.
+
+Keep arrivals, remediation capacity, and time horizon the same.
+:::
+
+::: {.definition-card}
+::: {.eyebrow}
+Change one thing
+:::
+### Work order
+Newest-First vs. Oldest-First.
+
+The only variable is which findings get closed first.
+:::
 :::
 
 ::: {.kicker}
-To isolate that effect, keep capacity constant and change only prioritization.
-
-Now watch what each metric rewards.
+This isolates what the metrics reward when capacity stays fixed.
 :::
 
 ---
@@ -903,10 +913,26 @@ MTTR still matters. It cannot stand alone.
 
 ## Change the review
 
-::: {.incremental}
-- Report MTTR and MOVA side by side
-- Track `180+ days open` as a separate backlog line
-- Change the review so exposure is visible before a judgment call is made
+::: {.definition-grid}
+::: {.definition-card}
+::: {.eyebrow}
+Old review
+:::
+### MTTR headline
+One number drives the discussion.
+
+Cleanup work can look like regression.
+:::
+
+::: {.definition-card}
+::: {.eyebrow}
+Better review
+:::
+### Exposure visible
+Read MTTR with MOVA and `180+ days open`.
+
+Make the judgment call after the backlog picture is visible.
+:::
 :::
 
 ---
