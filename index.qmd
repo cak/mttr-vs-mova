@@ -67,7 +67,7 @@ MUTED_ROSE = "#b58a96"
 chart_theme = (
     theme_minimal(base_size=22)
     + theme(
-        figure_size=(11.35, 5.25),
+        figure_size=(11.35, 5.35),
         legend_position="none",
         panel_grid_minor=element_blank(),
         panel_grid_major_x=element_blank(),
@@ -75,14 +75,14 @@ chart_theme = (
         panel_background=element_rect(fill=PANEL_BG, color=None),
         plot_background=element_rect(fill=ROOM_BG, color=None),
         axis_title=element_text(color="#26333A", size=18),
-        axis_text=element_text(color="#26333A", size=14),
-        axis_text_x=element_text(margin={"t": 6}),
-        axis_text_y=element_text(margin={"r": 6}),
+        axis_text=element_text(color="#26333A", size=15),
+        axis_text_x=element_text(margin={"t": 8}),
+        axis_text_y=element_text(margin={"r": 8}),
         plot_title=element_text(weight="bold", color="#101828", size=24),
-        plot_subtitle=element_text(color="#55606B", size=15, margin={"b": 10}),
-        plot_margin=0.22,
-        axis_title_x=element_text(margin={"t": 14}),
-        axis_title_y=element_text(margin={"r": 14}),
+        plot_subtitle=element_text(color="#55606B", size=15, margin={"b": 12}),
+        axis_title_x=element_text(margin={"t": 16}),
+        axis_title_y=element_text(margin={"r": 18}),
+        subplots_adjust={"left": 0.13, "right": 0.92, "top": 0.83, "bottom": 0.18},
     )
 )
 
@@ -148,7 +148,7 @@ Dashboards signal failure here. The better question is: what happened to exposur
 
 ## This actually happened
 
-::: {.callout}
+::: {.line-anchor}
 MTTR increased after we launched a program.
 :::
 
@@ -202,7 +202,7 @@ while
 :::
 :::
 
-::: {.callout}
+::: {.line-anchor .line-anchor-subtle}
 Same team. Same capacity. Different prioritization.
 :::
 
@@ -259,24 +259,6 @@ Once closed work and open work are separated, the exposure question becomes much
 ---
 
 ## Averages hide the tail
-
-::: {.tail-visual}
-::: {.tail-visual-caption}
-Most findings stay young. A small tail gets very old.
-:::
-<div class="tail-strip" role="img" aria-label="A tight cluster of younger findings on the left, with a small number of very old findings separated on the right.">
-  <div class="tail-cluster">
-    <span class="tail-dot"></span><span class="tail-dot"></span><span class="tail-dot"></span><span class="tail-dot"></span><span class="tail-dot"></span><span class="tail-dot"></span><span class="tail-dot"></span><span class="tail-dot"></span><span class="tail-dot"></span><span class="tail-dot"></span><span class="tail-dot"></span><span class="tail-dot"></span><span class="tail-dot"></span><span class="tail-dot"></span><span class="tail-dot"></span><span class="tail-dot"></span><span class="tail-dot"></span><span class="tail-dot"></span><span class="tail-dot"></span>
-  </div>
-  <div class="tail-cluster tail-cluster-outlier">
-    <span class="tail-dot tail-dot-outlier"></span>
-  </div>
-</div>
-<div class="tail-axis">
-  <span>Low age</span>
-  <span>Very high age</span>
-</div>
-:::
 
 ::: {.tail-example-grid}
 ::: {.tail-card}
@@ -468,26 +450,35 @@ mttr_labels = (
     mttr_plot.filter(pl.col("month_index") == LAST_MONTH)
     .with_columns(
         pl.format(
-            "{} {}d",
+            "{}\n{}d",
             pl.col("strategy_label"),
             pl.col("days").round(0).cast(pl.Int64),
-        ).alias("label")
+        ).alias("label"),
+        (
+            pl.col("days")
+            + pl.when(pl.col("strategy_label") == "Oldest-First")
+            .then(pl.lit(10))
+            .otherwise(pl.lit(0))
+        ).alias("label_y"),
     )
 )
 
 (
     ggplot(mttr_plot, aes(x="month_index", y="days", color="strategy_label"))
-    + geom_line(size=2.35)
-    + geom_point(data=mttr_labels, size=3.8)
+    + geom_line(size=2.5)
+    + geom_point(data=mttr_labels, size=4.1)
     + geom_label(
         data=mttr_labels,
-        mapping=aes(label="label"),
+        mapping=aes(y="label_y", label="label"),
         ha="left",
-        nudge_x=0.6,
-        size=10,
+        nudge_x=0.7,
+        size=9.2,
+        fontweight="bold",
+        lineheight=0.94,
         fill=PANEL_BG,
-        label_padding=0.15,
+        label_padding=0.16,
         label_r=0.12,
+        label_size=0.45,
     )
     + scale_color_manual(
         values={
@@ -496,7 +487,7 @@ mttr_labels = (
         }
     )
     + scale_x_continuous(breaks=MONTH_BREAKS)
-    + coord_cartesian(xlim=(1, 28.6))
+    + coord_cartesian(xlim=(1, 29.4))
     + labs(
         title="Newest-First wins on MTTR",
         subtitle="Closing recent findings first keeps closure age low.",
@@ -527,26 +518,35 @@ mova_labels = (
     mova_plot.filter(pl.col("month_index") == LAST_MONTH)
     .with_columns(
         pl.format(
-            "{} {}d",
+            "{}\n{}d",
             pl.col("strategy_label"),
             pl.col("days").round(0).cast(pl.Int64),
-        ).alias("label")
+        ).alias("label"),
+        (
+            pl.col("days")
+            + pl.when(pl.col("strategy_label") == "Oldest-First")
+            .then(pl.lit(-10))
+            .otherwise(pl.lit(10))
+        ).alias("label_y"),
     )
 )
 
 (
     ggplot(mova_plot, aes(x="month_index", y="days", color="strategy_label"))
-    + geom_line(size=2.35)
-    + geom_point(data=mova_labels, size=3.8)
+    + geom_line(size=2.5)
+    + geom_point(data=mova_labels, size=4.1)
     + geom_label(
         data=mova_labels,
-        mapping=aes(label="label"),
+        mapping=aes(y="label_y", label="label"),
         ha="left",
-        nudge_x=0.6,
-        size=10,
+        nudge_x=0.7,
+        size=9.2,
+        fontweight="bold",
+        lineheight=0.94,
         fill=PANEL_BG,
-        label_padding=0.15,
+        label_padding=0.16,
         label_r=0.12,
+        label_size=0.45,
     )
     + scale_color_manual(
         values={
@@ -555,7 +555,7 @@ mova_labels = (
         }
     )
     + scale_x_continuous(breaks=MONTH_BREAKS)
-    + coord_cartesian(xlim=(1, 28.6))
+    + coord_cartesian(xlim=(1, 29.4))
     + labs(
         title="Oldest-First lowers backlog age",
         subtitle="Working the oldest backlog first lowers the age still carried.",
@@ -586,26 +586,35 @@ tail_labels = (
     tail_plot.filter(pl.col("month_index") == LAST_MONTH)
     .with_columns(
         pl.format(
-            "{} {}",
+            "{}\n{}",
             pl.col("strategy_label"),
             pl.col("aged_over_180"),
-        ).alias("label")
+        ).alias("label"),
+        (
+            pl.col("aged_over_180")
+            + pl.when(pl.col("strategy_label") == "Oldest-First")
+            .then(pl.lit(10))
+            .otherwise(pl.lit(0))
+        ).alias("label_y"),
     )
 )
 
 (
     ggplot(tail_plot, aes(x="month_index", y="aged_over_180", color="strategy_label"))
-    + geom_line(size=2.35)
-    + geom_point(data=tail_labels, size=3.8)
+    + geom_line(size=2.5)
+    + geom_point(data=tail_labels, size=4.1)
     + geom_label(
         data=tail_labels,
-        mapping=aes(label="label"),
+        mapping=aes(y="label_y", label="label"),
         ha="left",
-        nudge_x=0.6,
-        size=10,
+        nudge_x=0.7,
+        size=9.2,
+        fontweight="bold",
+        lineheight=0.94,
         fill=PANEL_BG,
-        label_padding=0.15,
+        label_padding=0.16,
         label_r=0.12,
+        label_size=0.45,
     )
     + scale_color_manual(
         values={
@@ -614,7 +623,7 @@ tail_labels = (
         }
     )
     + scale_x_continuous(breaks=MONTH_BREAKS)
-    + coord_cartesian(xlim=(1, 28.6))
+    + coord_cartesian(xlim=(1, 29.4))
     + labs(
         title="Oldest-First reduces the 180+ tail",
         subtitle="Newest-First keeps almost the entire old backlog alive.",
@@ -1046,8 +1055,8 @@ That is the wrong decision.
 MTTR shows flow.
 
 MOVA shows exposure.
+:::
 
-<br>
-
-github.com/cak/mttr-vs-mova
+::: {.cta-link}
+[cak/mttr-vs-mova](https://github.com/cak/mttr-vs-mova)
 :::
