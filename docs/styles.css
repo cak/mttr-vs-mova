@@ -1,0 +1,241 @@
+:root {
+  --bg: #0b1120;
+  --bg-accent: rgba(56, 189, 248, 0.08);
+  --panel: rgba(15, 23, 42, 0.82);
+  --panel-strong: #111827;
+  --border: rgba(148, 163, 184, 0.16);
+  --text: #e5e7eb;
+  --muted: #a1aab8;
+  --heading: #f8fafc;
+  --accent: #7dd3fc;
+  --accent-strong: #38bdf8;
+  --button-text-dark: #082032;
+  --shadow: 0 12px 36px rgba(0, 0, 0, 0.28);
+  --radius: 18px;
+  --radius-sm: 14px;
+  --max-width: 860px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  line-height: 1.6;
+  color: var(--text);
+  background: radial-gradient(circle at top center, var(--bg-accent), transparent 28%), var(--bg);
+}
+
+.page {
+  width: min(calc(100% - 2rem), var(--max-width));
+  margin: 0 auto;
+  padding: 4.5rem 0 5rem;
+}
+
+.hero {
+  margin-bottom: 2rem;
+}
+
+h1,
+h2,
+p,
+ul {
+  margin-top: 0;
+}
+
+h1 {
+  margin-bottom: 0.35rem;
+  color: var(--heading);
+  font-size: clamp(2.9rem, 8vw, 4.75rem);
+  line-height: 0.94;
+  letter-spacing: -0.045em;
+}
+
+.subtitle {
+  margin-bottom: 1.4rem;
+  color: var(--muted);
+  font-size: 1.05rem;
+}
+
+.lede {
+  max-width: 44rem;
+  margin-bottom: 1rem;
+  color: var(--heading);
+  font-size: 1.3rem;
+  line-height: 1.45;
+  text-wrap: balance;
+}
+
+.summary {
+  max-width: 44rem;
+  margin-bottom: 0;
+  color: var(--muted);
+  font-size: 1rem;
+}
+
+.card {
+  margin-bottom: 1.2rem;
+  padding: 1.4rem;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(10px);
+}
+
+h2 {
+  margin-bottom: 1rem;
+  color: var(--heading);
+  font-size: 1.05rem;
+  letter-spacing: -0.02em;
+}
+
+.comparison {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.metric {
+  padding: 1rem;
+  background: var(--panel-strong);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.metric-label {
+  margin-bottom: 0.3rem;
+  color: var(--accent);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.metric-text {
+  margin-bottom: 0.35rem;
+  color: var(--heading);
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.metric-detail {
+  margin-bottom: 0;
+  color: var(--muted);
+  font-size: 0.98rem;
+}
+
+.callout {
+  margin-bottom: 0;
+  padding-left: 1rem;
+  border-left: 3px solid var(--accent-strong);
+  color: var(--text);
+}
+
+.list {
+  margin-bottom: 0;
+  padding-left: 1.2rem;
+}
+
+.list li + li {
+  margin-top: 0.45rem;
+}
+
+.body-text {
+  margin-bottom: 0;
+}
+
+code {
+  padding: 0.14rem 0.38rem;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--panel-strong);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.92em;
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  margin-top: 1.6rem;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0.78rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text);
+  background: transparent;
+  text-decoration: none;
+  font-weight: 600;
+  transition:
+    transform 120ms ease,
+    border-color 120ms ease,
+    background-color 120ms ease,
+    color 120ms ease;
+}
+
+.button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(125, 211, 252, 0.42);
+  background: rgba(125, 211, 252, 0.06);
+}
+
+.button.primary {
+  border-color: var(--accent-strong);
+  background: var(--accent-strong);
+  color: var(--button-text-dark);
+}
+
+.button.primary:hover {
+  background: #5ac8f5;
+  border-color: #5ac8f5;
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+@media (max-width: 720px) {
+  .page {
+    padding-top: 3rem;
+    padding-bottom: 4rem;
+  }
+
+  .comparison {
+    grid-template-columns: 1fr;
+  }
+
+  .lede {
+    font-size: 1.15rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button {
+    transition: none;
+  }
+}

@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MOVA | Mean Open Vulnerability Age</title>
+    <meta
+      name="description"
+      content="MOVA complements MTTR by showing how old the vulnerability backlog still open is right now."
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="page">
+      <section class="hero">
+        <h1>MOVA</h1>
+        <p class="subtitle">Mean Open Vulnerability Age</p>
+
+        <p class="lede">
+          MTTR tells you how fast work gets closed. MOVA tells you how old the vulnerability backlog
+          still open is right now.
+        </p>
+
+        <p class="summary">
+          The core idea is simple:
+          <strong>MTTR can rise while exposure falls.</strong>
+          When teams finally close older backlog, the age of closed work goes up, so MTTR can look
+          worse even while the backlog gets healthier.
+        </p>
+      </section>
+
+      <section class="card">
+        <h2>Two different signals</h2>
+
+        <div class="comparison">
+          <article class="metric">
+            <p class="metric-label">MTTR</p>
+            <p class="metric-text">Closure speed</p>
+            <p class="metric-detail">How long did the work that got closed take to remediate?</p>
+          </article>
+
+          <article class="metric">
+            <p class="metric-label">MOVA</p>
+            <p class="metric-text">Backlog age</p>
+            <p class="metric-detail">How old is the work still open and still carried today?</p>
+          </article>
+        </div>
+
+        <p class="callout">
+          MTTR measures flow. MOVA measures stock. You need both to understand what is actually
+          improving.
+        </p>
+      </section>
+
+      <section class="card">
+        <h2>What MOVA reveals</h2>
+        <ul class="list">
+          <li>Whether older exposure is actually being reduced</li>
+          <li>Whether teams are closing meaningful backlog or just recent work</li>
+          <li>Whether a low MTTR is hiding an aging tail of unresolved findings</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>How to use it</h2>
+        <p class="body-text">
+          MOVA does not replace MTTR. It complements it. Report both side by side, along with open
+          count and a backlog-age threshold such as
+          <code>180+ days open</code>, to understand both remediation speed and remaining exposure.
+        </p>
+      </section>
+
+      <section class="links" aria-label="Project links">
+        <a class="button primary" href="">View slides</a>
+        <a class="button" href="https://github.com/typeerror/mova">View code</a>
+      </section>
+    </main>
+  </body>
+</html>

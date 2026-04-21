@@ -216,4 +216,9 @@ data/
 
 # Private rehearsal files
 rehearsal/
+
+# Quarto generated index.quarto_ipynb_*
 index.quarto_ipynb_*
+
+# Docs
+!docs/index.html
