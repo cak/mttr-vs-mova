@@ -221,4 +221,4 @@ rehearsal/
 index.quarto_ipynb_*
 
 # Docs
-!docs/index.html
+!docs/**/index.html
