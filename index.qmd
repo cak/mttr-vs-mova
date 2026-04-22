@@ -963,7 +963,7 @@ Cleanup work can look like regression.
 Better review
 :::
 ### Exposure visible
-Read MTTR with MOVA and `180+ days open`.
+Read MTTR with MOVA and 180+ days open.
 
 Make the judgment call after the backlog picture is visible.
 :::
@@ -992,57 +992,72 @@ This is not a tooling problem first. It is a definition problem first.
 
 ## Add data science to your toolbox {.toolbox-slide}
 
+::: {.toolbox-intro}
+A small, opinionated stack to go from messy exports to a reviewable metric.
+:::
+
 ::: {.tool-grid}
+
 ::: {.tool-card .tool-define}
 <div class="tool-head">
 <div class="tool-icon" aria-hidden="true"><i class="bi bi-code-slash"></i></div>
-<div class="tool-title">Define metrics in code</div>
+<div class="tool-title">Define the metric</div>
 </div>
-<div class="tool-note">Own the calculation before it hits the dashboard</div>
-<div class="tool-method">Python + Polars</div>
+<div class="tool-note">Define the logic in code before it ever reaches a dashboard</div>
+<div class="tool-method">Polars</div>
+:::
+
+::: {.tool-card .tool-explore}
+<div class="tool-head">
+<div class="tool-icon" aria-hidden="true"><i class="bi bi-search"></i></div>
+<div class="tool-title">Inspect the raw data</div>
+</div>
+<div class="tool-note">Inspect raw records early to catch edge cases before they spread</div>
+<div class="tool-method">Positron</div>
 :::
 
 ::: {.tool-card .tool-show}
 <div class="tool-head">
 <div class="tool-icon" aria-hidden="true"><i class="bi bi-graph-up"></i></div>
-<div class="tool-title">Show risk over time</div>
+<div class="tool-title">Visualize the trend</div>
 </div>
-<div class="tool-note">Track flow and exposure month by month</div>
-<div class="tool-method">Plotnine charts</div>
+<div class="tool-note">Visualize flow, backlog age, and the tail clearly over time</div>
+<div class="tool-method">Plotnine</div>
 :::
 
 ::: {.tool-card .tool-summarize}
 <div class="tool-head">
 <div class="tool-icon" aria-hidden="true"><i class="bi bi-table"></i></div>
-<div class="tool-title">Summarize backlog state</div>
+<div class="tool-title">Summarize the backlog</div>
 </div>
-<div class="tool-note">Make count, age, and tail visible at a glance</div>
-<div class="tool-method">Great Tables outputs</div>
+<div class="tool-note">Summarize count, age, and tail so risk is clear at a glance</div>
+<div class="tool-method">Great Tables</div>
+:::
+
+::: {.tool-card .tool-explore-metric}
+<div class="tool-head">
+<div class="tool-icon" aria-hidden="true"><i class="bi bi-sliders"></i></div>
+<div class="tool-title">Explore the metric</div>
+</div>
+<div class="tool-note">Turn the analysis into a simple app people can inspect and use</div>
+<div class="tool-method">Shiny for Python</div>
 :::
 
 ::: {.tool-card .tool-report}
 <div class="tool-head">
 <div class="tool-icon" aria-hidden="true"><i class="bi bi-journal-text"></i></div>
-<div class="tool-title">Keep analysis with the story</div>
+<div class="tool-title">Publish the analysis</div>
 </div>
-<div class="tool-note">Put code, charts, and narrative in one reviewable artifact</div>
-<div class="tool-method">Quarto reports</div>
+<div class="tool-note">Publish code, charts, and narrative together in one consistent artifact</div>
+<div class="tool-method">Quarto</div>
 :::
 
-::: {.tool-card .tool-explore .tool-card-wide}
-<div class="tool-card-body">
-<div class="tool-head">
-<div class="tool-icon" aria-hidden="true"><i class="bi bi-search"></i></div>
-<div class="tool-title">Explore the raw data</div>
-</div>
-<div class="tool-note">Inspect exports, joins, and edge cases before you explain the number</div>
-</div>
-<div class="tool-method">Positron or your IDE</div>
-:::
 :::
 
 ::: {.toolbox-takeaway}
-Define the metric first. Then visualize it.
+Start small. Reduce tool choice. Define the metric in code before you visualize it.
+
+This is a practical path, not the only one.
 :::
 
 ---
@@ -1149,5 +1164,5 @@ MOVA shows exposure.
 :::
 
 ::: {.cta-link}
-[cak/mttr-vs-mova](https://github.com/cak/mttr-vs-mova)
+[typeerror.com/mova](https://typeerror.com/mova/)
 :::

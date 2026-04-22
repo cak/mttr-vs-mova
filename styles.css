@@ -486,52 +486,50 @@
   max-width: 900px;
 }
 
-.tool-grid {
+.reveal .slides section.toolbox-slide .tool-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.72rem 0.8rem;
-  max-width: 940px;
-  margin: 0.28rem auto 0;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  row-gap: 2rem;
+  column-gap: 1.05rem;
+  max-width: 1220px;
+  margin: 0.12rem auto 0;
 }
 
 .reveal .slides section.toolbox-slide h2 {
-  max-width: 840px;
-  margin-bottom: 0.36em;
+  max-width: 920px;
+  margin-bottom: 0.2em;
 }
 
-.tool-card {
+.reveal .slides section.toolbox-slide .toolbox-intro {
+  max-width: 1120px;
+  margin: 0 auto 0.4rem;
+  font-size: 0.63em;
+  line-height: 1.18;
+}
+
+.reveal .slides section.toolbox-slide .toolbox-intro > * {
+  margin: 0;
+}
+
+.reveal .slides section.toolbox-slide .tool-card {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  gap: 0.16rem;
-  min-height: 128px;
-  padding: 0.84rem 0.9rem 0.8rem;
+  gap: 0.1rem;
+  height: 100%;
+  min-height: 108px;
+  padding: 0.66rem 0.72rem 0.62rem;
   text-align: left;
 }
 
-.tool-card-wide {
-  grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 0.9rem;
-  min-height: auto;
-}
-
-.tool-card-body {
-  display: flex;
-  flex-direction: column;
-  gap: 0.16rem;
-}
-
-.tool-head {
+.reveal .slides section.toolbox-slide .tool-head {
   display: flex;
   align-items: center;
-  gap: 0.62rem;
-  margin-bottom: 0.08rem;
+  gap: 0.52rem;
+  margin-bottom: 0.04rem;
 }
 
-.tool-icon {
+.reveal .slides section.toolbox-slide .tool-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -555,28 +553,30 @@
   font-size: 18px;
 }
 
-.tool-title {
+.reveal .slides section.toolbox-slide .tool-title {
   color: var(--headline);
-  font-size: 0.78em;
+  font-size: 0.74em;
   font-weight: 700;
   line-height: 1.06;
   letter-spacing: -0.014em;
 }
 
-.tool-note {
+.reveal .slides section.toolbox-slide .tool-note {
+  flex: 1 1 auto;
   color: var(--ink);
-  font-size: 0.62em;
-  line-height: 1.2;
-  max-width: 25ch;
+  font-size: 0.6em;
+  line-height: 1.13;
+  max-width: none;
 }
 
-.tool-method {
+.reveal .slides section.toolbox-slide .tool-method {
   color: var(--ink-soft);
-  font-size: 0.58em;
+  font-size: 0.56em;
   font-weight: 650;
   line-height: 1.18;
   letter-spacing: -0.01em;
-  margin-top: 0.12rem;
+  margin-top: auto;
+  padding-top: 0.06rem;
 }
 
 .tool-card.tool-define .tool-icon {
@@ -604,14 +604,34 @@
   background: rgba(139, 30, 63, 0.09);
 }
 
-.toolbox-takeaway {
-  max-width: 940px;
-  margin: 0.5rem auto 0;
+.reveal .slides section.toolbox-slide .toolbox-takeaway {
+  max-width: 980px;
+  margin: 2rem auto 0;
   color: var(--headline);
-  font-size: 0.64em;
+  font-size: 0.62em;
   font-weight: 650;
   line-height: 1.18;
-  text-align: left;
+  text-align: center;
+}
+
+.reveal .slides section.toolbox-slide .toolbox-takeaway > * {
+  margin: 0;
+}
+
+.reveal .slides section.toolbox-slide .toolbox-takeaway > * + * {
+  margin-top: 0.16rem;
+}
+
+@media (max-width: 900px) {
+  .reveal .slides section.toolbox-slide .tool-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-width: 940px;
+  }
+
+  .reveal .slides section.toolbox-slide .toolbox-intro,
+  .reveal .slides section.toolbox-slide .toolbox-takeaway {
+    max-width: 940px;
+  }
 }
 
 .shock-value,
@@ -1120,7 +1140,7 @@
 }
 
 .reveal .cta-link::before {
-  content: "GitHub";
+  content: "Read More";
   color: var(--ink-soft);
   font-size: 0.3em;
   font-weight: 700;
@@ -1188,9 +1208,11 @@
     grid-template-columns: 1fr;
   }
 
-  .tool-card-wide {
-    grid-column: auto;
+}
+
+@media (max-width: 640px) {
+  .reveal .slides section.toolbox-slide .tool-grid {
     grid-template-columns: 1fr;
-    align-items: start;
+    max-width: 560px;
   }
 }
