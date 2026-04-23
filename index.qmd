@@ -172,7 +172,7 @@ What happened to backlog age, and to the oldest part of the backlog?
 ## This actually happened {.top-loaded}
 
 ::: {.line-anchor}
-MTTR increased after we formalized vulnerability management.
+MTTR increased after we made it a KPI.
 :::
 
 ::: {.incremental}
@@ -210,7 +210,7 @@ while
 :::
 
 ::: {.line-anchor .line-anchor-subtle}
-We needed to measure the risk still open, not just what closed.
+We needed to measure how old the open backlog is today, not just what closed.
 :::
 
 ---
@@ -235,7 +235,7 @@ Backlog age
 ### MOVA
 Mean Open Vulnerability Age. How old is the open backlog today?
 
-Age of the **backlog** today.
+Age of **open** vulnerabilities.
 :::
 :::
 
@@ -279,7 +279,7 @@ at 400 days
 The average looks fine.
 :::
 ::: {.tail-text}
-The oldest backlog is not moving.
+The oldest findings are not moving.
 :::
 :::
 :::
@@ -342,18 +342,18 @@ Open vulnerabilities not yet remediated
 
 ::: {.definition-card}
 ### Backlog age
-How long the backlog has been sitting
+How long open findings have been sitting
 :::
 
 ::: {.definition-card}
 ### Exposure
-Aging backlog usually increases exposure over time.
+Older backlog usually increases risk over time.
 :::
 :::
 
 ::: {.compact-list}
-- MTTR and MOVA use the same source data
-- Open findings age from the created date
+- MTTR and MOVA use the same data
+- For open findings, age starts at the created date
 - A CSV export is often enough
 :::
 
@@ -369,7 +369,7 @@ Hold constant
 ### Setup
 Start with one backlog.
 
-Fix arrivals, remediation capacity, and time horizon.
+Keep arrivals, remediation capacity, and time horizon fixed.
 :::
 
 ::: {.definition-card}
@@ -385,8 +385,6 @@ Only the order of closure changes.
 
 ::: {.kicker}
 Same team. Same capacity. Different prioritization.
-
-Same system. Same inputs. Only prioritization changes.
 :::
 
 ---
@@ -823,9 +821,9 @@ MTTR still matters. It cannot stand alone.
 ## Read the signals together
 
 ::: {.incremental}
-- MTTR up + MOVA down = older backlog is getting cleared
+- MTTR up + MOVA down = older findings are getting cleared
 - MTTR down + MOVA up = recent closures look better while backlog age worsens
-- MTTR up can mean effort shifted to older backlog
+- MTTR up can mean effort shifted to older findings
 - 180+ up = the aging tail is getting stranded
 :::
 
@@ -922,7 +920,7 @@ Start with an export. Define the metric in code before you visualize it.
 Policy
 :::
 ### Track MTTR + MOVA
-Prioritize older backlog first.
+Prioritize older findings first.
 :::
 
 ::: {.definition-card .decision-card .decision-card-wrong}
