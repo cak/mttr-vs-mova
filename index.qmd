@@ -159,7 +159,7 @@ This month
 ::::
 
 ::: {.shock-subtitle}
-Dashboards signal failure here. The better question is: what happened to exposure, the aging risk still sitting open?
+Dashboards signal failure here. The better question is: what happened to backlog age, and to the exposure created by aging open work?
 :::
 ::::
 
@@ -174,7 +174,7 @@ MTTR increased after we launched a program.
 ::: {.incremental}
 - MTTR was baselined as a KPI
 - The number went up
-- Leadership asked: “What changed?”
+- The review started with: “What changed?”
 - From the dashboard, it looked like we got worse
 :::
 
@@ -249,14 +249,14 @@ How old is the work still open?
 
 **Mean Open Vulnerability Age**
 
-How old is the vulnerability backlog we still carry?
+How old is the open backlog today?
 :::
 :::
 
 ::: {.kicker}
-It measures closure speed, not the age of the backlog that remains.
+MTTR shows flow.
 
-It measures the age of the backlog you still own today.
+MOVA shows backlog age.
 :::
 
 ---
@@ -266,11 +266,11 @@ It measures the age of the backlog you still own today.
 ::: {.incremental}
 - Older vulnerabilities tend to carry more risk over time
 - Long-lived backlog increases uncertainty and attack surface
-- Reducing the age of the backlog reduces accumulated exposure
+- Reducing backlog age reduces accumulated exposure
 :::
 
 ::: {.kicker}
-Age is not just time. It is unaddressed risk.
+Backlog age is not just time. Aging backlog increases exposure.
 
 Once closed work and open work are separated, the exposure question becomes much easier to see.
 :::
@@ -316,7 +316,7 @@ The oldest findings are not moving.
 
 ---
 
-## Report the full picture {.center}
+## Read the full picture {.center}
 
 ::: {.signal-grid}
 ::: {.signal-card .signal-flow}
@@ -399,7 +399,7 @@ mova = (
 ```
 
 ::: {.kicker}
-Open work. Current age. Age still carried today.
+Open work. Current age. Backlog age today.
 :::
 
 ---
@@ -425,8 +425,8 @@ Same data. Different population. Different age.
 ::: {.incremental}
 - SLA views are useful
 - But they tell you whether you met a deadline
-- They say less about the exposure you still carry now
-- MOVA shows the age of the backlog still open today
+- They say less about the backlog age you still carry now
+- MOVA shows backlog age for the work still open today
 :::
 
 ---
@@ -533,7 +533,7 @@ On MTTR, Newest-First wins.
 
 ```{python}
 #| echo: false
-#| fig-alt: "Line chart of MOVA over time under two prioritization strategies. Oldest-First is highlighted and finishes with the lower open-backlog age because it removes older findings first."
+#| fig-alt: "Line chart of MOVA over time under two prioritization strategies. Oldest-First is highlighted and finishes with the lower backlog age because it removes older findings first."
 mova_plot = metrics.select(
     "month_index",
     "strategy_label",
@@ -583,7 +583,7 @@ mova_labels = (
     + coord_cartesian(xlim=(1, 29.4))
     + labs(
         title="Oldest-First lowers backlog age",
-        subtitle="Working the oldest backlog first lowers the age still carried.",
+        subtitle="Working the oldest backlog first lowers backlog age.",
         x="Month",
         y="MOVA (days)",
     )
@@ -828,12 +828,14 @@ It is using MTTR alone.
 :::
 
 ::: {.kicker}
-MTTR shows flow. MOVA reveals aging exposure.
+MTTR shows flow. MOVA shows backlog age.
+
+Aging backlog increases exposure.
 :::
 
 ---
 
-## When leaders see only MTTR {auto-animate="true"}
+## When the dashboard shows only MTTR {auto-animate="true"}
 
 ::: {.dashboard-grid}
 ::: {.dashboard-card .winner}
@@ -862,12 +864,12 @@ MTTR
 :::
 
 ::: {.centered .muted}
-If this is the only KPI, leaders reward the strategy that closes recent work fastest.
+If this is the only KPI, decision-makers reward the strategy that closes recent work fastest.
 :::
 
 ---
 
-## When leaders see the full system {auto-animate="true"}
+## When the dashboard shows the full system {auto-animate="true"}
 
 ::: {.dashboard-grid}
 ::: {.dashboard-card .dashboard-detail}
@@ -940,7 +942,7 @@ MTTR still matters. It cannot stand alone.
 - Label the MTTR time window before calling a regression
 - Use the full set of metrics to explain cleanup work when old findings close
 - Define both metrics in code before they reach the dashboard
-- Show one chart and one table that make exposure visible
+- Show one chart and one table that make backlog age and the tail visible
 :::
 
 ---
@@ -962,7 +964,7 @@ Cleanup work can look like regression.
 ::: {.eyebrow}
 Better review
 :::
-### Exposure visible
+### Backlog age visible
 Read MTTR with MOVA and 180+ days open.
 
 Make the judgment call after the backlog picture is visible.
@@ -1085,7 +1087,7 @@ The implementation details matter less than changing what gets reviewed.
 Track together
 :::
 ### MTTR + MOVA
-Read flow and exposure together.
+Read flow and backlog age together.
 :::
 
 ::: {.definition-card}
@@ -1110,8 +1112,8 @@ Do not reward low MTTR while backlog ages.
 ::: {.eyebrow}
 MOVA
 :::
-### Exposure
-Age still carried today.
+### Backlog age
+Average age of open vulnerabilities.
 :::
 
 ::: {.definition-card .centered}
@@ -1119,7 +1121,7 @@ Age still carried today.
 MTTR
 :::
 ### Flow
-Speed of closed work.
+Closure speed for closed work.
 :::
 :::
 
@@ -1145,7 +1147,7 @@ This team looks healthiest.
 What is true
 :::
 ### Aging backlog elsewhere
-Exposure needs effort in another queue.
+That queue needs effort first.
 :::
 :::
 
@@ -1160,7 +1162,7 @@ That is the wrong decision.
 ::: {.metric-big .centered}
 MTTR shows flow.
 
-MOVA shows exposure.
+MOVA shows backlog age.
 :::
 
 ::: {.cta-link}
