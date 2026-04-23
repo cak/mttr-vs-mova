@@ -252,7 +252,6 @@
 
 .reveal .kicker p,
 .reveal .metric-big p,
-.reveal .metric-mid p,
 .paradox-pill p,
 .paradox-connector p {
   margin: 0;
@@ -262,8 +261,7 @@
   margin-top: 0.28em;
 }
 
-.reveal .metric-big p + p,
-.reveal .metric-mid p + p {
+.reveal .metric-big p + p {
   margin-top: 0.16em;
 }
 
@@ -276,33 +274,7 @@
   text-wrap: balance;
 }
 
-.reveal .metric-mid {
-  font-size: 1.28em;
-  font-weight: 650;
-  line-height: 1.14;
-  max-width: 780px;
-  margin: 0 auto;
-  text-wrap: balance;
-}
-
-.reveal .callout {
-  max-width: 1040px;
-  margin-top: 0.72em;
-  padding: 0.82rem 1rem;
-  border-left: 6px solid var(--teal);
-  border-radius: 0 var(--radius-callout) var(--radius-callout) 0;
-  background: rgba(31, 111, 120, 0.08);
-  line-height: 1.32;
-}
-
-.reveal .callout .callout-body,
-.reveal .callout .callout-content,
-.reveal .callout p:last-child {
-  margin: 0;
-}
-
-.reveal .line-anchor,
-.reveal .callout-anchor {
+.reveal .line-anchor {
   max-width: 900px;
   margin-top: 0.72em;
   padding: 0.92rem 1.12rem 0.96rem;
@@ -318,21 +290,18 @@
   text-wrap: balance;
 }
 
-.reveal .line-anchor p,
-.reveal .callout-anchor .callout-content {
+.reveal .line-anchor p {
   max-width: none;
   margin: 0;
 }
 
 .reveal .kicker.centered,
-.reveal .line-anchor.centered,
-.reveal .callout-anchor.centered {
+.reveal .line-anchor.centered {
   margin-left: auto;
   margin-right: auto;
 }
 
-.reveal .line-anchor-subtle,
-.reveal .callout-anchor-subtle {
+.reveal .line-anchor-subtle {
   max-width: 760px;
   margin: 0.95rem auto 0;
   padding: 0.76rem 1rem 0.8rem;
@@ -432,7 +401,6 @@
 /* Shared component shells */
 .shock-card,
 .definition-card,
-.signal-card,
 .tool-card,
 .dashboard-card,
 .score-card,
@@ -445,7 +413,6 @@
 
 .shock-card p,
 .definition-card p,
-.signal-card p,
 .tool-card p,
 .dashboard-card p,
 .score-card p,
@@ -454,7 +421,6 @@
 }
 
 .definition-grid,
-.signal-grid,
 .dashboard-grid,
 .score-grid,
 .tail-example-grid {
@@ -470,20 +436,9 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.signal-grid {
-  gap: 0.86rem;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  max-width: 920px;
-  margin: 0.3rem auto 0;
-}
-
 .narrow-grid {
   width: min(100%, 980px);
   margin: 0.38rem auto 0;
-}
-
-.statement-narrow {
-  max-width: 900px;
 }
 
 .reveal .slides section.toolbox-slide .tool-grid {
@@ -543,8 +498,7 @@
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.38);
 }
 
-.tool-icon i,
-.signal-icon i {
+.tool-icon i {
   display: inline-block;
   line-height: 1;
 }
@@ -728,86 +682,6 @@
   margin-bottom: 0.54rem;
 }
 
-.tail-visual {
-  max-width: 980px;
-  margin: 0.1rem 0 0.95rem;
-  padding: 0.8rem 0.95rem 0.72rem;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-panel);
-  background: rgba(255, 253, 248, 0.78);
-  overflow: hidden;
-}
-
-.tail-visual-caption {
-  color: var(--ink-soft);
-  font-size: 0.56em;
-  margin-bottom: 0.42rem;
-}
-
-.tail-strip {
-  position: relative;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 1.4rem;
-  padding: 0.12rem 0;
-}
-
-.tail-strip::before {
-  content: "";
-  position: absolute;
-  left: 0.35rem;
-  right: 0.35rem;
-  top: 50%;
-  border-top: 2px dashed rgba(72, 83, 93, 0.26);
-  transform: translateY(-50%);
-  z-index: 0;
-}
-
-.tail-cluster {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  grid-template-columns: repeat(10, minmax(0, 14px));
-  gap: 0.3rem;
-  width: max-content;
-  max-width: 100%;
-  padding-right: 0.55rem;
-  background: rgba(255, 253, 248, 0.94);
-}
-
-.tail-cluster-outlier {
-  justify-self: end;
-  min-width: auto;
-  padding-left: 0.55rem;
-}
-
-.tail-dot {
-  width: 14px;
-  height: 14px;
-  border-radius: 999px;
-  background: rgba(31, 111, 120, 0.68);
-}
-
-.tail-dot-outlier {
-  background: rgba(198, 90, 33, 0.84);
-}
-
-.tail-axis {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-top: 0.34rem;
-  color: var(--ink-soft);
-  font-size: 0.48em;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-
-.tail-axis span:last-child {
-  text-align: right;
-}
-
 .tail-number {
   font-size: 2.08em;
   line-height: 1;
@@ -826,89 +700,6 @@
   color: var(--headline);
   font-weight: 700;
   margin-bottom: 0.3rem;
-}
-
-.signal-card {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  gap: 0.18rem;
-  min-height: 146px;
-  padding: 0.9rem 0.92rem 0.86rem;
-  text-align: left;
-}
-
-.signal-head {
-  display: flex;
-  align-items: center;
-  gap: 0.66rem;
-  margin-bottom: 0.12rem;
-}
-
-.signal-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 38px;
-  height: 38px;
-  flex: 0 0 38px;
-  border: 1px solid rgba(72, 83, 93, 0.12);
-  border-radius: 12px;
-  background: rgba(72, 83, 93, 0.06);
-  color: var(--headline);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.38);
-}
-
-.signal-icon i {
-  font-size: 20px;
-}
-
-.signal-card.signal-flow .signal-icon {
-  color: var(--orange);
-  border-color: rgba(198, 90, 33, 0.16);
-  background: rgba(198, 90, 33, 0.1);
-}
-
-.signal-card.signal-age .signal-icon {
-  color: var(--teal);
-  border-color: rgba(31, 111, 120, 0.16);
-  background: rgba(31, 111, 120, 0.1);
-}
-
-.signal-card.signal-count .signal-icon {
-  color: #51606a;
-  border-color: rgba(72, 83, 93, 0.14);
-  background: rgba(72, 83, 93, 0.08);
-}
-
-.signal-card.signal-tail .signal-icon {
-  color: #8b1e3f;
-  border-color: rgba(139, 30, 63, 0.16);
-  background: rgba(139, 30, 63, 0.09);
-}
-
-.signal-name {
-  color: var(--headline);
-  font-size: 0.8em;
-  font-weight: 700;
-  line-height: 1.05;
-  letter-spacing: -0.015em;
-  margin-bottom: 0;
-}
-
-.signal-meaning {
-  color: var(--ink-soft);
-  font-size: 0.68em;
-  line-height: 1.2;
-  max-width: 13ch;
-}
-
-.signal-support {
-  color: var(--ink);
-  font-size: 0.63em;
-  line-height: 1.22;
-  max-width: 22ch;
-  margin-top: 0.08rem;
 }
 
 .dashboard-grid {
@@ -1200,7 +991,6 @@
 
   .shock-row,
   .definition-grid,
-  .signal-grid,
   .dashboard-grid,
   .score-grid,
   .tail-example-grid,
