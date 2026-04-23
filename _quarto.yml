@@ -21,12 +21,10 @@ format:
     margin: 0.04
     slide-number: c/t
     transition: fade
-    transition-speed: fast
     background-transition: fade
     controls: false
     progress: true
     center: false
-    center-title-slide: true
     hash: true
     history: false
     embed-resources: true
@@ -34,5 +32,3 @@ format:
     auto-stretch: false
     auto-animate-easing: ease-out
     auto-animate-duration: 0.55
-    title-slide-attributes:
-      data-background-color: "#f6f0e5"
