@@ -61,19 +61,19 @@ ul {
 .page {
   width: min(calc(100% - 2rem), var(--max-width));
   margin: 0 auto;
-  padding: var(--space-6) 0 calc(var(--space-6) + var(--space-1));
+  padding: calc(var(--space-6) - 0.5rem) 0 calc(var(--space-6) + var(--space-1));
 }
 
 .page > * + * {
-  margin-top: 1.25rem;
+  margin-top: 1.35rem;
 }
 
 .hero {
-  padding-top: 0.25rem;
+  padding-top: 0.5rem;
 }
 
 .hero > * {
-  max-width: 44rem;
+  max-width: 46rem;
 }
 
 .hero > * + * {
@@ -82,8 +82,8 @@ ul {
 
 h1 {
   color: var(--heading);
-  font-size: clamp(2.9rem, 8vw, 4.75rem);
-  line-height: 0.94;
+  font-size: clamp(2.45rem, 7vw, 4.1rem);
+  line-height: 0.98;
   letter-spacing: -0.045em;
 }
 
@@ -102,6 +102,7 @@ h1 {
 .summary {
   color: var(--muted);
   font-size: 1rem;
+  max-width: 45rem;
 }
 
 .card {
@@ -189,6 +190,7 @@ code {
   flex-wrap: wrap;
   gap: 0.85rem;
   margin-top: var(--space-5);
+  align-items: stretch;
 }
 
 .button {
@@ -196,6 +198,7 @@ code {
   align-items: center;
   justify-content: center;
   min-height: 44px;
+  min-width: min(100%, 13.5rem);
   padding: 0.78rem 1rem;
   border: 1px solid var(--border);
   border-radius: 999px;
@@ -244,6 +247,17 @@ code {
 
   .lede {
     font-size: 1.15rem;
+  }
+}
+
+@media (max-width: 560px) {
+  .actions {
+    gap: 0.75rem;
+  }
+
+  .button {
+    width: 100%;
+    min-width: 0;
   }
 }
 
