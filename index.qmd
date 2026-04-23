@@ -18,12 +18,10 @@ import polars as pl
 from great_tables import GT, loc, style
 from plotnine import (
     aes,
-    coord_cartesian,
     element_blank,
     element_line,
     element_rect,
     element_text,
-    geom_label,
     geom_line,
     geom_point,
     ggplot,
@@ -59,18 +57,25 @@ STRATEGY_COLORS = {
     "Oldest-First": "#1F6F78",
     "Newest-First": "#8B1E3F",
 }
+STRATEGY_ORDER = ["Oldest-First", "Newest-First"]
 MONTH_BREAKS = [1, 6, 12, 18, 24]
 LAST_MONTH = metrics.select(pl.col("month_index").max()).item()
 ROOM_BG = "#f3ebde"
 PANEL_BG = "#fffdf8"
 GRID_COLOR = "#c8baa5"
-MUTED_TEAL = "#8ea1a4"
-MUTED_ROSE = "#b58a96"
+LINE_SIZE = 2.8
+ENDPOINT_SIZE = 5.0
+COMPARISON_ALPHA = 0.75
+X_AXIS_EXPAND = (0.01, 0.01)
 chart_theme = (
     theme_minimal(base_size=22)
     + theme(
         figure_size=(11.35, 5.35),
-        legend_position="none",
+        legend_position="top",
+        legend_title=element_blank(),
+        legend_text=element_text(color="#26333A", size=15),
+        legend_background=element_blank(),
+        legend_key=element_blank(),
         panel_grid_minor=element_blank(),
         panel_grid_major_x=element_blank(),
         panel_grid_major_y=element_line(color=GRID_COLOR, size=0.7),
@@ -80,13 +85,52 @@ chart_theme = (
         axis_text=element_text(color="#26333A", size=15),
         axis_text_x=element_text(margin={"t": 8}),
         axis_text_y=element_text(margin={"r": 8}),
-        plot_title=element_text(weight="bold", color="#101828", size=24),
-        plot_subtitle=element_text(color="#55606B", size=15, margin={"b": 12}),
+        plot_title=element_text(weight="bold", color="#101828", size=22),
+        plot_subtitle=element_text(color="#55606B", size=14, margin={"b": 10}),
         axis_title_x=element_text(margin={"t": 16}),
         axis_title_y=element_text(margin={"r": 18}),
-        subplots_adjust={"left": 0.13, "right": 0.92, "top": 0.83, "bottom": 0.18},
     )
 )
+
+
+def strategy_line_plot(
+    dataframe,
+    y_col,
+    title,
+    subtitle,
+    y_axis_label,
+    highlighted_strategy,
+):
+    highlighted = dataframe.filter(pl.col("strategy_label") == highlighted_strategy)
+    comparison = dataframe.filter(pl.col("strategy_label") != highlighted_strategy)
+    endpoints = dataframe.filter(pl.col("month_index") == LAST_MONTH)
+    highlighted_endpoints = endpoints.filter(
+        pl.col("strategy_label") == highlighted_strategy
+    )
+    comparison_endpoints = endpoints.filter(
+        pl.col("strategy_label") != highlighted_strategy
+    )
+
+    return (
+        ggplot(mapping=aes(x="month_index", y=y_col, color="strategy_label"))
+        + geom_line(data=comparison, size=LINE_SIZE, alpha=COMPARISON_ALPHA)
+        + geom_line(data=highlighted, size=LINE_SIZE)
+        + geom_point(
+            data=comparison_endpoints,
+            size=ENDPOINT_SIZE,
+            alpha=COMPARISON_ALPHA,
+        )
+        + geom_point(data=highlighted_endpoints, size=ENDPOINT_SIZE)
+        + scale_color_manual(values=STRATEGY_COLORS, breaks=STRATEGY_ORDER)
+        + scale_x_continuous(breaks=MONTH_BREAKS, expand=X_AXIS_EXPAND)
+        + labs(
+            title=title,
+            subtitle=subtitle,
+            x="Month",
+            y=y_axis_label,
+        )
+        + chart_theme
+    )
 
 card_lookup = {
     row["strategy_label"]: row
@@ -381,52 +425,15 @@ mttr_plot = metrics.select(
     "strategy_label",
     pl.col("mttr_days").alias("days"),
 )
-mttr_labels = mttr_plot.filter(pl.col("month_index") == LAST_MONTH).with_columns(
-    pl.format(
-        "{}\n{}d",
-        pl.col("strategy_label"),
-        pl.col("days").round(0).cast(pl.Int64),
-    ).alias("label"),
-    (
-        pl.col("days")
-        + pl.when(pl.col("strategy_label") == "Oldest-First")
-        .then(pl.lit(10))
-        .otherwise(pl.lit(0))
-    ).alias("label_y"),
-)
-
 (
-    ggplot(mttr_plot, aes(x="month_index", y="days", color="strategy_label"))
-    + geom_line(size=3.0)
-    + geom_point(data=mttr_labels, size=4.4)
-    + geom_label(
-        data=mttr_labels,
-        mapping=aes(y="label_y", label="label"),
-        ha="left",
-        nudge_x=0.7,
-        size=9.6,
-        fontweight="bold",
-        lineheight=0.94,
-        fill=PANEL_BG,
-        label_padding=0.16,
-        label_r=0.12,
-        label_size=0.5,
-    )
-    + scale_color_manual(
-        values={
-            "Newest-First": STRATEGY_COLORS["Newest-First"],
-            "Oldest-First": MUTED_TEAL,
-        }
-    )
-    + scale_x_continuous(breaks=MONTH_BREAKS)
-    + coord_cartesian(xlim=(1, 29.4))
-    + labs(
+    strategy_line_plot(
+        dataframe=mttr_plot,
+        y_col="days",
         title="Newest-First wins on MTTR",
         subtitle="Closing recent findings first keeps closure age low.",
-        x="Month",
-        y="MTTR (days)",
+        y_axis_label="MTTR (days)",
+        highlighted_strategy="Newest-First",
     )
-    + chart_theme
 )
 ```
 
@@ -446,55 +453,15 @@ mova_plot = metrics.select(
     "strategy_label",
     pl.col("mova_days").alias("days"),
 )
-mova_labels = (
-    mova_plot.filter(pl.col("month_index") == LAST_MONTH)
-    .with_columns(
-        pl.format(
-            "{}\n{}d",
-            pl.col("strategy_label"),
-            pl.col("days").round(0).cast(pl.Int64),
-        ).alias("label"),
-        (
-            pl.col("days")
-            + pl.when(pl.col("strategy_label") == "Oldest-First")
-            .then(pl.lit(-10))
-            .otherwise(pl.lit(10))
-        ).alias("label_y"),
-    )
-)
-
 (
-    ggplot(mova_plot, aes(x="month_index", y="days", color="strategy_label"))
-    + geom_line(size=3.0)
-    + geom_point(data=mova_labels, size=4.4)
-    + geom_label(
-        data=mova_labels,
-        mapping=aes(y="label_y", label="label"),
-        ha="left",
-        nudge_x=0.7,
-        size=9.6,
-        fontweight="bold",
-        lineheight=0.94,
-        fill=PANEL_BG,
-        label_padding=0.16,
-        label_r=0.12,
-        label_size=0.5,
-    )
-    + scale_color_manual(
-        values={
-            "Oldest-First": STRATEGY_COLORS["Oldest-First"],
-            "Newest-First": MUTED_ROSE,
-        }
-    )
-    + scale_x_continuous(breaks=MONTH_BREAKS)
-    + coord_cartesian(xlim=(1, 29.4))
-    + labs(
+    strategy_line_plot(
+        dataframe=mova_plot,
+        y_col="days",
         title="Oldest-First lowers backlog age",
         subtitle="Closing older findings first lowers today's backlog age.",
-        x="Month",
-        y="MOVA (days)",
+        y_axis_label="MOVA (days)",
+        highlighted_strategy="Oldest-First",
     )
-    + chart_theme
 )
 ```
 
@@ -514,55 +481,15 @@ tail_plot = metrics.select(
     "strategy_label",
     "aged_over_180",
 )
-tail_labels = (
-    tail_plot.filter(pl.col("month_index") == LAST_MONTH)
-    .with_columns(
-        pl.format(
-            "{}\n{}",
-            pl.col("strategy_label"),
-            pl.col("aged_over_180"),
-        ).alias("label"),
-        (
-            pl.col("aged_over_180")
-            + pl.when(pl.col("strategy_label") == "Oldest-First")
-            .then(pl.lit(10))
-            .otherwise(pl.lit(0))
-        ).alias("label_y"),
-    )
-)
-
 (
-    ggplot(tail_plot, aes(x="month_index", y="aged_over_180", color="strategy_label"))
-    + geom_line(size=2.5)
-    + geom_point(data=tail_labels, size=4.1)
-    + geom_label(
-        data=tail_labels,
-        mapping=aes(y="label_y", label="label"),
-        ha="left",
-        nudge_x=0.7,
-        size=9.2,
-        fontweight="bold",
-        lineheight=0.94,
-        fill=PANEL_BG,
-        label_padding=0.16,
-        label_r=0.12,
-        label_size=0.45,
-    )
-    + scale_color_manual(
-        values={
-            "Oldest-First": STRATEGY_COLORS["Oldest-First"],
-            "Newest-First": MUTED_ROSE,
-        }
-    )
-    + scale_x_continuous(breaks=MONTH_BREAKS)
-    + coord_cartesian(xlim=(1, 29.4))
-    + labs(
+    strategy_line_plot(
+        dataframe=tail_plot,
+        y_col="aged_over_180",
         title="Oldest-First reduces the 180+ tail",
         subtitle="Newest-First leaves the 180+ tail in place.",
-        x="Month",
-        y="Open findings over 180 days",
+        y_axis_label="Open findings over 180 days",
+        highlighted_strategy="Oldest-First",
     )
-    + chart_theme
 )
 ```
 
