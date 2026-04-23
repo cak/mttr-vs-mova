@@ -163,7 +163,7 @@ This month
 Dashboards signal failure here.
 The next question is: did we slow down, or did we change what we fixed?
 
-What happened to backlog age, and to the oldest open work?
+What happened to backlog age, and to the oldest part of the backlog?
 :::
 ::::
 
@@ -177,9 +177,10 @@ MTTR increased after we formalized vulnerability management.
 
 ::: {.incremental}
 - MTTR became a KPI
+- Teams started closing older findings
 - MTTR went up
 - The first question in the review was: “What changed?”
-- Dashboard read: vulnerability management had regressed
+- The dashboard said: ‘we got worse’
 :::
 
 ::: {.kicker}
@@ -209,7 +210,7 @@ while
 :::
 
 ::: {.line-anchor .line-anchor-subtle}
-We needed a way to measure the open backlog today, not just what closed.
+We needed to measure the risk still open, not just what closed.
 :::
 
 ---
@@ -234,7 +235,7 @@ Backlog age
 ### MOVA
 Mean Open Vulnerability Age. How old is the open backlog today?
 
-Age of **open** vulnerabilities.
+Age of the **backlog** today.
 :::
 :::
 
@@ -278,7 +279,7 @@ at 400 days
 The average looks fine.
 :::
 ::: {.tail-text}
-The oldest findings are not moving.
+The oldest backlog is not moving.
 :::
 :::
 :::
@@ -326,7 +327,7 @@ mova = (
 ```
 
 ::: {.kicker}
-Backlog age today. Current age of open vulnerabilities.
+Backlog age today. The age of what is still open.
 :::
 
 ---
@@ -341,18 +342,18 @@ Open vulnerabilities not yet remediated
 
 ::: {.definition-card}
 ### Backlog age
-How long that open work has been sitting
+How long the backlog has been sitting
 :::
 
 ::: {.definition-card}
 ### Exposure
-Aging open work usually increases exposure over time.
+Aging backlog usually increases exposure over time.
 :::
 :::
 
 ::: {.compact-list}
 - MTTR and MOVA use the same source data
-- Backlog age starts at the created date
+- Open findings age from the created date
 - A CSV export is often enough
 :::
 
@@ -620,7 +621,7 @@ findings older than 180 days
 :::
 
 ::: {.centered .muted}
-Under Newest-First, the oldest open work barely moves.
+Under Newest-First, the oldest backlog barely moves.
 :::
 
 ---
@@ -822,9 +823,9 @@ MTTR still matters. It cannot stand alone.
 ## Read the signals together
 
 ::: {.incremental}
-- MTTR up + MOVA down = older open work is getting cleared
+- MTTR up + MOVA down = older backlog is getting cleared
 - MTTR down + MOVA up = recent closures look better while backlog age worsens
-- MTTR up can mean effort shifted to older open work
+- MTTR up can mean effort shifted to older backlog
 - 180+ up = the aging tail is getting stranded
 :::
 
@@ -921,7 +922,7 @@ Start with an export. Define the metric in code before you visualize it.
 Policy
 :::
 ### Track MTTR + MOVA
-Prioritize the oldest open work first.
+Prioritize older backlog first.
 :::
 
 ::: {.definition-card .decision-card .decision-card-wrong}
