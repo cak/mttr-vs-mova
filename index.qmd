@@ -2,6 +2,11 @@
 title: "Why Vulnerability MTTR Alone Misleads"
 subtitle: "Add MOVA to Measure Real Risk"
 author: "Caleb Kinney"
+format:
+  revealjs:
+    css:
+      - styles.css
+      - assets/bootstrap-icons/bootstrap-icons.css
 execute:
   echo: false
   warning: false
