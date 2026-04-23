@@ -174,7 +174,7 @@ MTTR increased after we launched a program.
 ::: {.incremental}
 - MTTR was baselined as a KPI
 - The number went up
-- The review started with: “What changed?”
+- The first question in the review was: “What changed?”
 - From the dashboard, it looked like the program regressed
 :::
 
@@ -255,7 +255,7 @@ MOVA shows backlog age.
 :::
 
 ::: {.kicker}
-Backlog age is not just time. Aging backlog increases exposure.
+Backlog age is not just time. Aging open work usually increases exposure.
 
 Once closed work and open work are separated, the exposure question becomes much easier to see.
 :::
@@ -384,7 +384,7 @@ mova = (
 ```
 
 ::: {.kicker}
-Open work. Current age. Backlog age today.
+Open work. Current age of the backlog.
 :::
 
 ---
@@ -568,7 +568,7 @@ mova_labels = (
     + coord_cartesian(xlim=(1, 29.4))
     + labs(
         title="Oldest-First lowers backlog age",
-        subtitle="Working the oldest backlog first lowers backlog age.",
+        subtitle="Prioritizing older findings lowers backlog age.",
         x="Month",
         y="MOVA (days)",
     )
