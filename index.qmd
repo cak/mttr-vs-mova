@@ -4,9 +4,9 @@ subtitle: "Add MOVA to Measure Real Risk"
 author: "Caleb Kinney"
 format:
   revealjs:
-    css:
-      - styles.css
-      - assets/bootstrap-icons/bootstrap-icons.css
+    include-in-header:
+      text: |
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 execute:
   echo: false
   warning: false
@@ -34,26 +34,20 @@ from plotnine import (
     theme_minimal,
 )
 
-metrics = pl.read_parquet("data/metrics.parquet").with_columns(
-    pl.col("strategy")
-    .replace(
-        {
-            "oldest_first": "Oldest-First",
-            "newest_first": "Newest-First",
-        }
+STRATEGY_LABELS = {
+    "oldest_first": "Oldest-First",
+    "newest_first": "Newest-First",
+}
+
+
+def add_strategy_label(dataframe):
+    return dataframe.with_columns(
+        pl.col("strategy").replace(STRATEGY_LABELS).alias("strategy_label")
     )
-    .alias("strategy_label")
-)
-summary = pl.read_parquet("data/summary.parquet").with_columns(
-    pl.col("strategy")
-    .replace(
-        {
-            "oldest_first": "Oldest-First",
-            "newest_first": "Newest-First",
-        }
-    )
-    .alias("strategy_label")
-)
+
+
+metrics = add_strategy_label(pl.read_parquet("data/metrics.parquet"))
+summary = add_strategy_label(pl.read_parquet("data/summary.parquet"))
 
 STRATEGY_COLORS = {
     "Oldest-First": "#1F6F78",
@@ -61,7 +55,9 @@ STRATEGY_COLORS = {
 }
 STRATEGY_ORDER = ["Oldest-First", "Newest-First"]
 MONTH_BREAKS = [1, 6, 12, 18, 24]
-LAST_MONTH = metrics.select(pl.col("month_index").max()).item()
+LAST_MONTH = metrics.get_column("month_index").max()
+if LAST_MONTH is None:
+    raise ValueError("data/metrics.parquet does not contain any month_index values.")
 ROOM_BG = "#f3ebde"
 PANEL_BG = "#fffdf8"
 GRID_COLOR = "#c8baa5"
@@ -100,15 +96,12 @@ def strategy_line_plot(
     y_axis_label,
     highlighted_strategy,
 ):
-    highlighted = dataframe.filter(pl.col("strategy_label") == highlighted_strategy)
-    comparison = dataframe.filter(pl.col("strategy_label") != highlighted_strategy)
-    endpoints = dataframe.filter(pl.col("month_index") == LAST_MONTH)
-    highlighted_endpoints = endpoints.filter(
-        pl.col("strategy_label") == highlighted_strategy
-    )
-    comparison_endpoints = endpoints.filter(
-        pl.col("strategy_label") != highlighted_strategy
-    )
+    is_highlighted = pl.col("strategy_label") == highlighted_strategy
+    is_endpoint = pl.col("month_index") == LAST_MONTH
+    highlighted = dataframe.filter(is_highlighted)
+    comparison = dataframe.filter(~is_highlighted)
+    highlighted_endpoints = highlighted.filter(is_endpoint)
+    comparison_endpoints = comparison.filter(is_endpoint)
 
     return (
         ggplot(mapping=aes(x="month_index", y=y_col, color="strategy_label"))
@@ -143,15 +136,30 @@ card_lookup = {
     ).to_dicts()
 }
 
-oldest_mttr = f"{card_lookup['Oldest-First']['mttr_days']:.1f}"
-oldest_mova = f"{card_lookup['Oldest-First']['mova_days']:.1f}"
-oldest_open = int(card_lookup["Oldest-First"]["open_count"])
-oldest_tail = int(card_lookup["Oldest-First"]["aged_over_180"])
 
-newest_mttr = f"{card_lookup['Newest-First']['mttr_days']:.1f}"
-newest_mova = f"{card_lookup['Newest-First']['mova_days']:.1f}"
-newest_open = int(card_lookup["Newest-First"]["open_count"])
-newest_tail = int(card_lookup["Newest-First"]["aged_over_180"])
+def get_strategy_card(strategy_label):
+    card = card_lookup.get(strategy_label)
+    if card is None:
+        available_labels = ", ".join(sorted(card_lookup)) or "none"
+        raise ValueError(
+            "data/summary.parquet is missing required strategy_label "
+            f"{strategy_label!r}. Available labels: {available_labels}."
+        )
+    return card
+
+
+oldest_card = get_strategy_card("Oldest-First")
+newest_card = get_strategy_card("Newest-First")
+
+oldest_mttr = f"{oldest_card['mttr_days']:.1f}"
+oldest_mova = f"{oldest_card['mova_days']:.1f}"
+oldest_open = int(oldest_card["open_count"])
+oldest_tail = int(oldest_card["aged_over_180"])
+
+newest_mttr = f"{newest_card['mttr_days']:.1f}"
+newest_mova = f"{newest_card['mova_days']:.1f}"
+newest_open = int(newest_card["open_count"])
+newest_tail = int(newest_card["aged_over_180"])
 ```
 
 ## Opening {.hero-slide}
