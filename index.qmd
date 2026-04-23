@@ -21,6 +21,7 @@ from plotnine import (
     element_text,
     geom_line,
     geom_point,
+    geom_text,
     ggplot,
     labs,
     scale_color_manual,
@@ -63,10 +64,12 @@ GRID_COLOR = "#c8baa5"
 LINE_SIZE = 2.8
 ENDPOINT_SIZE = 5.0
 COMPARISON_ALPHA = 0.75
-X_AXIS_EXPAND = (0.01, 0.01)
+X_AXIS_EXPAND = (0.01, 0.08)
+LABEL_SIZE = 8.2
+LABEL_NUDGE_X = 0.35
 chart_theme = theme_minimal(base_size=22) + theme(
     figure_size=(11.35, 5.35),
-    legend_position="top",
+    legend_position="none",
     legend_title=element_blank(),
     legend_text=element_text(color="#26333A", size=15),
     legend_background=element_blank(),
@@ -104,6 +107,13 @@ def strategy_line_plot(
     comparison_endpoints = endpoints.filter(
         pl.col("strategy_label") != highlighted_strategy
     )
+    label_data = endpoints.with_columns(pl.col("strategy_label").alias("label"))
+    highlighted_labels = label_data.filter(
+        pl.col("strategy_label") == highlighted_strategy
+    )
+    comparison_labels = label_data.filter(
+        pl.col("strategy_label") != highlighted_strategy
+    )
 
     return (
         ggplot(mapping=aes(x="month_index", y=y_col, color="strategy_label"))
@@ -115,6 +125,23 @@ def strategy_line_plot(
             alpha=COMPARISON_ALPHA,
         )
         + geom_point(data=highlighted_endpoints, size=ENDPOINT_SIZE)
+        + geom_text(
+            data=comparison_labels,
+            mapping=aes(label="label"),
+            nudge_x=LABEL_NUDGE_X,
+            ha="left",
+            va="center",
+            size=LABEL_SIZE,
+            alpha=COMPARISON_ALPHA,
+        )
+        + geom_text(
+            data=highlighted_labels,
+            mapping=aes(label="label"),
+            nudge_x=LABEL_NUDGE_X,
+            ha="left",
+            va="center",
+            size=LABEL_SIZE,
+        )
         + scale_color_manual(values=STRATEGY_COLORS, breaks=STRATEGY_ORDER)
         + scale_x_continuous(breaks=MONTH_BREAKS, expand=X_AXIS_EXPAND)
         + labs(
