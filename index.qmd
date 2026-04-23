@@ -175,26 +175,11 @@ MTTR increased after we launched a program.
 - MTTR was baselined as a KPI
 - The number went up
 - The review started with: “What changed?”
-- From the dashboard, it looked like we got worse
+- From the dashboard, it looked like the program regressed
 :::
 
 ::: {.kicker}
 We were closing older backlog that had been sitting for a long time.
-:::
-
----
-
-## Why this looks like failure
-
-::: {.incremental}
-- MTTR increased
-- Longer time to remediate closed work
-- Interpreted as slower performance
-- Interpreted as declining team effectiveness
-:::
-
-::: {.kicker}
-The mistake is assuming one closure metric describes the whole backlog.
 :::
 
 ---
@@ -864,7 +849,7 @@ MTTR
 :::
 
 ::: {.centered .muted}
-If this is the only KPI, decision-makers reward the strategy that closes recent work fastest.
+If this is the only KPI, the system rewards the strategy that closes recent work fastest.
 :::
 
 ---
@@ -939,36 +924,10 @@ MTTR still matters. It cannot stand alone.
 ::: {.compact-list}
 - Put MTTR and MOVA on the same monthly view
 - Add open count and a threshold such as 180+ days
+- Review MTTR only with backlog age and the tail visible
 - Label the MTTR time window before calling a regression
-- Use the full set of metrics to explain cleanup work when old findings close
 - Define both metrics in code before they reach the dashboard
-- Show one chart and one table that make backlog age and the tail visible
-:::
-
----
-
-## Change the review
-
-::: {.definition-grid}
-::: {.definition-card}
-::: {.eyebrow}
-Old review
-:::
-### MTTR headline
-One number drives the discussion.
-
-Cleanup work can look like regression.
-:::
-
-::: {.definition-card}
-::: {.eyebrow}
-Better review
-:::
-### Backlog age visible
-Read MTTR with MOVA and 180+ days open.
-
-Make the judgment call after the backlog picture is visible.
-:::
+- Show one chart and one table that surface backlog age and the tail
 :::
 
 ---
@@ -1100,7 +1059,7 @@ Reduce the oldest open work first.
 :::
 
 ::: {.line-anchor .line-anchor-subtle .centered}
-Do not reward low MTTR while backlog ages.
+Do not let low MTTR outrank aging backlog.
 :::
 
 ---
@@ -1139,7 +1098,7 @@ Read them together, not alone.
 Dashboard says
 :::
 ### Low MTTR
-This team looks healthiest.
+This looks healthiest on the dashboard.
 :::
 
 ::: {.definition-card .decision-card .decision-card-right}
@@ -1152,7 +1111,7 @@ That queue needs effort first.
 :::
 
 ::: {.line-anchor .centered .decision-close}
-That is the wrong decision.
+That is the wrong call.
 :::
 
 ---
