@@ -160,10 +160,11 @@ This month
 ::::
 
 ::: {.shock-subtitle}
-Dashboards signal failure here.
-The next question is: did we slow down, or did we change what we fixed?
+Dashboards call this failure.
+Did we slow down, or just change what we fixed?
 
-What happened to backlog age, and to the oldest part of the backlog?
+What happened to backlog age?
+What happened to the oldest findings?
 :::
 ::::
 
@@ -184,7 +185,7 @@ MTTR increased after we made it a KPI.
 :::
 
 ::: {.kicker}
-MTTR rose because we were finally closing older findings from the backlog.
+MTTR rose because we finally closed older backlog.
 :::
 
 ---
@@ -210,7 +211,7 @@ while
 :::
 
 ::: {.line-anchor .line-anchor-subtle}
-We needed to measure how old the open backlog is today, not just what closed.
+We need to measure how old the backlog is today, not just what closed.
 :::
 
 ---
@@ -327,7 +328,7 @@ mova = (
 ```
 
 ::: {.kicker}
-Backlog age today. The age of what is still open.
+Backlog age today. What is still open.
 :::
 
 ---
@@ -353,7 +354,6 @@ Older backlog usually increases risk over time.
 
 ::: {.compact-list}
 - MTTR and MOVA use the same data
-- For open findings, age starts at the created date
 - A CSV export is often enough
 :::
 
@@ -369,7 +369,7 @@ Hold constant
 ### Setup
 Start with one backlog.
 
-Keep arrivals, remediation capacity, and time horizon fixed.
+Keep arrivals and capacity fixed.
 :::
 
 ::: {.definition-card}
@@ -944,6 +944,8 @@ Do not let low MTTR outrank backlog age.
 MTTR shows flow.
 
 MOVA shows backlog age.
+
+You need both.
 :::
 
 ::: {.cta-link}
