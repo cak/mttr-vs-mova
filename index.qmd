@@ -64,29 +64,26 @@ LINE_SIZE = 2.8
 ENDPOINT_SIZE = 5.0
 COMPARISON_ALPHA = 0.75
 X_AXIS_EXPAND = (0.01, 0.01)
-chart_theme = (
-    theme_minimal(base_size=22)
-    + theme(
-        figure_size=(11.35, 5.35),
-        legend_position="top",
-        legend_title=element_blank(),
-        legend_text=element_text(color="#26333A", size=15),
-        legend_background=element_blank(),
-        legend_key=element_blank(),
-        panel_grid_minor=element_blank(),
-        panel_grid_major_x=element_blank(),
-        panel_grid_major_y=element_line(color=GRID_COLOR, size=0.7),
-        panel_background=element_rect(fill=PANEL_BG, color=None),
-        plot_background=element_rect(fill=ROOM_BG, color=None),
-        axis_title=element_text(color="#26333A", size=18),
-        axis_text=element_text(color="#26333A", size=15),
-        axis_text_x=element_text(margin={"t": 8}),
-        axis_text_y=element_text(margin={"r": 8}),
-        plot_title=element_text(weight="bold", color="#101828", size=22),
-        plot_subtitle=element_text(color="#55606B", size=14, margin={"b": 10}),
-        axis_title_x=element_text(margin={"t": 16}),
-        axis_title_y=element_text(margin={"r": 18}),
-    )
+chart_theme = theme_minimal(base_size=22) + theme(
+    figure_size=(11.35, 5.35),
+    legend_position="top",
+    legend_title=element_blank(),
+    legend_text=element_text(color="#26333A", size=15),
+    legend_background=element_blank(),
+    legend_key=element_blank(),
+    panel_grid_minor=element_blank(),
+    panel_grid_major_x=element_blank(),
+    panel_grid_major_y=element_line(color=GRID_COLOR, size=0.7),
+    panel_background=element_rect(fill=PANEL_BG, color=None),
+    plot_background=element_rect(fill=ROOM_BG, color=None),
+    axis_title=element_text(color="#26333A", size=18),
+    axis_text=element_text(color="#26333A", size=15),
+    axis_text_x=element_text(margin={"t": 8}),
+    axis_text_y=element_text(margin={"r": 8}),
+    plot_title=element_text(weight="bold", color="#101828", size=22),
+    plot_subtitle=element_text(color="#55606B", size=14, margin={"b": 10}),
+    axis_title_x=element_text(margin={"t": 16}),
+    axis_title_y=element_text(margin={"r": 18}),
 )
 
 
@@ -129,6 +126,7 @@ def strategy_line_plot(
         + chart_theme
     )
 
+
 card_lookup = {
     row["strategy_label"]: row
     for row in summary.select(
@@ -140,13 +138,13 @@ card_lookup = {
     ).to_dicts()
 }
 
-oldest_mttr = f'{card_lookup["Oldest-First"]["mttr_days"]:.1f}'
-oldest_mova = f'{card_lookup["Oldest-First"]["mova_days"]:.1f}'
+oldest_mttr = f"{card_lookup['Oldest-First']['mttr_days']:.1f}"
+oldest_mova = f"{card_lookup['Oldest-First']['mova_days']:.1f}"
 oldest_open = int(card_lookup["Oldest-First"]["open_count"])
 oldest_tail = int(card_lookup["Oldest-First"]["aged_over_180"])
 
-newest_mttr = f'{card_lookup["Newest-First"]["mttr_days"]:.1f}'
-newest_mova = f'{card_lookup["Newest-First"]["mova_days"]:.1f}'
+newest_mttr = f"{card_lookup['Newest-First']['mttr_days']:.1f}"
+newest_mova = f"{card_lookup['Newest-First']['mova_days']:.1f}"
 newest_open = int(card_lookup["Newest-First"]["open_count"])
 newest_tail = int(card_lookup["Newest-First"]["aged_over_180"])
 ```
