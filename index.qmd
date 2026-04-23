@@ -212,7 +212,7 @@ Same team. Same capacity. Different prioritization.
 
 ---
 
-## Flow vs. stock
+## Flow vs. backlog age
 
 ::: {.definition-grid}
 ::: {.definition-card}
@@ -227,7 +227,7 @@ Time to remediate **closed** vulnerabilities.
 
 ::: {.definition-card}
 ::: {.eyebrow}
-Stock
+Open work
 :::
 ### MOVA
 How old is the work still open?
@@ -250,14 +250,14 @@ MOVA shows backlog age.
 
 ::: {.incremental}
 - Longer-open vulnerabilities usually create more exposure over time
-- Long-lived backlog usually increases uncertainty and attack surface
+- An older backlog usually increases uncertainty and attack surface
 - Reducing backlog age usually reduces accumulated exposure
 :::
 
 ::: {.kicker}
 Backlog age is not just time. Aging open work usually increases exposure.
 
-Once closed work and open work are separated, exposure is much easier to review.
+Once closed work and open work are separated, backlog age and exposure are easier to review.
 :::
 
 ---
@@ -401,17 +401,8 @@ Open work. Current age of the backlog.
 
 ::: {.kicker}
 Same data. Different population. Different age.
-:::
 
----
-
-## Why “did we fix it in time?” falls short
-
-::: {.incremental}
-- SLA views are useful
-- But they tell you whether you met a deadline
-- They say less about the backlog age you still carry now
-- MOVA shows backlog age for the work still open today
+SLA views tell you if you met a deadline, not the backlog age you still carry.
 :::
 
 ---
@@ -945,7 +936,7 @@ Most teams already have the data. It is usually sitting in a CSV.
 :::
 
 ::: {.kicker}
-This is not a tooling problem first. It is a definition problem first.
+This is a definition problem before it is a tooling problem.
 :::
 
 ---
