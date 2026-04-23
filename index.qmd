@@ -285,48 +285,6 @@ The oldest findings are not moving.
 
 ---
 
-## Read the full picture {.center}
-
-::: {.signal-grid}
-::: {.signal-card .signal-flow}
-<div class="signal-head">
-<div class="signal-icon" aria-hidden="true"><i class="bi bi-stopwatch"></i></div>
-<div class="signal-name">MTTR</div>
-</div>
-<div class="signal-meaning">Closure speed</div>
-<div class="signal-support">Time to remediate closed findings</div>
-:::
-
-::: {.signal-card .signal-age}
-<div class="signal-head">
-<div class="signal-icon" aria-hidden="true"><i class="bi bi-hourglass-split"></i></div>
-<div class="signal-name">MOVA</div>
-</div>
-<div class="signal-meaning">Backlog age</div>
-<div class="signal-support">Mean age of open vulnerabilities</div>
-:::
-
-::: {.signal-card .signal-count}
-<div class="signal-head">
-<div class="signal-icon" aria-hidden="true"><i class="bi bi-collection"></i></div>
-<div class="signal-name">Open Count</div>
-</div>
-<div class="signal-meaning">Backlog size</div>
-<div class="signal-support">Total open findings</div>
-:::
-
-::: {.signal-card .signal-tail}
-<div class="signal-head">
-<div class="signal-icon" aria-hidden="true"><i class="bi bi-exclamation-diamond"></i></div>
-<div class="signal-name">180+ Days</div>
-</div>
-<div class="signal-meaning">Aging tail</div>
-<div class="signal-support">Findings older than 180 days</div>
-:::
-:::
-
----
-
 ## MTTR measures closed work {auto-animate="true"}
 
 **MTTR**
@@ -431,21 +389,18 @@ mttr_plot = metrics.select(
     "strategy_label",
     pl.col("mttr_days").alias("days"),
 )
-mttr_labels = (
-    mttr_plot.filter(pl.col("month_index") == LAST_MONTH)
-    .with_columns(
-        pl.format(
-            "{}\n{}d",
-            pl.col("strategy_label"),
-            pl.col("days").round(0).cast(pl.Int64),
-        ).alias("label"),
-        (
-            pl.col("days")
-            + pl.when(pl.col("strategy_label") == "Oldest-First")
-            .then(pl.lit(10))
-            .otherwise(pl.lit(0))
-        ).alias("label_y"),
-    )
+mttr_labels = mttr_plot.filter(pl.col("month_index") == LAST_MONTH).with_columns(
+    pl.format(
+        "{}\n{}d",
+        pl.col("strategy_label"),
+        pl.col("days").round(0).cast(pl.Int64),
+    ).alias("label"),
+    (
+        pl.col("days")
+        + pl.when(pl.col("strategy_label") == "Oldest-First")
+        .then(pl.lit(10))
+        .otherwise(pl.lit(0))
+    ).alias("label_y"),
 )
 
 (
