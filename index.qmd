@@ -815,7 +815,7 @@ It is using MTTR alone.
 ::: {.kicker}
 MTTR shows flow. MOVA shows backlog age.
 
-Aging backlog increases exposure.
+Aging open work usually increases exposure.
 :::
 
 ---
