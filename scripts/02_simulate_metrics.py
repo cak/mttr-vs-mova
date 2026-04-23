@@ -7,7 +7,6 @@ work is applied.
 
 from __future__ import annotations
 
-import argparse
 import calendar
 from dataclasses import dataclass
 from datetime import date, datetime
@@ -46,29 +45,6 @@ class SimulationConfig:
     tail_days: int = DEFAULT_TAIL_DAYS
 
 
-def parse_args() -> argparse.Namespace:
-    """Parse lightweight CLI arguments for the simulation."""
-
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--base", type=Path, default=BASE_PATH, help="Input base dataset.")
-    parser.add_argument("--out", type=Path, default=METRICS_PATH, help="Parquet output path.")
-    parser.add_argument(
-        "--csv-out",
-        type=Path,
-        default=None,
-        help="Optional CSV export for presentation demos.",
-    )
-    parser.add_argument("--months", type=int, default=DEFAULT_MONTHS)
-    parser.add_argument("--monthly-capacity", type=int, default=DEFAULT_MONTHLY_CAPACITY)
-    parser.add_argument(
-        "--tail-days",
-        type=int,
-        default=DEFAULT_TAIL_DAYS,
-        help="Age threshold for the fixed `aged_over_180` output column.",
-    )
-    return parser.parse_args()
-
-
 def validate_config(config: SimulationConfig) -> None:
     """Fail fast on invalid simulation settings."""
 
@@ -101,7 +77,10 @@ def month_window(start_month: date, month_index: int) -> MonthWindow:
 def simulation_windows(config: SimulationConfig) -> list[MonthWindow]:
     """Construct the sequence of month windows used for snapshots."""
 
-    return [month_window(config.start_month, month_index) for month_index in range(1, config.months + 1)]
+    return [
+        month_window(config.start_month, month_index)
+        for month_index in range(1, config.months + 1)
+    ]
 
 
 def format_output_path(path: Path) -> str:
@@ -144,7 +123,9 @@ def open_vulnerabilities(vulns: pl.DataFrame, as_of: datetime) -> pl.DataFrame:
     )
 
 
-def select_to_resolve(open_vulns: pl.DataFrame, strategy: str, monthly_capacity: int) -> list[int]:
+def select_to_resolve(
+    open_vulns: pl.DataFrame, strategy: str, monthly_capacity: int
+) -> list[int]:
     """Choose which open findings to close this month.
 
     Only the ordering rule changes by strategy. Capacity and the candidate
@@ -163,7 +144,9 @@ def select_to_resolve(open_vulns: pl.DataFrame, strategy: str, monthly_capacity:
     )
 
 
-def resolve_vulnerabilities(vulns: pl.DataFrame, vuln_ids: list[int], resolved_at: datetime) -> pl.DataFrame:
+def resolve_vulnerabilities(
+    vulns: pl.DataFrame, vuln_ids: list[int], resolved_at: datetime
+) -> pl.DataFrame:
     """Mark a set of vulnerabilities as resolved at the month-end timestamp."""
 
     if not vuln_ids:
@@ -192,6 +175,8 @@ def compute_monthly_metrics(
     )
     open_as_of_month_end = open_vulnerabilities(vulns, window.end)
 
+    # MTTR measures the age of closed work (flow); MOVA measures the age of the
+    # open backlog at month end (stock).
     closed_with_age = closed_this_month.with_columns(
         (pl.col("resolved_at") - pl.col("created_at")).dt.total_days().alias("age_days")
     )
@@ -205,8 +190,11 @@ def compute_monthly_metrics(
         else closed_with_age.select(pl.col("age_days").mean()).item()
     )
     mova_days = (
-        None if open_with_age.is_empty() else open_with_age.select(pl.col("age_days").mean()).item()
+        None
+        if open_with_age.is_empty()
+        else open_with_age.select(pl.col("age_days").mean()).item()
     )
+    # The `aged_over_180` column name stays fixed even when the threshold moves.
     aged_over_tail = (
         0
         if open_with_age.is_empty()
@@ -225,7 +213,9 @@ def compute_monthly_metrics(
     }
 
 
-def simulate_strategy(base_vulns: pl.DataFrame, strategy: str, config: SimulationConfig) -> pl.DataFrame:
+def simulate_strategy(
+    base_vulns: pl.DataFrame, strategy: str, config: SimulationConfig
+) -> pl.DataFrame:
     """Run the month-by-month simulation for a single prioritization strategy."""
 
     if strategy not in STRATEGIES:
@@ -236,42 +226,36 @@ def simulate_strategy(base_vulns: pl.DataFrame, strategy: str, config: Simulatio
 
     for window in simulation_windows(config):
         available_open = open_vulnerabilities(working, window.end)
-        to_resolve = select_to_resolve(available_open, strategy, config.monthly_capacity)
+        to_resolve = select_to_resolve(
+            available_open, strategy, config.monthly_capacity
+        )
         working = resolve_vulnerabilities(working, to_resolve, window.end)
-        rows.append(compute_monthly_metrics(working, strategy, window, config.tail_days))
+        rows.append(
+            compute_monthly_metrics(working, strategy, window, config.tail_days)
+        )
 
     return pl.DataFrame(rows).sort(["strategy", "month_index"])
 
 
-def write_outputs(df: pl.DataFrame, parquet_path: Path, csv_path: Path | None) -> None:
-    """Write the primary metrics dataset and optional CSV export."""
+def write_output(df: pl.DataFrame) -> None:
+    """Write the default metrics dataset for the pipeline."""
 
-    parquet_path.parent.mkdir(parents=True, exist_ok=True)
-    df.write_parquet(parquet_path)
-    print(f"Wrote {format_output_path(parquet_path)} ({df.height} rows)")
-
-    if csv_path is not None:
-        csv_path.parent.mkdir(parents=True, exist_ok=True)
-        df.write_csv(csv_path)
-        print(f"Wrote {format_output_path(csv_path)}")
+    METRICS_PATH.parent.mkdir(parents=True, exist_ok=True)
+    df.write_parquet(METRICS_PATH)
+    print(f"Wrote {format_output_path(METRICS_PATH)} ({df.height} rows)")
 
 
 def main() -> None:
     """Run both strategy simulations and persist the monthly metrics."""
 
-    args = parse_args()
-    config = SimulationConfig(
-        months=args.months,
-        monthly_capacity=args.monthly_capacity,
-        tail_days=args.tail_days,
-    )
+    config = SimulationConfig()
     validate_config(config)
 
-    base_vulns = load_base_vulnerabilities(args.base)
+    base_vulns = load_base_vulnerabilities(BASE_PATH)
     metrics = pl.concat(
         [simulate_strategy(base_vulns, strategy, config) for strategy in STRATEGIES]
     ).sort(["strategy", "month_index"])
-    write_outputs(metrics, args.out, args.csv_out)
+    write_output(metrics)
 
 
 if __name__ == "__main__":

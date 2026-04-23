@@ -7,7 +7,6 @@ this same arrival pattern for every prioritization strategy.
 
 from __future__ import annotations
 
-import argparse
 import calendar
 import random
 from dataclasses import dataclass
@@ -55,29 +54,6 @@ class GenerationConfig:
     initial_backlog: int = DEFAULT_INITIAL_BACKLOG
     backlog_history_months: int = DEFAULT_BACKLOG_HISTORY_MONTHS
     seed: int = DEFAULT_SEED
-
-
-def parse_args() -> argparse.Namespace:
-    """Parse lightweight CLI arguments for local reruns."""
-
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--out", type=Path, default=BASE_PATH, help="Parquet output path.")
-    parser.add_argument(
-        "--csv-out",
-        type=Path,
-        default=None,
-        help="Optional CSV export for demo and inspection workflows.",
-    )
-    parser.add_argument("--months", type=int, default=DEFAULT_MONTHS)
-    parser.add_argument("--monthly-arrivals", type=int, default=DEFAULT_MONTHLY_ARRIVALS)
-    parser.add_argument("--initial-backlog", type=int, default=DEFAULT_INITIAL_BACKLOG)
-    parser.add_argument(
-        "--backlog-history-months",
-        type=int,
-        default=DEFAULT_BACKLOG_HISTORY_MONTHS,
-    )
-    parser.add_argument("--seed", type=int, default=DEFAULT_SEED)
-    return parser.parse_args()
 
 
 def add_months(value: date, delta: int) -> date:
@@ -169,7 +145,9 @@ def generate_base_vulnerabilities(config: GenerationConfig) -> pl.DataFrame:
             rows.append(
                 {
                     "id": next_id,
-                    "severity": rng.choices(severity_labels, weights=severity_weights, k=1)[0],
+                    "severity": rng.choices(
+                        severity_labels, weights=severity_weights, k=1
+                    )[0],
                     "created_at": random_timestamp_within_month(rng, month_anchor),
                     "resolved_at": None,
                     "created_month": month_anchor,
@@ -185,7 +163,9 @@ def generate_base_vulnerabilities(config: GenerationConfig) -> pl.DataFrame:
             rows.append(
                 {
                     "id": next_id,
-                    "severity": rng.choices(severity_labels, weights=severity_weights, k=1)[0],
+                    "severity": rng.choices(
+                        severity_labels, weights=severity_weights, k=1
+                    )[0],
                     "created_at": random_timestamp_within_month(rng, month_anchor),
                     "resolved_at": None,
                     "created_month": month_anchor,
@@ -207,32 +187,20 @@ def generate_base_vulnerabilities(config: GenerationConfig) -> pl.DataFrame:
     )
 
 
-def write_outputs(df: pl.DataFrame, parquet_path: Path, csv_path: Path | None) -> None:
-    """Write the primary Parquet artifact and optional CSV export."""
+def write_output(df: pl.DataFrame) -> None:
+    """Write the default Parquet artifact for the pipeline."""
 
-    parquet_path.parent.mkdir(parents=True, exist_ok=True)
-    df.write_parquet(parquet_path)
-    print(f"Wrote {format_output_path(parquet_path)} ({df.height} rows)")
-
-    if csv_path is not None:
-        csv_path.parent.mkdir(parents=True, exist_ok=True)
-        df.write_csv(csv_path)
-        print(f"Wrote {format_output_path(csv_path)}")
+    BASE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    df.write_parquet(BASE_PATH)
+    print(f"Wrote {format_output_path(BASE_PATH)} ({df.height} rows)")
 
 
 def main() -> None:
-    """Generate the base dataset from CLI parameters."""
+    """Generate the base dataset at the default pipeline path."""
 
-    args = parse_args()
-    config = GenerationConfig(
-        months=args.months,
-        monthly_arrivals=args.monthly_arrivals,
-        initial_backlog=args.initial_backlog,
-        backlog_history_months=args.backlog_history_months,
-        seed=args.seed,
-    )
+    config = GenerationConfig()
     base_vulns = generate_base_vulnerabilities(config)
-    write_outputs(base_vulns, args.out, args.csv_out)
+    write_output(base_vulns)
 
 
 if __name__ == "__main__":
