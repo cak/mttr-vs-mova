@@ -1,10 +1,7 @@
 ---
-format:
-  revealjs:
-    title-slide: false
-    include-in-header:
-      text: |
-        <link rel="stylesheet" href="/Applications/quarto/share/formats/html/bootstrap/dist/bootstrap-icons.css">
+title: "Why Vulnerability MTTR Alone Misleads"
+subtitle: "Add MOVA to Measure Real Risk"
+author: "Caleb Kinney"
 execute:
   echo: false
   warning: false
@@ -226,7 +223,7 @@ MTTR increased after we made it a KPI.
 :::
 
 ::: {.kicker}
-MTTR rose because we finally closed older findings.
+MTTR rose because we finally closed the oldest findings.
 :::
 
 ---
@@ -234,7 +231,7 @@ MTTR rose because we finally closed older findings.
 ## Paradox {.center .statement-slide}
 
 ::: {.metric-big .centered}
-The MTTR Paradox: MTTR can rise while backlog age falls
+The MTTR Paradox
 :::
 
 ::: {.paradox-cue}
@@ -251,8 +248,8 @@ while
 :::
 :::
 
-::: {.line-anchor .line-anchor-subtle}
-Same system. Only prioritization changed.
+::: {.line-anchor .line-anchor-subtle .centered}
+MTTR can rise while backlog age falls.
 :::
 
 ---
@@ -379,8 +376,8 @@ Backlog age today. What is still open.
 - Older findings usually create more exposure over time
 :::
 
-::: {.kicker}
-Same data. Two views: flow and backlog age.
+::: {.line-anchor .line-anchor-subtle}
+SLA views tell you if you met a deadline, not the backlog age you still carry.
 :::
 
 ---
