@@ -193,7 +193,7 @@ MTTR rose because we finally closed older backlog.
 ## Paradox {.center .statement-slide}
 
 ::: {.metric-big .centered}
-The MTTR Paradox: MTTR rises while backlog age falls
+The MTTR Paradox: MTTR can rise while backlog age falls
 :::
 
 ::: {.paradox-cue}
@@ -221,12 +221,10 @@ We need to measure how old the backlog is today, not just what closed.
 ::: {.definition-grid}
 ::: {.definition-card}
 ::: {.eyebrow}
-Closed work
+Flow
 :::
 ### MTTR
-Mean Time to Remediate. How fast are we closing work?
-
-Age of **closed** vulnerabilities.
+How fast are we closing work?
 :::
 
 ::: {.definition-card}
@@ -234,9 +232,7 @@ Age of **closed** vulnerabilities.
 Backlog age
 :::
 ### MOVA
-Mean Open Vulnerability Age. How old is the open backlog today?
-
-Age of **open** vulnerabilities.
+How old is the open backlog today?
 :::
 :::
 
@@ -335,26 +331,15 @@ Backlog age today. What is still open.
 
 ## You already have the data
 
-::: {.definition-grid .narrow-grid}
-::: {.definition-card}
-### Backlog
-Open vulnerabilities not yet remediated
-:::
-
-::: {.definition-card}
-### Backlog age
-How long open findings have been sitting
-:::
-
-::: {.definition-card}
-### Exposure
-Older backlog usually increases risk over time.
-:::
-:::
-
 ::: {.compact-list}
 - MTTR and MOVA use the same data
 - A CSV export is often enough
+- Backlog age comes from open findings
+- Older backlog usually increases risk over time
+:::
+
+::: {.kicker}
+Same data. Two views: flow and backlog age.
 :::
 
 ---
