@@ -1,3 +1,9 @@
+/* Hide any Quarto title slide variants */
+.reveal .slides section#title-slide,
+.reveal .slides section.quarto-title-block {
+  display: none !important;
+}
+
 :root {
   --bg: #0b1120;
   --bg-accent: rgba(56, 189, 248, 0.08);
