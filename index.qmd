@@ -159,7 +159,7 @@ This month
 ::::
 
 ::: {.shock-subtitle}
-Dashboards signal failure here. The better question is: what happened to backlog age, and to the exposure created by aging open work?
+Dashboards signal failure here. The better question is: what happened to backlog age, and to the exposure from aging open work?
 :::
 ::::
 
@@ -179,7 +179,7 @@ MTTR increased after we launched a program.
 :::
 
 ::: {.kicker}
-We were closing older backlog that had been sitting for a long time.
+We were finally closing the older backlog.
 :::
 
 ---
@@ -249,15 +249,15 @@ MOVA shows backlog age.
 ## What do we mean by exposure?
 
 ::: {.incremental}
-- Older vulnerabilities tend to carry more risk over time
-- Long-lived backlog increases uncertainty and attack surface
-- Reducing backlog age reduces accumulated exposure
+- Longer-open vulnerabilities usually create more exposure over time
+- Long-lived backlog usually increases uncertainty and attack surface
+- Reducing backlog age usually reduces accumulated exposure
 :::
 
 ::: {.kicker}
 Backlog age is not just time. Aging open work usually increases exposure.
 
-Once closed work and open work are separated, the exposure question becomes much easier to see.
+Once closed work and open work are separated, exposure is much easier to review.
 :::
 
 ---
@@ -636,7 +636,7 @@ tail_labels = (
     + coord_cartesian(xlim=(1, 29.4))
     + labs(
         title="Oldest-First reduces the 180+ tail",
-        subtitle="Newest-First keeps almost the entire old backlog alive.",
+        subtitle="Newest-First leaves most of the old backlog in place.",
         x="Month",
         y="Open findings over 180 days",
     )
@@ -645,7 +645,7 @@ tail_labels = (
 ```
 
 ::: {.centered .muted}
-This is the backlog that stays stranded.
+This is the tail that gets stranded.
 :::
 
 ---
@@ -780,7 +780,7 @@ Read only MTTR and you pick the wrong winner.
 
 ::: {.incremental}
 - MTTR is still useful
-- It shows how efficiently work is completed
+- It shows how quickly closed work gets resolved
 - It helps identify process friction
 :::
 
@@ -809,7 +809,7 @@ It is using MTTR alone.
 - Remediation effort shifts to Team B
 - MTTR rises because older work is finally closing
 - MOVA falls because the oldest backlog is finally shrinking
-- Exposure drops even though the headline metric looks worse
+- Exposure usually drops even though the headline metric looks worse
 :::
 
 ::: {.kicker}
@@ -911,10 +911,10 @@ MTTR still matters. It cannot stand alone.
 ## Read the signals together
 
 ::: {.incremental}
-- MTTR up + MOVA down = old backlog is getting cleared
+- MTTR up + MOVA down = the older backlog is getting cleared
 - MTTR down + MOVA up = recent closures look better while backlog age worsens
-- Across teams, MTTR up can mean effort shifted to older backlog
-- 180+ up = aging backlog is getting stranded
+- Across teams, MTTR up can mean effort shifted to the older backlog
+- 180+ up = the aging tail is getting stranded
 :::
 
 ---
@@ -927,7 +927,6 @@ MTTR still matters. It cannot stand alone.
 - Review MTTR only with backlog age and the tail visible
 - Label the MTTR time window before calling a regression
 - Define both metrics in code before they reach the dashboard
-- Show one chart and one table that surface backlog age and the tail
 :::
 
 ---
@@ -1059,33 +1058,7 @@ Reduce the oldest open work first.
 :::
 
 ::: {.line-anchor .line-anchor-subtle .centered}
-Do not let low MTTR outrank aging backlog.
-:::
-
----
-
-## Add MOVA. Keep MTTR in context. {.center .statement-slide}
-
-::: {.definition-grid .narrow-grid}
-::: {.definition-card .centered}
-::: {.eyebrow}
-MOVA
-:::
-### Backlog age
-Average age of open vulnerabilities.
-:::
-
-::: {.definition-card .centered}
-::: {.eyebrow}
-MTTR
-:::
-### Flow
-Closure speed for closed work.
-:::
-:::
-
-::: {.line-anchor .line-anchor-subtle .centered}
-Read them together, not alone.
+Do not let low MTTR outrank backlog age.
 :::
 
 ---
@@ -1105,7 +1078,7 @@ This looks healthiest on the dashboard.
 ::: {.eyebrow}
 What is true
 :::
-### Aging backlog elsewhere
+### Older backlog elsewhere
 That queue needs effort first.
 :::
 :::
