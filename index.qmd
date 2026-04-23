@@ -4,6 +4,7 @@ subtitle: "Add MOVA to Measure Real Risk"
 author: "Caleb Kinney"
 format:
   revealjs:
+    title-slide: false
     include-in-header:
       text: |
         <link rel="stylesheet" href="/Applications/quarto/share/formats/html/bootstrap/dist/bootstrap-icons.css">
@@ -159,7 +160,10 @@ This month
 ::::
 
 ::: {.shock-subtitle}
-Dashboards signal failure here. The better question is: what happened to backlog age, and to the oldest open work?
+Dashboards signal failure here.
+The first question is: did we slow down, or did we change what we fixed?
+
+What happened to backlog age, and to the oldest open work?
 :::
 ::::
 
@@ -168,14 +172,14 @@ Dashboards signal failure here. The better question is: what happened to backlog
 ## This actually happened {.top-loaded}
 
 ::: {.line-anchor}
-MTTR increased after we launched a program.
+MTTR increased after we launched a vulnerability management program.
 :::
 
 ::: {.incremental}
-- MTTR was baselined as a KPI
-- The number went up
-- The first question in the review was: “What changed?”
-- From the dashboard, it looked like the program regressed
+- MTTR became a KPI
+- MTTR went up
+- Review question: “What changed?”
+- Dashboard read: the vulnerability management program regressed
 :::
 
 ::: {.kicker}
@@ -184,12 +188,10 @@ We were finally closing the oldest backlog.
 
 ---
 
-## The paradox {.center .statement-slide}
+## Paradox {.center .statement-slide}
 
 ::: {.metric-big .centered}
-MTTR can rise
-
-while backlog age falls
+The MTTR Paradox: MTTR rises while backlog age falls
 :::
 
 ::: {.paradox-cue}
@@ -207,7 +209,7 @@ while
 :::
 
 ::: {.line-anchor .line-anchor-subtle}
-Same team. Same capacity. Different prioritization.
+We needed a way to measure the risk still open, not just what closed.
 :::
 
 ---
@@ -217,24 +219,22 @@ Same team. Same capacity. Different prioritization.
 ::: {.definition-grid}
 ::: {.definition-card}
 ::: {.eyebrow}
-Flow
+Closed work
 :::
 ### MTTR
 How fast are we closing work?
 
-Time to remediate **closed** vulnerabilities.
+Age of **closed** vulnerabilities.
 :::
 
 ::: {.definition-card}
 ::: {.eyebrow}
-Open work
+Backlog age
 :::
 ### MOVA
-How old is the work still open?
-
-**Mean Open Vulnerability Age**
-
 How old is the open backlog today?
+
+Age of **open** vulnerabilities.
 :::
 :::
 
@@ -308,7 +308,7 @@ Closed work. Time to remediate. Age at closure.
 
 ---
 
-## MOVA measures open work {auto-animate="true"}
+## MOVA measures backlog age {auto-animate="true"}
 
 **MOVA**
 
@@ -326,25 +326,34 @@ mova = (
 ```
 
 ::: {.kicker}
-Open work. Current age of the backlog.
+Backlog age. Current age of open vulnerabilities.
 :::
 
 ---
 
 ## You already have the data
 
-::: {.incremental}
-- MTTR comes from your tools
-- MOVA uses the same data
-- For open findings, age = today minus created date
-- Take the average across open findings
-- A CSV export is usually enough
+::: {.definition-grid .narrow-grid}
+::: {.definition-card}
+### Backlog
+Open vulnerabilities not yet remediated
 :::
 
-::: {.kicker}
-Same data. Different population. Different age.
+::: {.definition-card}
+### Backlog age
+How long that work has been open
+:::
 
-SLA views tell you if you met a deadline, not the backlog age you still carry.
+::: {.definition-card}
+### Exposure
+Aging backlog increases exposure over time.
+:::
+:::
+
+::: {.compact-list}
+- MTTR and MOVA use the same source data
+- Open findings age from the created date
+- A CSV export is often enough
 :::
 
 ---
@@ -357,9 +366,9 @@ SLA views tell you if you met a deadline, not the backlog age you still carry.
 Hold constant
 :::
 ### Same system
-Start with the same backlog.
+Start with one backlog.
 
-Keep arrivals, remediation capacity, and time horizon the same.
+Fix arrivals, remediation capacity, and time horizon.
 :::
 
 ::: {.definition-card}
@@ -369,12 +378,14 @@ Change one thing
 ### Work order
 Newest-First vs. Oldest-First.
 
-The only variable is which findings get closed first.
+Change the order of closure.
 :::
 :::
 
 ::: {.kicker}
-This isolates what the metrics reward when capacity stays fixed.
+Same team. Same capacity. Different prioritization.
+
+Same system. Same inputs. Only prioritization changes.
 :::
 
 ---
@@ -405,20 +416,20 @@ mttr_labels = mttr_plot.filter(pl.col("month_index") == LAST_MONTH).with_columns
 
 (
     ggplot(mttr_plot, aes(x="month_index", y="days", color="strategy_label"))
-    + geom_line(size=2.5)
-    + geom_point(data=mttr_labels, size=4.1)
+    + geom_line(size=3.0)
+    + geom_point(data=mttr_labels, size=4.4)
     + geom_label(
         data=mttr_labels,
         mapping=aes(y="label_y", label="label"),
         ha="left",
         nudge_x=0.7,
-        size=9.2,
+        size=9.6,
         fontweight="bold",
         lineheight=0.94,
         fill=PANEL_BG,
         label_padding=0.16,
         label_r=0.12,
-        label_size=0.45,
+        label_size=0.5,
     )
     + scale_color_manual(
         values={
@@ -473,20 +484,20 @@ mova_labels = (
 
 (
     ggplot(mova_plot, aes(x="month_index", y="days", color="strategy_label"))
-    + geom_line(size=2.5)
-    + geom_point(data=mova_labels, size=4.1)
+    + geom_line(size=3.0)
+    + geom_point(data=mova_labels, size=4.4)
     + geom_label(
         data=mova_labels,
         mapping=aes(y="label_y", label="label"),
         ha="left",
         nudge_x=0.7,
-        size=9.2,
+        size=9.6,
         fontweight="bold",
         lineheight=0.94,
         fill=PANEL_BG,
         label_padding=0.16,
         label_r=0.12,
-        label_size=0.45,
+        label_size=0.5,
     )
     + scale_color_manual(
         values={
@@ -646,7 +657,7 @@ decision_table = (
         title="Same data, wrong winner",
         subtitle="Newest-First wins on MTTR. Oldest-First wins on backlog age.",
     )
-    .tab_spanner(label="Flow", columns="mttr_days")
+    .tab_spanner(label="MTTR", columns="mttr_days")
     .tab_spanner(label="Backlog Age", columns=["mova_days", "aged_over_180"])
     .tab_spanner(label="Backlog", columns="open_count")
     .tab_spanner(label="Interpretation", columns="decision")
@@ -710,14 +721,12 @@ Read only MTTR and you pick the wrong winner.
 
 ::: {.incremental}
 - MTTR is still useful
-- It shows how quickly closed work gets resolved
-- It helps identify process friction
+- It shows age at closure
+- It reveals process friction
 :::
 
 ::: {.kicker}
-The problem is not MTTR.
-
-It is using MTTR alone.
+The problem is using MTTR alone.
 :::
 
 ---
@@ -837,7 +846,7 @@ MTTR still matters. It cannot stand alone.
 ::: {.toolbox-intro}
 Most teams already have the data. A CSV export is often enough.
 
-The real work is defining the metric in code before it reaches a dashboard.
+Define the metric in code before it reaches a dashboard.
 :::
 
 ::: {.tool-grid}
@@ -900,8 +909,6 @@ The real work is defining the metric in code before it reaches a dashboard.
 
 ::: {.toolbox-takeaway}
 Start with an export. Define the metric in code before you visualize it.
-
-This is a practical path, not the only one.
 :::
 
 ---
