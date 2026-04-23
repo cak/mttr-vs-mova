@@ -159,7 +159,7 @@ This month
 ::::
 
 ::: {.shock-subtitle}
-Dashboards signal failure here. The better question is: what happened to backlog age, and the exposure from aging open work?
+Dashboards signal failure here. The better question is: what happened to backlog age, and to the oldest open work?
 :::
 ::::
 
@@ -242,22 +242,6 @@ How old is the open backlog today?
 MTTR shows flow.
 
 MOVA shows backlog age.
-:::
-
----
-
-## What do we mean by exposure?
-
-::: {.incremental}
-- Longer-open vulnerabilities usually create more exposure over time
-- An older backlog usually increases uncertainty and attack surface
-- Reducing backlog age usually reduces accumulated exposure
-:::
-
-::: {.kicker}
-Backlog age is not just time. Aging open work usually increases exposure.
-
-Once closed and open work are separated, backlog age and exposure are easier to review.
 :::
 
 ---
@@ -783,34 +767,6 @@ It is using MTTR alone.
 
 ---
 
-## The paradox repeats across teams
-
-::: {.incremental}
-- The same pattern appears across teams
-- Team A has a cleaner backlog and faster closures
-- Team B has an older backlog and slower closures
-- If the oldest backlog sits in Team B, effort should shift there
-:::
-
----
-
-## Clean up the oldest backlog
-
-::: {.incremental}
-- Remediation effort shifts to Team B
-- MTTR rises because older work is finally closing
-- MOVA falls because the oldest backlog is finally shrinking
-- Exposure usually drops even though the headline metric looks worse
-:::
-
-::: {.kicker}
-MTTR shows flow. MOVA shows backlog age.
-
-Aging open work usually increases exposure.
-:::
-
----
-
 ## When the dashboard shows only MTTR {auto-animate="true"}
 
 ::: {.dashboard-grid}
@@ -904,7 +860,7 @@ MTTR still matters. It cannot stand alone.
 ::: {.incremental}
 - MTTR up + MOVA down = the older backlog is getting cleared
 - MTTR down + MOVA up = recent closures look better while backlog age worsens
-- Across teams, MTTR up can mean effort shifted to the older backlog
+- MTTR up can mean effort shifted to the older backlog
 - 180+ up = the aging tail is getting stranded
 :::
 
@@ -917,26 +873,6 @@ MTTR still matters. It cannot stand alone.
 - Add open count and a threshold such as 180+ days
 - Review MTTR only with backlog age and the tail visible
 - Label the MTTR time window before calling a regression
-- Define both metrics in code before they reach the dashboard
-:::
-
----
-
-## Real data, not just dashboards
-
-You do not need a new platform for this.
-
-Most teams already have the data. It is usually sitting in a CSV.
-
-::: {.incremental}
-- A simple export is enough
-- CSVs are messy and unavoidable
-- Dashboards often hide the metric definition
-- Analysts need to own the definition in code
-:::
-
-::: {.kicker}
-This is a definition problem before it is a tooling problem.
 :::
 
 ---
@@ -944,7 +880,9 @@ This is a definition problem before it is a tooling problem.
 ## Add data science to your toolbox {.toolbox-slide}
 
 ::: {.toolbox-intro}
-A small, opinionated stack to go from messy exports to a reviewable metric.
+Most teams already have the data. A CSV export is often enough.
+
+The real work is defining the metric in code before it reaches a dashboard.
 :::
 
 ::: {.tool-grid}
@@ -1006,76 +944,35 @@ A small, opinionated stack to go from messy exports to a reviewable metric.
 :::
 
 ::: {.toolbox-takeaway}
-Start small. Reduce tool choice. Define the metric in code before you visualize it.
+Start with an export. Define the metric in code before you visualize it.
 
 This is a practical path, not the only one.
 :::
 
 ---
 
-## Can AI do this for me?
-
-::: {.incremental}
-- AI can speed up transforms, charts, and first drafts
-- The metric definition still needs an owner
-- Use AI to move faster
-- Keep the work in code so it stays auditable and repeatable
-:::
-
-::: {.kicker}
-The implementation details matter less than changing what gets reviewed.
-:::
-
----
-
 ## A simple policy {.center}
 
-::: {.definition-grid .narrow-grid}
-::: {.definition-card}
-::: {.eyebrow}
-Track together
-:::
-### MTTR + MOVA
-Read flow and backlog age together.
-:::
-
-::: {.definition-card}
-::: {.eyebrow}
-Prioritize age
-:::
-### Oldest backlog first
-Reduce the oldest open work first.
-:::
-:::
-
-::: {.line-anchor .line-anchor-subtle .centered}
-Do not let low MTTR outrank backlog age.
-:::
-
----
-
-## MTTR alone drives the wrong call {.center .statement-slide}
-
 ::: {.definition-grid .narrow-grid .decision-grid}
-::: {.definition-card .decision-card .decision-card-wrong}
-::: {.eyebrow}
-Dashboard says
-:::
-### Low MTTR
-This looks healthiest on the dashboard.
-:::
-
 ::: {.definition-card .decision-card .decision-card-right}
 ::: {.eyebrow}
-What is true
+Policy
 :::
-### Older backlog elsewhere
-That queue needs effort first.
+### Track MTTR + MOVA
+Prioritize the oldest backlog first.
+:::
+
+::: {.definition-card .decision-card .decision-card-wrong}
+::: {.eyebrow}
+Guardrail
+:::
+### MTTR alone
+Can reward the wrong queue.
 :::
 :::
 
 ::: {.line-anchor .centered .decision-close}
-That is the wrong call.
+Do not let low MTTR outrank backlog age.
 :::
 
 ---
