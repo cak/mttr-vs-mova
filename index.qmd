@@ -159,7 +159,7 @@ This month
 ::::
 
 ::: {.shock-subtitle}
-Dashboards signal failure here. The better question is: what happened to backlog age, and to the exposure from aging open work?
+Dashboards signal failure here. The better question is: what happened to backlog age, and the exposure from aging open work?
 :::
 ::::
 
@@ -179,7 +179,7 @@ MTTR increased after we launched a program.
 :::
 
 ::: {.kicker}
-We were finally closing the older backlog.
+We were finally closing the oldest backlog.
 :::
 
 ---
@@ -257,7 +257,7 @@ MOVA shows backlog age.
 ::: {.kicker}
 Backlog age is not just time. Aging open work usually increases exposure.
 
-Once closed work and open work are separated, backlog age and exposure are easier to review.
+Once closed and open work are separated, backlog age and exposure are easier to review.
 :::
 
 ---
