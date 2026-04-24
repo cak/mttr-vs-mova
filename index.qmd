@@ -259,7 +259,8 @@ This month
 
 ::: {.shock-subtitle}
 Dashboards call this failure.
-The better question is: what actually changed?
+
+Better question: what actually changed?
 
 What happened to backlog age?
 What happened to the oldest findings?
@@ -268,25 +269,29 @@ What happened to the oldest findings?
 
 ---
 
-## This actually happened {.top-loaded}
+## This actually happened {.top-loaded .story-slide}
 
-::: {.line-anchor}
-In a vulnerability management program, MTTR increased after we made it a KPI.
+::: {.line-anchor .story-lead}
+MTTR went up after we made it a KPI.
 :::
 
-::: {.incremental}
+::: {.story-grid}
+
+::: {.story-steps}
 - We made MTTR visible
-- Teams were doing better, including the older findings
+- Teams started closing older findings first
 - The metric got worse
 :::
 
-. . .
+::: {.story-question}
+The review question was:
 
-::: {.line-anchor .centered}
-The review question was: “Why are we getting worse?”
+**“Why are we getting worse?”**
 :::
 
-::: {.kicker}
+:::
+
+::: {.kicker .story-joke}
 That was a fun meeting.
 :::
 
@@ -342,15 +347,15 @@ How old is the open backlog today?
 :::
 :::
 
-::: {.kicker}
-MTTR shows flow.
+::: {.line-anchor .line-anchor-subtle .centered}
+MTTR shows flow. MOVA shows backlog age.
 
-MOVA shows backlog age.
+Same data. Different questions.
 :::
 
 ---
 
-## The average said “fine.” The backlog said “absolutely not.” {.center}
+## The average said “fine.” {.center}
 
 ::: {.tail-example-grid}
 ::: {.tail-card}
@@ -379,7 +384,7 @@ at 400 days
 
 ::: {.tail-card .emphasis}
 ::: {.tail-text .strong}
-The average looks fine.
+The backlog said “absolutely not.”
 :::
 ::: {.tail-text}
 The oldest findings are not moving.
@@ -390,8 +395,6 @@ The oldest findings are not moving.
 ---
 
 ## MTTR measures closed work {auto-animate="true"}
-
-**MTTR**
 
 ```{python}
 #| echo: true
@@ -414,8 +417,6 @@ Closed work. Time to remediate. Age at closure.
 
 ## MOVA measures backlog age {auto-animate="true"}
 
-**MOVA**
-
 ```{python}
 #| echo: true
 #| eval: false
@@ -430,7 +431,7 @@ mova = (
 ```
 
 ::: {.kicker}
-Backlog age today. What is still open.
+Open work. Backlog age today.
 :::
 
 ---
@@ -442,16 +443,14 @@ You do not need a new platform.
 :::
 
 ::: {.compact-list}
-- MTTR and MOVA use the same vulnerability records
+- MTTR and MOVA use the same records
 - A CSV export is often enough
-- Backlog age comes from open findings
-- The oldest findings are usually where the story gets uncomfortable
+- MOVA comes from open findings
+- The oldest findings usually tell the real story
 :::
 
 ::: {.line-anchor .centered .blood-line}
-SLA views tell you if you met a deadline.
-
-They do not tell you the backlog age you still carry.
+SLA views tell you if you hit a deadline, not the backlog age you still carry.
 :::
 
 ---
@@ -480,7 +479,7 @@ Only the order of closure changes.
 :::
 :::
 
-::: {.kicker}
+::: {.line-anchor .line-anchor-subtle .centered}
 Same team. Same capacity. Different prioritization.
 :::
 
@@ -509,7 +508,7 @@ mttr_plot = metrics.select(
 ```
 
 ::: {.centered .muted}
-On MTTR, Newest-First looks like the winner.
+On MTTR, Newest-First wins.
 :::
 
 ---
@@ -538,7 +537,7 @@ mova_plot = metrics.select(
 ```
 
 ::: {.centered .muted}
-On backlog age, Oldest-First is the healthier system.
+On backlog age, Oldest-First is healthier.
 :::
 
 ---
@@ -606,7 +605,7 @@ Under Newest-First, the oldest backlog barely moves.
 
 ---
 
-## Same data, wrong winner {.statement-slide}
+## Same data, wrong winner {.statement-slide .table-slide}
 
 ```{python}
 #| echo: false
@@ -692,23 +691,15 @@ decision_table = (
 )
 ```
 
-::: {.kicker .centered}
-Read only MTTR and you pick the wrong winner.
+::: {.line-anchor .line-anchor-subtle .centered}
+If you read only MTTR, you pick the wrong winner.
 :::
 
 ---
 
 ## Which metric drives the decision? {.center .meme-slide}
 
-::: {.line-anchor .centered}
-When MTTR is the only KPI:
-:::
-
 ![](assets/images/mttr-vs-mova-meme.png){width=100%}
-
-::: {.kicker .centered}
-MTTR is useful. MTTR alone is the trap.
-:::
 
 ---
 
@@ -742,12 +733,8 @@ How old the backlog still is
 
 :::
 
-::: {.line-anchor .centered}
-You need both.
-:::
-
 ::: {.line-anchor .centered .blood-line}
-The mistake is letting MTTR decide alone.
+MTTR is useful. The mistake is letting it decide alone.
 :::
 
 ---
@@ -781,7 +768,7 @@ MTTR
 :::
 
 ::: {.centered .muted}
-If this is the only KPI, the system rewards the strategy that closes recent work fastest.
+If this is the only KPI, the system rewards closing recent work first.
 :::
 
 ---
@@ -835,14 +822,14 @@ Oldest-First
 :::
 
 ::: {.centered .muted}
-MTTR still matters. It cannot stand alone.
+MTTR matters. It cannot stand alone.
 :::
 
 ---
 
-## Read the signals like a system {.center}
+## Read the signals like a system {.center .signals-slide}
 
-::: {.score-grid}
+::: {.score-grid .signals-grid}
 
 ::: {.score-card .score-good}
 ::: {.score-title}
@@ -874,18 +861,45 @@ Old risk is stranded
 :::
 
 ::: {.line-anchor .centered}
-If you don’t read them together, you will reward the wrong behavior.
+Read them together or you reward the wrong behavior.
 :::
 
 ---
 
 ## What to report
 
-::: {.compact-list}
-- Put MTTR and MOVA on the same monthly view
-- Add open count and a threshold such as 180+ days
-- Review MTTR only with backlog age and the 180+ tail visible
-- Label the MTTR time window before calling a regression
+::: {.definition-grid}
+::: {.definition-card}
+::: {.eyebrow}
+Monthly view
+:::
+### MTTR + MOVA
+Put both on the same monthly view.
+:::
+
+::: {.definition-card}
+::: {.eyebrow}
+Backlog
+:::
+### Open count + 180+
+Add count and a threshold such as 180+ days.
+:::
+
+::: {.definition-card}
+::: {.eyebrow}
+Review rule
+:::
+### Read together
+Review MTTR with backlog age and the 180+ tail visible.
+:::
+
+::: {.definition-card}
+::: {.eyebrow}
+Framing
+:::
+### Label the window
+Label the MTTR time window before calling a regression.
+:::
 :::
 
 ---
@@ -895,7 +909,7 @@ If you don’t read them together, you will reward the wrong behavior.
 ::: {.toolbox-intro}
 Most teams already have the data. A CSV export is often enough.
 
-Define the metric in code before it reaches a dashboard.
+Define the metric in code before it reaches the dashboard.
 :::
 
 ::: {.tool-grid}
@@ -905,7 +919,7 @@ Define the metric in code before it reaches a dashboard.
 <div class="tool-icon" aria-hidden="true"><i class="bi bi-code-slash"></i></div>
 <div class="tool-title">Define the metric</div>
 </div>
-<div class="tool-note">Define the logic in code before it ever reaches a dashboard</div>
+<div class="tool-note">Define the logic in code before it hits the dashboard</div>
 <div class="tool-method">Polars</div>
 :::
 
@@ -914,7 +928,7 @@ Define the metric in code before it reaches a dashboard.
 <div class="tool-icon" aria-hidden="true"><i class="bi bi-search"></i></div>
 <div class="tool-title">Inspect the raw data</div>
 </div>
-<div class="tool-note">Inspect raw records early to catch edge cases before they spread</div>
+<div class="tool-note">Inspect raw records early to catch edge cases</div>
 <div class="tool-method">Positron</div>
 :::
 
@@ -923,7 +937,7 @@ Define the metric in code before it reaches a dashboard.
 <div class="tool-icon" aria-hidden="true"><i class="bi bi-graph-up"></i></div>
 <div class="tool-title">Visualize the trend</div>
 </div>
-<div class="tool-note">Visualize flow, backlog age, and the tail clearly over time</div>
+<div class="tool-note">Visualize flow, backlog age, and the tail over time</div>
 <div class="tool-method">Plotnine</div>
 :::
 
@@ -932,7 +946,7 @@ Define the metric in code before it reaches a dashboard.
 <div class="tool-icon" aria-hidden="true"><i class="bi bi-table"></i></div>
 <div class="tool-title">Summarize the backlog</div>
 </div>
-<div class="tool-note">Summarize count, age, and tail so risk is clear at a glance</div>
+<div class="tool-note">Summarize count, age, and tail at a glance</div>
 <div class="tool-method">Great Tables</div>
 :::
 
@@ -941,7 +955,7 @@ Define the metric in code before it reaches a dashboard.
 <div class="tool-icon" aria-hidden="true"><i class="bi bi-sliders"></i></div>
 <div class="tool-title">Explore the metric</div>
 </div>
-<div class="tool-note">Turn the analysis into a simple app people can inspect and use</div>
+<div class="tool-note">Turn the analysis into a simple app people can inspect</div>
 <div class="tool-method">Shiny for Python</div>
 :::
 
@@ -950,14 +964,14 @@ Define the metric in code before it reaches a dashboard.
 <div class="tool-icon" aria-hidden="true"><i class="bi bi-journal-text"></i></div>
 <div class="tool-title">Publish the analysis</div>
 </div>
-<div class="tool-note">Publish code, charts, and narrative together in one consistent artifact</div>
+<div class="tool-note">Publish code, charts, and narrative together</div>
 <div class="tool-method">Quarto</div>
 :::
 
 :::
 
 ::: {.toolbox-takeaway}
-Start with an export. Define the metric in code before you visualize it.
+Start with an export. Define the metric in code first.
 :::
 
 ---
@@ -992,12 +1006,16 @@ Do not let low MTTR outrank backlog age.
 
 ::: {.metric-big .centered}
 MTTR shows flow.
+:::
 
+::: {.metric-big .centered .muted}
 MOVA shows backlog age.
+:::
 
+::: {.line-anchor .centered .blood-line}
 You need both.
 :::
 
 ::: {.cta-link}
-[typeerror.com/mova](https://typeerror.com/mova/)
+typeerror.com/mova
 :::
