@@ -4,6 +4,8 @@ project:
     - index.qmd
   execute-dir: project
   output-dir: _output
+  resources:
+    - assets/**
   pre-render:
     - uv run python scripts/01_generate_data.py
     - uv run python scripts/02_simulate_metrics.py
@@ -23,7 +25,7 @@ format:
     slide-number: c/t
     transition: fade
     background-transition: fade
-    controls: true
+    controls: false
     progress: true
     center: false
     hash: true
