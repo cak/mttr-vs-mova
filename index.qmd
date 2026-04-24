@@ -271,18 +271,26 @@ What happened to the oldest findings?
 ## This actually happened {.top-loaded}
 
 ::: {.line-anchor}
-MTTR increased after we made it a KPI.
+In a vulnerability management program, MTTR increased after we made it a KPI.
 :::
 
 ::: {.incremental}
-- MTTR became a KPI
-- Teams started closing older findings
-- MTTR went up
-- The first question in the review was: “What changed?”
-- The dashboard said: ‘we got worse’
+- We made MTTR visible
+- Teams were doing better, including the older findings
+- The metric got worse
+:::
+
+. . .
+
+::: {.line-anchor .centered}
+The review question was: “Why are we getting worse?”
 :::
 
 ::: {.kicker}
+That was a fun meeting.
+:::
+
+::: {.line-anchor .line-anchor-subtle .centered}
 MTTR rose because we finally closed the oldest findings.
 :::
 
@@ -342,7 +350,7 @@ MOVA shows backlog age.
 
 ---
 
-## Averages hide the tail {.center}
+## The average said “fine.” The backlog said “absolutely not.” {.center}
 
 ::: {.tail-example-grid}
 ::: {.tail-card}
@@ -427,17 +435,23 @@ Backlog age today. What is still open.
 
 ---
 
-## You already have the data
+## You already have the data {.center .statement-slide}
 
-::: {.compact-list}
-- MTTR and MOVA use the same data
-- A CSV export is often enough
-- Backlog age comes from open findings
-- Older findings usually create more exposure over time
+::: {.metric-big .centered}
+You do not need a new platform.
 :::
 
-::: {.line-anchor .line-anchor-subtle}
-SLA views tell you if you met a deadline, not the backlog age you still carry.
+::: {.compact-list}
+- MTTR and MOVA use the same vulnerability records
+- A CSV export is often enough
+- Backlog age comes from open findings
+- The oldest findings are usually where the story gets uncomfortable
+:::
+
+::: {.line-anchor .centered .blood-line}
+SLA views tell you if you met a deadline.
+
+They do not tell you the backlog age you still carry.
 :::
 
 ---
@@ -592,7 +606,7 @@ Under Newest-First, the oldest backlog barely moves.
 
 ---
 
-## Same data, wrong winner
+## Same data, wrong winner {.statement-slide}
 
 ```{python}
 #| echo: false
@@ -678,22 +692,62 @@ decision_table = (
 )
 ```
 
-::: {.kicker}
+::: {.kicker .centered}
 Read only MTTR and you pick the wrong winner.
 :::
 
 ---
 
-## This is not anti-MTTR
+## Which metric drives the decision? {.center .meme-slide}
 
-::: {.incremental}
-- MTTR is still useful
-- It shows age at closure
-- It reveals process friction
+::: {.line-anchor .centered}
+When MTTR is the only KPI:
 :::
 
-::: {.kicker}
-The problem is using MTTR alone.
+![](assets/images/mttr-vs-mova-meme.png){width=100%}
+
+::: {.kicker .centered}
+MTTR is useful. MTTR alone is the trap.
+:::
+
+---
+
+## MTTR is not wrong {.center}
+
+::: {.dashboard-grid}
+
+::: {.dashboard-card}
+::: {.dashboard-title}
+MTTR
+:::
+::: {.dashboard-value}
+Flow
+:::
+::: {.dashboard-label}
+How fast work closes
+:::
+:::
+
+::: {.dashboard-card}
+::: {.dashboard-title}
+MOVA
+:::
+::: {.dashboard-value}
+Backlog age
+:::
+::: {.dashboard-label}
+How old the backlog still is
+:::
+:::
+
+:::
+
+::: {.line-anchor .centered}
+You need both.
+:::
+
+::: {.line-anchor .centered .blood-line}
+The mistake is letting MTTR decide alone.
 :::
 
 ---
@@ -786,13 +840,41 @@ MTTR still matters. It cannot stand alone.
 
 ---
 
-## Read the signals together
+## Read the signals like a system {.center}
 
-::: {.incremental}
-- MTTR up + MOVA down = older findings are getting cleared
-- MTTR down + MOVA up = recent closures look better while backlog age worsens
-- MTTR up can mean effort shifted to older findings
-- 180+ up = the aging tail is getting stranded
+::: {.score-grid}
+
+::: {.score-card .score-good}
+::: {.score-title}
+MTTR ↑ + MOVA ↓
+:::
+::: {.score-label}
+Clearing old risk
+:::
+:::
+
+::: {.score-card .score-bad}
+::: {.score-title}
+MTTR ↓ + MOVA ↑
+:::
+::: {.score-label}
+Backlog is aging
+:::
+:::
+
+::: {.score-card}
+::: {.score-title}
+180+ tail ↑
+:::
+::: {.score-label}
+Old risk is stranded
+:::
+:::
+
+:::
+
+::: {.line-anchor .centered}
+If you don’t read them together, you will reward the wrong behavior.
 :::
 
 ---

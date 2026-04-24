@@ -13,7 +13,7 @@ project:
 
 format:
   revealjs:
-    title-slide: false
+    footer: "Caleb Kinney · typeerror.com/mova"
     theme: simple
     css: styles.css
     highlight-style: github
@@ -23,7 +23,7 @@ format:
     slide-number: c/t
     transition: fade
     background-transition: fade
-    controls: false
+    controls: true
     progress: true
     center: false
     hash: true
