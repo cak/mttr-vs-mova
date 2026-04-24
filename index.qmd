@@ -1,7 +1,5 @@
 ---
-title: "Why Vulnerability MTTR Alone Misleads"
-subtitle: "Add MOVA to Measure Real Risk"
-author: "Caleb Kinney"
+pagetitle: "Why Vulnerability MTTR Alone Misleads"
 format:
   revealjs:
     include-in-header:
@@ -212,7 +210,7 @@ newest_open = int(newest_card["open_count"])
 newest_tail = int(newest_card["aged_over_180"])
 ```
 
-## Opening {.hero-slide}
+## {#opening .hero-slide}
 
 ::: {.hero-block}
 ::: {.hero-eyebrow}
