@@ -23,8 +23,8 @@ BASE_PATH = DATA_DIR / "base_vulns.parquet"
 DEFAULT_START = date(2024, 1, 1)
 DEFAULT_MONTHS = 24
 DEFAULT_MONTHLY_ARRIVALS = 60
-DEFAULT_INITIAL_BACKLOG = 180
-DEFAULT_BACKLOG_HISTORY_MONTHS = 12
+DEFAULT_INITIAL_BACKLOG = 120
+DEFAULT_BACKLOG_HISTORY_MONTHS = 9
 DEFAULT_SEED = 20260426
 DEFAULT_SEED_NAME = "talk_final_polish_v1"
 DEFAULT_ARRIVAL_VARIATION = 0.15
@@ -253,9 +253,7 @@ def generate_base_vulnerabilities(
             )
             next_id += 1
 
-    for month_offset, arrival_count in zip(
-        range(config.months), schedule, strict=True
-    ):
+    for month_offset, arrival_count in zip(range(config.months), schedule, strict=True):
         drawn_arrival_count = bounded_normal_int(
             rng=rng,
             mean=config.monthly_arrivals,

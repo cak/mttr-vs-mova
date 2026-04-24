@@ -26,10 +26,12 @@ from plotnine import (
     element_text,
     geom_line,
     geom_point,
+    geom_text,
     ggplot,
     labs,
     scale_color_manual,
     scale_x_continuous,
+    scale_y_continuous,
     theme,
     theme_minimal,
 )
@@ -63,8 +65,12 @@ PANEL_BG = "#fffdf8"
 GRID_COLOR = "#c8baa5"
 LINE_SIZE = 2.8
 ENDPOINT_SIZE = 5.0
+ENDPOINT_LABEL_SIZE = 8
+ENDPOINT_LABEL_X_NUDGE = 0.55
 COMPARISON_ALPHA = 0.75
-X_AXIS_EXPAND = (0.01, 0.01)
+X_AXIS_EXPAND = (0.01, 0.85)
+DEFAULT_Y_EXPAND = (0.02, 0)
+TAIL_Y_EXPAND = (0.02, 12)
 chart_theme = theme_minimal(base_size=22) + theme(
     figure_size=(11.35, 5.35),
     legend_position="top",
@@ -95,6 +101,7 @@ def strategy_line_plot(
     subtitle,
     y_axis_label,
     highlighted_strategy,
+    y_expand=DEFAULT_Y_EXPAND,
 ):
     is_highlighted = pl.col("strategy_label") == highlighted_strategy
     is_endpoint = pl.col("month_index") == LAST_MONTH
@@ -102,6 +109,23 @@ def strategy_line_plot(
     comparison = dataframe.filter(~is_highlighted)
     highlighted_endpoints = highlighted.filter(is_endpoint)
     comparison_endpoints = comparison.filter(is_endpoint)
+    y_min = dataframe.select(pl.col(y_col).min()).item()
+    y_max = dataframe.select(pl.col(y_col).max()).item()
+    if y_min is None or y_max is None:
+        raise ValueError(f"{y_col} does not contain any values to plot.")
+
+    label_floor_offset = max(3.0, (y_max - y_min) * 0.03)
+    endpoint_labels = dataframe.filter(is_endpoint).with_columns(
+        (pl.col("month_index") + ENDPOINT_LABEL_X_NUDGE).alias("label_month"),
+        pl.col(y_col).round(0).cast(pl.Int64).cast(pl.String).alias("endpoint_label"),
+        (
+            pl.when(pl.col(y_col) <= label_floor_offset)
+            .then(pl.col(y_col) + label_floor_offset)
+            .otherwise(pl.col(y_col))
+        ).alias("label_value"),
+    )
+    highlighted_labels = endpoint_labels.filter(is_highlighted)
+    comparison_labels = endpoint_labels.filter(~is_highlighted)
 
     return (
         ggplot(mapping=aes(x="month_index", y=y_col, color="strategy_label"))
@@ -113,8 +137,34 @@ def strategy_line_plot(
             alpha=COMPARISON_ALPHA,
         )
         + geom_point(data=highlighted_endpoints, size=ENDPOINT_SIZE)
+        + geom_text(
+            data=comparison_labels,
+            mapping=aes(
+                x="label_month",
+                y="label_value",
+                label="endpoint_label",
+            ),
+            size=ENDPOINT_LABEL_SIZE,
+            ha="left",
+            va="center",
+            alpha=COMPARISON_ALPHA,
+            show_legend=False,
+        )
+        + geom_text(
+            data=highlighted_labels,
+            mapping=aes(
+                x="label_month",
+                y="label_value",
+                label="endpoint_label",
+            ),
+            size=ENDPOINT_LABEL_SIZE,
+            ha="left",
+            va="center",
+            show_legend=False,
+        )
         + scale_color_manual(values=STRATEGY_COLORS, breaks=STRATEGY_ORDER)
         + scale_x_continuous(breaks=MONTH_BREAKS, expand=X_AXIS_EXPAND)
+        + scale_y_continuous(expand=y_expand)
         + labs(
             title=title,
             subtitle=subtitle,
@@ -497,6 +547,7 @@ tail_plot = metrics.select(
         subtitle="Newest-First leaves the 180+ tail in place.",
         y_axis_label="Open findings over 180 days",
         highlighted_strategy="Oldest-First",
+        y_expand=TAIL_Y_EXPAND,
     )
 )
 ```
