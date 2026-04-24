@@ -2,15 +2,17 @@
 
 MTTR is computed from vulnerabilities resolved within each month. MOVA, open
 count, and 180+ tail are month-end snapshots after that month's remediation
-work is applied.
+work is applied using a shared deterministic capacity schedule.
 """
 
 from __future__ import annotations
 
 import calendar
+import random
 from dataclasses import dataclass
 from datetime import date, datetime
 from pathlib import Path
+from typing import Sequence
 
 import polars as pl
 
@@ -23,7 +25,24 @@ DEFAULT_START = date(2024, 1, 1)
 DEFAULT_MONTHS = 24
 DEFAULT_MONTHLY_CAPACITY = 60
 DEFAULT_TAIL_DAYS = 180
+DEFAULT_SEED = 20260426
+DEFAULT_SEED_NAME = "talk_final_polish_v1"
+DEFAULT_CAPACITY_VARIATION = 0.12
 STRATEGIES: tuple[str, ...] = ("oldest_first", "newest_first")
+CAPACITY_RHYTHM: tuple[float, ...] = (
+    0.97,
+    0.99,
+    1.02,
+    1.03,
+    1.01,
+    0.98,
+    0.96,
+    0.99,
+    1.02,
+    1.04,
+    1.01,
+    0.98,
+)
 
 
 @dataclass(frozen=True)
@@ -43,6 +62,9 @@ class SimulationConfig:
     months: int = DEFAULT_MONTHS
     monthly_capacity: int = DEFAULT_MONTHLY_CAPACITY
     tail_days: int = DEFAULT_TAIL_DAYS
+    seed_name: str = DEFAULT_SEED_NAME
+    seed: int = DEFAULT_SEED
+    capacity_variation: float = DEFAULT_CAPACITY_VARIATION
 
 
 def validate_config(config: SimulationConfig) -> None:
@@ -54,6 +76,8 @@ def validate_config(config: SimulationConfig) -> None:
         raise ValueError("monthly_capacity must be positive")
     if config.tail_days <= 0:
         raise ValueError("tail_days must be positive")
+    if not 0 < config.capacity_variation < 0.5:
+        raise ValueError("capacity_variation must be between 0 and 0.5")
 
 
 def add_months(value: date, delta: int) -> date:
@@ -81,6 +105,45 @@ def simulation_windows(config: SimulationConfig) -> list[MonthWindow]:
         month_window(config.start_month, month_index)
         for month_index in range(1, config.months + 1)
     ]
+
+
+def bounded_normal_int(
+    rng: random.Random,
+    mean: float,
+    stddev: float,
+    lower_bound: int,
+    upper_bound: int,
+) -> int:
+    """Return a rounded bounded normal draw using a local RNG."""
+
+    if lower_bound > upper_bound:
+        raise ValueError("lower_bound cannot exceed upper_bound")
+
+    sampled = round(rng.gauss(mean, stddev))
+    return max(lower_bound, min(upper_bound, sampled))
+
+
+def monthly_capacity_schedule(config: SimulationConfig) -> list[int]:
+    """Build the explicit month-by-month capacity plan shared by both strategies."""
+
+    rng = random.Random(config.seed)
+    lower_bound = round(config.monthly_capacity * (1 - config.capacity_variation))
+    upper_bound = round(config.monthly_capacity * (1 + config.capacity_variation))
+    schedule: list[int] = []
+
+    for month_index in range(config.months):
+        rhythm = CAPACITY_RHYTHM[month_index % len(CAPACITY_RHYTHM)]
+        schedule.append(
+            bounded_normal_int(
+                rng=rng,
+                mean=config.monthly_capacity * rhythm,
+                stddev=config.monthly_capacity * 0.03,
+                lower_bound=lower_bound,
+                upper_bound=upper_bound,
+            )
+        )
+
+    return schedule
 
 
 def format_output_path(path: Path) -> str:
@@ -214,27 +277,64 @@ def compute_monthly_metrics(
 
 
 def simulate_strategy(
-    base_vulns: pl.DataFrame, strategy: str, config: SimulationConfig
+    base_vulns: pl.DataFrame,
+    strategy: str,
+    config: SimulationConfig,
+    capacity_schedule: Sequence[int],
 ) -> pl.DataFrame:
     """Run the month-by-month simulation for a single prioritization strategy."""
 
     if strategy not in STRATEGIES:
         raise ValueError(f"Unsupported strategy: {strategy}")
+    if len(capacity_schedule) != config.months:
+        raise ValueError("capacity_schedule length must match config.months")
 
     working = base_vulns.clone()
     rows: list[dict[str, object]] = []
 
-    for window in simulation_windows(config):
+    for window, monthly_capacity in zip(
+        simulation_windows(config), capacity_schedule, strict=True
+    ):
         available_open = open_vulnerabilities(working, window.end)
-        to_resolve = select_to_resolve(
-            available_open, strategy, config.monthly_capacity
-        )
+        # The same capacity noise is shared across strategies so the only
+        # strategic difference remains closure order.
+        to_resolve = select_to_resolve(available_open, strategy, monthly_capacity)
         working = resolve_vulnerabilities(working, to_resolve, window.end)
         rows.append(
             compute_monthly_metrics(working, strategy, window, config.tail_days)
         )
 
     return pl.DataFrame(rows).sort(["strategy", "month_index"])
+
+
+def print_validation_summary(
+    capacity_schedule: Sequence[int], metrics: pl.DataFrame
+) -> None:
+    """Print a compact sanity summary for the shared capacity plan and end state."""
+
+    average_capacity = sum(capacity_schedule) / len(capacity_schedule)
+    print(
+        "Capacity schedule: "
+        f"avg={average_capacity:.1f}/month "
+        f"min={min(capacity_schedule)} "
+        f"max={max(capacity_schedule)}"
+    )
+
+    final_rows = (
+        metrics.sort(["strategy", "month_index"])
+        .group_by("strategy", maintain_order=True)
+        .tail(1)
+        .sort("strategy")
+        .select("strategy", "mttr_days", "mova_days", "aged_over_180")
+    )
+
+    for row in final_rows.iter_rows(named=True):
+        print(
+            f"{row['strategy']}: "
+            f"MTTR={row['mttr_days']:.1f} "
+            f"MOVA={row['mova_days']:.1f} "
+            f"180+={int(row['aged_over_180'])}"
+        )
 
 
 def write_output(df: pl.DataFrame) -> None:
@@ -252,9 +352,14 @@ def main() -> None:
     validate_config(config)
 
     base_vulns = load_base_vulnerabilities(BASE_PATH)
+    capacity_schedule = monthly_capacity_schedule(config)
     metrics = pl.concat(
-        [simulate_strategy(base_vulns, strategy, config) for strategy in STRATEGIES]
+        [
+            simulate_strategy(base_vulns, strategy, config, capacity_schedule)
+            for strategy in STRATEGIES
+        ]
     ).sort(["strategy", "month_index"])
+    print_validation_summary(capacity_schedule, metrics)
     write_output(metrics)
 
 
