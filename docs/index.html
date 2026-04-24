@@ -3,84 +3,117 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+
     <title>Why Vulnerability MTTR Alone Misleads | MOVA</title>
     <meta
       name="description"
-      content="A lightweight overview of the MOVA talk: why MTTR alone misleads, how backlog age complements it, and where to find the slides."
+      content="A practical security metrics talk on why vulnerability MTTR alone can mislead, how MOVA measures backlog age, and why teams need both signals."
     />
+
     <link rel="stylesheet" href="styles.css" />
   </head>
+
   <body>
     <main class="page" id="main-content">
       <header class="hero">
-        <h1 id="page-title">Why Vulnerability MTTR Alone Misleads</h1>
-        <p class="subtitle">MOVA: Mean Open Vulnerability Age</p>
+        <p class="eyebrow">Security Metrics / BSides Charm</p>
+
+        <h1>Why Vulnerability MTTR Alone Misleads</h1>
+
+        <p class="subtitle">Add MOVA to measure real backlog risk.</p>
 
         <p class="lede">
-          MTTR shows how fast work closed. MOVA shows how old the backlog still open is today.
+          MTTR shows how fast work closes. MOVA shows how old the open backlog is today.
         </p>
 
         <p class="summary">
-          The key paradox is simple: <strong>MTTR can rise while backlog age falls.</strong> When
-          teams finally close older backlog, the age of closed work goes up, so MTTR can look worse
-          even while the remaining backlog gets healthier. This repo contains the talk deck and the
-          reproducible simulation behind it.
+          The paradox is simple:
+          <strong>MTTR can rise while backlog age falls.</strong>
+          When teams finally close older findings, the age of closed work goes up. MTTR can look
+          worse even while the remaining backlog gets healthier.
         </p>
+
+        <nav class="actions" aria-label="Project links">
+          <a class="button primary" href="slides/">Open slides</a>
+          <a
+            class="button"
+            href="https://github.com/TypeError/mova"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            View source
+          </a>
+          <a
+            class="button"
+            href="https://pretalx.com/bsidescharm2026/talk/MMNUPD/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Talk details
+          </a>
+        </nav>
       </header>
 
       <section class="card" aria-labelledby="signals-title">
-        <h2 id="signals-title">Two different signals</h2>
+        <div class="section-heading">
+          <p class="eyebrow">Core idea</p>
+          <h2 id="signals-title">Same data. Different questions.</h2>
+        </div>
 
-        <ul class="comparison">
-          <li class="metric">
-            <h3 class="metric-label">MTTR</h3>
-            <p class="metric-text">Work that closed</p>
-            <p class="metric-detail">How old was the work that got closed?</p>
-          </li>
+        <div class="comparison">
+          <article class="metric">
+            <p class="metric-kicker">Flow</p>
+            <h3>MTTR</h3>
+            <p class="metric-text">How old was the work that closed?</p>
+          </article>
 
-          <li class="metric">
-            <h3 class="metric-label">MOVA</h3>
-            <p class="metric-text">Backlog still open</p>
-            <p class="metric-detail">How old is the work still open today?</p>
-          </li>
-        </ul>
+          <article class="metric">
+            <p class="metric-kicker">Backlog age</p>
+            <h3>MOVA</h3>
+            <p class="metric-text">How old is the work still open today?</p>
+          </article>
+        </div>
 
-        <p class="callout">
-          MTTR reflects flow. MOVA measures backlog age. You need both to see whether recent
-          closures are improving the backlog that remains.
-        </p>
+        <p class="callout">MTTR is useful. The mistake is letting it decide alone.</p>
       </section>
 
-      <section class="card" aria-labelledby="reveals-title">
-        <h2 id="reveals-title">What MOVA reveals</h2>
-        <ul>
-          <li>Whether older backlog is actually being reduced</li>
-          <li>Whether recent closures are reaching the aging tail</li>
-          <li>Whether a low MTTR is masking a stranded <code>180+ days open</code> tail</li>
-        </ul>
+      <section class="grid">
+        <section class="card" aria-labelledby="reveals-title">
+          <div class="section-heading">
+            <p class="eyebrow">What MOVA reveals</p>
+            <h2 id="reveals-title">The backlog story MTTR can miss</h2>
+          </div>
+
+          <ul class="clean-list">
+            <li>Whether older backlog is actually shrinking</li>
+            <li>Whether recent closures are reaching the aging tail</li>
+            <li>Whether low MTTR is masking stranded findings</li>
+          </ul>
+        </section>
+
+        <section class="card" aria-labelledby="report-title">
+          <div class="section-heading">
+            <p class="eyebrow">What to report</p>
+            <h2 id="report-title">Use a small metric set</h2>
+          </div>
+
+          <ul class="clean-list">
+            <li>MTTR for closure flow</li>
+            <li>MOVA for open backlog age</li>
+            <li>Open count for backlog size</li>
+            <li>180+ days for the aging tail</li>
+          </ul>
+        </section>
       </section>
 
-      <section class="card" aria-labelledby="usage-title">
-        <h2 id="usage-title">How to use it</h2>
+      <section class="card final-card" aria-labelledby="takeaway-title">
+        <p class="eyebrow">Takeaway</p>
+        <h2 id="takeaway-title">Read the system, not just the metric.</h2>
         <p>
-          Report MTTR and MOVA together, along with open count and a threshold such as
-          <code>180+ days open</code>. That gives you one view of recent closure behavior and
-          another view of whether the oldest backlog is actually shrinking.
+          Do not let low MTTR outrank backlog age. Use MTTR and MOVA together to see whether the
+          system is getting healthier.
         </p>
       </section>
-
-      <nav class="actions" aria-label="Project links">
-        <a class="button primary" href="slides/">Open slides</a>
-        <a
-          class="button"
-          href="https://pretalx.com/bsidescharm2026/talk/MMNUPD/"
-          rel="noopener noreferrer"
-          >View BSides Charm talk</a
-        >
-        <a class="button" href="https://github.com/typeerror/mova" rel="noopener noreferrer"
-          >View source on GitHub</a
-        >
-      </nav>
     </main>
   </body>
 </html>
