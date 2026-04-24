@@ -222,3 +222,6 @@ index.quarto_ipynb_*
 
 # Docs
 !docs/**/index.html
+
+# Output
+_output/
