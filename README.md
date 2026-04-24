@@ -10,7 +10,7 @@ The talk is grounded in a real operational pattern, but the repo stays vendor-ne
 
 - **MTTR reflects flow**: the age of work that got closed.
 - **MOVA measures backlog age**: the age of work still open today.
-- MTTR alone can reward recent closures while older backlog remains stranded.
+- MTTR alone can reward closing recent work while older backlog remains.
 - Open count and a threshold like `180+ days open` help show whether the aging tail is actually shrinking.
 - The point is not to replace MTTR. It is to stop using MTTR alone.
 
@@ -30,10 +30,14 @@ Generated artifacts are created during render under `data/` and `_output/`.
 The deck uses a small reproducible simulation to isolate prioritization:
 
 - same starting backlog
-- same incoming vulnerabilities each month
-- same monthly remediation capacity
+- same deterministic arrival pattern (with realistic variability)
+- same deterministic capacity pattern (shared across strategies)
 - same 24-month horizon
 - only the work order changes: `newest_first` vs. `oldest_first`
+
+Both strategies operate on the exact same arrivals and capacity each month. Only prioritization changes.
+
+Small deterministic variability is introduced to avoid perfectly smooth charts while keeping the comparison fair.
 
 That makes the tradeoff explicit:
 
