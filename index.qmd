@@ -100,6 +100,7 @@ def strategy_line_plot(
     y_axis_label,
     highlighted_strategy,
     y_expand=DEFAULT_Y_EXPAND,
+    y_limits=None,
 ):
     is_highlighted = pl.col("strategy_label") == highlighted_strategy
     is_endpoint = pl.col("month_index") == LAST_MONTH
@@ -162,7 +163,7 @@ def strategy_line_plot(
         )
         + scale_color_manual(values=STRATEGY_COLORS, breaks=STRATEGY_ORDER)
         + scale_x_continuous(breaks=MONTH_BREAKS, expand=X_AXIS_EXPAND)
-        + scale_y_continuous(expand=y_expand)
+        + scale_y_continuous(expand=y_expand, limits=y_limits)
         + labs(
             title=title,
             subtitle=subtitle,
@@ -517,6 +518,7 @@ mova_plot = metrics.select(
         subtitle="Closing older findings first lowers today's backlog age.",
         y_axis_label="MOVA (days)",
         highlighted_strategy="Oldest-First",
+        y_limits=(0, mova_plot.get_column("days").max() * 1.08),
     )
 )
 ```
