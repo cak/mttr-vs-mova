@@ -312,7 +312,7 @@ mttr = (
 ```
 
 ::: {.kicker}
-Closed work. Time to remediate. Age at closure.
+The flow signal comes from resolved records.
 :::
 
 ---
@@ -333,7 +333,7 @@ mova = (
 ```
 
 ::: {.kicker}
-Open work. Backlog age today.
+The backlog-age signal comes from open records.
 :::
 
 ---
@@ -447,7 +447,7 @@ mova_plot = metrics.select(
 ```
 
 ::: {.kicker .centered}
-MOVA reveals what remains open.
+MOVA reveals the backlog you are carrying.
 :::
 
 ::: {.centered .muted}
@@ -513,7 +513,7 @@ MTTR
 :::
 
 ::: {.centered .muted}
-On MTTR alone, Newest-First looks better.
+A one-metric dashboard makes that the verdict.
 :::
 
 ---
@@ -582,7 +582,7 @@ decision_table = (
     GT(decision_table, rowname_col="strategy_label")
     .tab_header(
         title="Same data, different signals",
-        subtitle="MTTR reflects flow. MOVA reflects backlog age. They are complementary partial signals.",
+        subtitle="Each metric answers one side of the earlier split.",
     )
     .tab_spanner(label="Flow", columns="mttr_days")
     .tab_spanner(label="Backlog Age", columns="mova_days")
@@ -649,9 +649,7 @@ If you read only MTTR, you may misread progress.
 ## Both are partial signals {.center .statement-slide}
 
 ::: {.line-anchor .centered .blood-line}
-MTTR shows closure flow.
-
-MOVA shows backlog age.
+Each signal is intentionally partial.
 
 The mistake is reading either one alone.
 :::
@@ -691,9 +689,9 @@ Oldest-First
 :::
 
 ::: {.centered .muted}
-MTTR and MOVA show the consequences of your prioritization.
+The disagreement is now visible.
 
-They should not drive the queue.
+Interpret it before judging progress.
 :::
 
 ---
@@ -776,7 +774,7 @@ Put both on the same monthly view.
 Definitions
 :::
 ### Flow + backlog age
-MTTR is flow. MOVA is backlog age.
+Use the earlier split consistently.
 :::
 
 ::: {.definition-card}
@@ -901,11 +899,11 @@ Metrics verify decisions. They do not decide them.
 ## Read the system, not just the metric {.center .statement-slide}
 
 ::: {.metric-big .centered}
-MTTR shows flow.
+Read both signals.
 :::
 
 ::: {.metric-big .centered .muted}
-MOVA shows backlog age.
+Question the disagreement.
 :::
 
 ::: {.line-anchor .centered .blood-line}
