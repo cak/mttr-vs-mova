@@ -2,7 +2,9 @@
 
 This repository contains the [Quarto](https://quarto.org/) / Reveal.js talk deck and reproducible analysis for the MOVA talk **Why Vulnerability MTTR Alone Misleads**.
 
-The central pattern is simple: **MTTR can rise while backlog age falls**. MTTR reflects the age of work that got closed. **MOVA** (Mean Open Vulnerability Age) measures backlog age: the age of the work still open today. When a team finally closes older backlog, the age of closed work goes up, so MTTR can look worse even while the remaining backlog changes in a useful way. Older vulnerabilities often persist because they are harder to fix, require coordination, or carry higher risk.
+The central pattern is simple: **MTTR can rise while backlog age falls**. MTTR reflects flow: how fast work closes. **MOVA** (Mean Open Vulnerability Age) measures backlog age: how old work still open today is. When a team finally closes older backlog, the age of closed work goes up, so MTTR can look worse even while the remaining backlog changes in a useful way. Older vulnerabilities often persist because they are harder to fix, require coordination, or carry higher risk.
+
+If older risk is not being addressed, it will show up in MOVA.
 
 Metrics are not the goal. They are how we observe the consequences of risk-based decisions.
 
@@ -22,13 +24,13 @@ The talk is grounded in a real operational pattern, but the repo stays vendor-ne
 
 ## Core Argument
 
-- **MTTR reflects flow**: the age of work that got closed.
-- **MOVA measures backlog age**: the age of work still open today.
+- **MTTR reflects flow**: how fast work closes.
+- **MOVA measures backlog age**: how old work still open today is.
 - Each answers a different question.
 - Neither metric is sufficient alone.
-- MOVA without MTTR can also mislead. A healthier backlog can still hide slow response to new risk.
-- Open count and an aging-tail diagnostic help show whether older backlog is actually shrinking.
-- Use MTTR and MOVA together to understand whether your risk-based prioritization is improving the system.
+- MOVA without MTTR can also mislead. Lower backlog age can still hide slow response to new risk.
+- MTTR and MOVA are complementary partial signals.
+- If your prioritization is risk-based, MTTR and MOVA help verify the consequences. They should not drive the queue.
 
 ## Repo Contents
 
@@ -51,9 +53,9 @@ The deck uses a small reproducible simulation to isolate prioritization:
 - same 24-month horizon
 - only the work order changes: `newest_first` vs. `oldest_first`
 
-This is an intentionally simplified comparison. It is not a recommendation to use `oldest_first` as a remediation strategy. We do not prioritize by age. We prioritize by risk. Metrics show the consequences of those decisions.
+This is an intentionally simplified comparison. `newest_first` and `oldest_first` are simplified closure patterns used only to reveal metric behavior. This is not a remediation policy. It is a metric demonstration. Prioritization is risk-based.
 
-In the simulation, `oldest_first` produces lower backlog age, but it ignores risk and is not a real-world strategy.
+In the simulation, `oldest_first` changes MOVA by working older backlog first, but it ignores risk and is not a real-world strategy.
 
 Newest-first can improve MTTR while leaving high-risk older findings open.
 
@@ -66,7 +68,7 @@ Small deterministic variability is introduced to avoid perfectly smooth charts w
 That makes the tradeoff explicit:
 
 - **Newest-First** keeps MTTR lower by closing newer findings first.
-- **Oldest-First** produces lower MOVA and a smaller aging tail in the simulation because it reaches older backlog work first.
+- **Oldest-First** changes MOVA in the simulation because it reaches older backlog work first.
 - If you look only at MTTR, recent closures can look like full-program progress.
 
 ## Published Links
