@@ -799,7 +799,7 @@ Label the MTTR time window before calling a regression.
 ## Add data science to your toolbox {.toolbox-slide}
 
 ::: {.toolbox-intro}
-Most teams already have the data. A CSV export is often enough.
+Once the metric is defined, make the analysis reproducible.
 
 Define the metric in code before it reaches the dashboard.
 :::
