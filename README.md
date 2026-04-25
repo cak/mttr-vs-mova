@@ -2,7 +2,21 @@
 
 This repository contains the [Quarto](https://quarto.org/) / Reveal.js talk deck and reproducible analysis for the MOVA talk **Why Vulnerability MTTR Alone Misleads**.
 
-The central claim is simple: **MTTR can rise while backlog age falls**. MTTR reflects the age of work that got closed. **MOVA** (Mean Open Vulnerability Age) measures backlog age: the age of the work still open today. When a team finally closes older backlog, the age of closed work goes up, so MTTR can look worse even while the remaining backlog gets healthier.
+The central pattern is simple: **MTTR can rise while backlog age falls**. MTTR reflects the age of work that got closed. **MOVA** (Mean Open Vulnerability Age) measures backlog age: the age of the work still open today. When a team finally closes older backlog, the age of closed work goes up, so MTTR can look worse even while the remaining backlog changes in a useful way. Older vulnerabilities often persist because they are harder to fix, require coordination, or carry higher risk.
+
+Metrics are not the goal. They are how we observe the consequences of risk-based decisions.
+
+MTTR and MOVA are partial signals. Each answers a different question, and neither is sufficient alone.
+
+## How to Prioritize
+
+Prioritize remediation based on risk. Not newest-first or oldest-first.
+
+- Severity (CVSS)
+- Exploitability (KEV, weaponized PoC)
+- Exposure (reachability)
+- Asset criticality
+- Threat intelligence
 
 The talk is grounded in a real operational pattern, but the repo stays vendor-neutral and reproducible. The examples use deterministic synthetic data, and the metric definitions, charts, and tables all live in code rather than dashboard screenshots or hidden platform logic.
 
@@ -10,9 +24,11 @@ The talk is grounded in a real operational pattern, but the repo stays vendor-ne
 
 - **MTTR reflects flow**: the age of work that got closed.
 - **MOVA measures backlog age**: the age of work still open today.
-- MTTR alone can reward closing recent work while older backlog remains.
-- Open count and a threshold like `180+ days open` help show whether the aging tail is actually shrinking.
-- The point is not to replace MTTR. It is to stop using MTTR alone.
+- Each answers a different question.
+- Neither metric is sufficient alone.
+- MOVA without MTTR can also mislead. A healthier backlog can still hide slow response to new risk.
+- Open count and an aging-tail diagnostic help show whether older backlog is actually shrinking.
+- Use MTTR and MOVA together to understand whether your risk-based prioritization is improving the system.
 
 ## Repo Contents
 
@@ -35,6 +51,14 @@ The deck uses a small reproducible simulation to isolate prioritization:
 - same 24-month horizon
 - only the work order changes: `newest_first` vs. `oldest_first`
 
+This is an intentionally simplified comparison. It is not a recommendation to use `oldest_first` as a remediation strategy. We do not prioritize by age. We prioritize by risk. Metrics show the consequences of those decisions.
+
+In the simulation, `oldest_first` produces lower backlog age, but it ignores risk and is not a real-world strategy.
+
+Newest-first can improve MTTR while leaving high-risk older findings open.
+
+The simulation isolates closure order so the metric behavior is easy to see.
+
 Both strategies operate on the exact same arrivals and capacity each month. Only prioritization changes.
 
 Small deterministic variability is introduced to avoid perfectly smooth charts while keeping the comparison fair.
@@ -42,8 +66,8 @@ Small deterministic variability is introduced to avoid perfectly smooth charts w
 That makes the tradeoff explicit:
 
 - **Newest-First** keeps MTTR lower by closing newer findings first.
-- **Oldest-First** raises MTTR while lowering MOVA and shrinking the `180+ days` tail.
-- If you look only at MTTR, you pick the wrong winner.
+- **Oldest-First** produces lower MOVA and a smaller aging tail in the simulation because it reaches older backlog work first.
+- If you look only at MTTR, recent closures can look like full-program progress.
 
 ## Published Links
 
