@@ -997,8 +997,29 @@
    Table slide (bigger table)
    ========================= */
 
-.reveal .table-slide .gt_table {
-  font-size: 0.82em;
+.reveal .table-slide .same-signals-gt {
+  display: flex;
+  justify-content: center;
+  width: min(100%, 1420px);
+  margin: 0.05rem auto 0;
+  overflow-x: auto;
+}
+
+.reveal .table-slide .same-signals-gt .cell-output-display {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin: 0;
+}
+
+.reveal .table-slide .same-signals-gt .gt_table {
+  width: 100% !important;
+  max-width: 100%;
+}
+
+.reveal .table-slide .same-signals-gt .gt_col_heading,
+.reveal .table-slide .same-signals-gt .gt_column_spanner {
+  white-space: nowrap;
 }
 
 .reveal .table-slide .line-anchor {

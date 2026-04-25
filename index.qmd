@@ -580,6 +580,7 @@ On backlog age, the story changes.
 
 ## Same data, different signals {.statement-slide .table-slide}
 
+::: {.same-signals-gt}
 ```{python}
 #| echo: false
 decision_table = (
@@ -621,6 +622,12 @@ decision_table = (
         align="center",
         columns=["mttr_days", "mova_days"],
     )
+    .cols_width(
+        strategy_label="24%",
+        mttr_days="15%",
+        mova_days="15%",
+        decision="46%",
+    )
     .fmt_number(columns=["mttr_days", "mova_days"], decimals=1)
     .tab_style(
         style=[style.fill("#f7e7ec"), style.text(color="#6b1230", weight="bold")],
@@ -651,12 +658,37 @@ decision_table = (
         style=style.text(weight="bold"),
         locations=loc.column_labels(),
     )
+    .tab_style(
+        style=style.text(size="27px", weight="bold"),
+        locations=loc.spanner_labels(ids=["Flow", "Backlog Age", "Interpretation"]),
+    )
+    .tab_style(
+        style=style.text(size="46px", weight="bold"),
+        locations=loc.body(columns=["mttr_days", "mova_days"]),
+    )
     .opt_align_table_header(align="left")
     .opt_row_striping()
-    .opt_vertical_padding(scale=1.1)
-    .opt_horizontal_padding(scale=1.0)
+    .tab_options(
+        table_width="100%",
+        table_layout="fixed",
+        table_font_size="30px",
+        table_font_weight="500",
+        heading_title_font_size="40px",
+        heading_title_font_weight="700",
+        heading_subtitle_font_size="24px",
+        heading_padding="18px",
+        column_labels_font_size="31px",
+        column_labels_font_weight="800",
+        column_labels_padding="18px",
+        column_labels_padding_horizontal="14px",
+        data_row_padding="22px",
+        data_row_padding_horizontal="18px",
+        stub_font_size="30px",
+        stub_font_weight="800",
+    )
 )
 ```
+:::
 
 ::: {.line-anchor .line-anchor-subtle .centered}
 If you read only MTTR, you may misread progress.
