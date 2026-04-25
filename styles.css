@@ -1119,3 +1119,83 @@
   background: rgba(31, 111, 120, 0.25);
   border-radius: 2px;
 }
+
+.text-good {
+  color: #1f6f78; /* teal */
+}
+
+.text-warn {
+  color: #b45309; /* amber */
+}
+
+.text-bad {
+  color: #8b1e3f; /* red */
+}
+
+.score-title i {
+  margin: 0 6px;
+  font-size: 1.1em;
+  font-weight: 700;
+  vertical-align: -1px;
+}
+
+.risk-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem 2.5rem;
+  max-width: 700px;
+  margin: 2rem auto 1.5rem;
+  font-size: 1.25em;
+}
+
+.risk-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  list-style: none;
+}
+
+.risk-list li::before {
+  content: "•";
+  color: #1f6f78;
+  font-size: 1.2em;
+}
+
+.risk-contrast {
+  margin-top: 0.8rem;
+  color: #55606b;
+  font-size: 0.95em;
+}
+
+/* Subtle semantic coloring */
+
+.dashboard-good,
+.score-good {
+  background: rgba(31, 111, 120, 0.06);
+  border-color: rgba(31, 111, 120, 0.35);
+}
+
+.dashboard-bad,
+.score-bad {
+  background: rgba(139, 30, 63, 0.06);
+  border-color: rgba(139, 30, 63, 0.35);
+}
+
+/* Slight emphasis on numbers without being loud */
+
+.dashboard-good .dashboard-value,
+.score-good .score-metric {
+  color: #134b52;
+}
+
+.dashboard-bad .dashboard-value,
+.score-bad .score-metric {
+  color: #7a2941;
+}
+
+/* Keep everything feeling balanced */
+
+.dashboard-card,
+.score-card {
+  border-width: 1.5px;
+}
