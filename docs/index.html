@@ -7,7 +7,7 @@
     <title>Why Vulnerability MTTR Alone Misleads | MOVA</title>
     <meta
       name="description"
-      content="A practical security metrics talk on why vulnerability MTTR alone can mislead, how MOVA measures backlog age, and why teams need both signals."
+      content="A practical security metrics talk on why MTTR and MOVA are complementary partial signals, how prioritization affects each, and why teams need both."
     />
 
     <link rel="stylesheet" href="styles.css" />
@@ -20,17 +20,35 @@
 
         <h1>Why Vulnerability MTTR Alone Misleads</h1>
 
-        <p class="subtitle">Add MOVA to measure real backlog risk.</p>
+        <p class="subtitle">Use MTTR and MOVA to read the system.</p>
 
         <p class="lede">
-          MTTR shows how fast work closes. MOVA shows how old the open backlog is today.
+          MTTR shows how fast work closes. MOVA shows how old the open backlog is today. Each
+          answers a different question.
         </p>
 
         <p class="summary">
           The paradox is simple:
           <strong>MTTR can rise while backlog age falls.</strong>
           When teams finally close older findings, the age of closed work goes up. MTTR can look
-          worse even while the remaining backlog gets healthier.
+          worse even while the remaining backlog changes in a useful way. Older vulnerabilities
+          often persist because they are harder to fix, require coordination, or carry higher
+          risk.
+        </p>
+
+        <p class="summary">
+          Metrics are not the goal. They are how we observe the consequences of risk-based
+          decisions.
+        </p>
+
+        <p class="summary">
+          MTTR and MOVA are partial signals. Each answers a different question, and neither is
+          sufficient alone.
+        </p>
+
+        <p class="summary">
+          MOVA without MTTR can also mislead. A healthier backlog can still hide slow response to
+          new risk.
         </p>
 
         <nav class="actions" aria-label="Project links">
@@ -74,14 +92,14 @@
           </article>
         </div>
 
-        <p class="callout">MTTR is useful. The mistake is letting it decide alone.</p>
+        <p class="callout">Both are partial signals. The mistake is reading either one alone.</p>
       </section>
 
       <section class="grid">
         <section class="card" aria-labelledby="reveals-title">
           <div class="section-heading">
-            <p class="eyebrow">What MOVA reveals</p>
-            <h2 id="reveals-title">The backlog story MTTR can miss</h2>
+            <p class="eyebrow">Read MTTR and MOVA together</p>
+            <h2 id="reveals-title">The backlog signal a single metric can miss</h2>
           </div>
 
           <ul class="clean-list">
@@ -101,17 +119,38 @@
             <li>MTTR for closure flow</li>
             <li>MOVA for open backlog age</li>
             <li>Open count for backlog size</li>
-            <li>180+ days for the aging tail</li>
+            <li>An aging-tail diagnostic, not a target</li>
           </ul>
         </section>
+      </section>
+
+      <section class="card" aria-labelledby="prioritize-title">
+        <div class="section-heading">
+          <p class="eyebrow">How to prioritize</p>
+          <h2 id="prioritize-title">How to prioritize</h2>
+        </div>
+
+        <p>Prioritize remediation based on risk. Not newest-first or oldest-first.</p>
+
+        <ul class="clean-list">
+          <li>Severity (CVSS)</li>
+          <li>Exploitability (KEV, weaponized PoC)</li>
+          <li>Exposure (reachability)</li>
+          <li>Asset criticality</li>
+          <li>Threat intelligence</li>
+        </ul>
       </section>
 
       <section class="card final-card" aria-labelledby="takeaway-title">
         <p class="eyebrow">Takeaway</p>
         <h2 id="takeaway-title">Read the system, not just the metric.</h2>
         <p>
-          Do not let low MTTR outrank backlog age. Use MTTR and MOVA together to see whether the
-          system is getting healthier.
+          We do not prioritize by age. We prioritize by risk. Metrics show the consequences of
+          those decisions.
+        </p>
+        <p>
+          Use MTTR and MOVA together to understand whether your risk-based prioritization is
+          improving the system.
         </p>
       </section>
     </main>
