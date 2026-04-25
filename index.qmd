@@ -182,11 +182,11 @@ newest_mova = f"{newest_card['mova_days']:.1f}"
 
 ::: {.hero-block}
 ::: {.hero-eyebrow}
-Security Metrics / BSides Charm
+BSides Charm · 2026
 :::
 
 <div class="hero-title">Why Vulnerability<br>MTTR Alone<br>Misleads</div>
-<div class="hero-subtitle">Use MTTR and MOVA to Read the System</div>
+<div class="hero-subtitle">Use MTTR and MOVA to Measure Remediation Progress</div>
 <div class="hero-divider" aria-hidden="true"></div>
 <div class="hero-author">Caleb Kinney</div>
 :::
