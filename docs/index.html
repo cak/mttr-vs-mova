@@ -7,7 +7,7 @@
     <title>Why Vulnerability MTTR Alone Misleads | MOVA</title>
     <meta
       name="description"
-      content="A practical security metrics talk on why MTTR and MOVA are complementary partial signals, how prioritization affects each, and why teams need both."
+      content="A practical security metrics talk on why MTTR and MOVA answer different questions, how prioritization changes both, and why teams should read them together."
     />
 
     <link rel="stylesheet" href="styles.css" />
@@ -23,33 +23,20 @@
         <p class="subtitle">Use MTTR and MOVA to read the system.</p>
 
         <p class="lede">
-          MTTR shows flow: how fast work closes. MOVA shows backlog age: how old the open work is
-          today. Each answers a different question.
+          MTTR shows the age of work when it closes. MOVA shows the age of work still open today.
+          Together, they reveal whether remediation is improving the backlog or just making the
+          dashboard look better.
         </p>
-
-        <p class="summary">If older risk is not being addressed, it will show up in MOVA.</p>
 
         <p class="summary">
           The paradox is simple:
           <strong>MTTR can rise while backlog age falls.</strong>
-          When teams finally close older findings, the age of closed work goes up. MTTR can look
-          worse even while the remaining backlog changes in a useful way. Older vulnerabilities
-          often persist because they are harder to fix, require coordination, or carry higher risk.
+          When teams finally close older findings, MTTR can look worse even as the open backlog gets
+          healthier.
         </p>
 
         <p class="summary">
-          Metrics are not the goal. They are how we observe the consequences of risk-based
-          decisions.
-        </p>
-
-        <p class="summary">
-          MTTR and MOVA are partial signals. Each answers a different question, and neither is
-          sufficient alone.
-        </p>
-
-        <p class="summary">
-          MOVA without MTTR can also mislead. Lower backlog age can still hide slow response to new
-          risk.
+          Metrics are not the goal. They help observe the consequences of risk-based decisions.
         </p>
 
         <nav class="actions" aria-label="Project links">
@@ -93,62 +80,64 @@
           </article>
         </div>
 
-        <p class="callout">Both are partial signals. The mistake is reading either one alone.</p>
+        <p class="callout">The mistake is treating either signal as the whole system.</p>
       </section>
 
       <section class="grid">
         <section class="card" aria-labelledby="reveals-title">
           <div class="section-heading">
-            <p class="eyebrow">Read MTTR and MOVA together</p>
-            <h2 id="reveals-title">The backlog signal a single metric can miss</h2>
+            <p class="eyebrow">Read them together</p>
+            <h2 id="reveals-title">What the pair reveals</h2>
           </div>
 
           <ul class="clean-list">
-            <li>Whether MTTR and MOVA are moving in different directions</li>
-            <li>Whether backlog age is changing while recent closures look faster</li>
-            <li>Whether a single metric is hiding part of the system</li>
+            <li>Whether closure speed and backlog age are moving in different directions</li>
+            <li>Whether faster-looking closures are leaving older findings behind</li>
+            <li>Whether remediation progress is real or cosmetic</li>
           </ul>
         </section>
 
         <section class="card" aria-labelledby="report-title">
           <div class="section-heading">
             <p class="eyebrow">What to report</p>
-            <h2 id="report-title">Report the two core signals</h2>
+            <h2 id="report-title">Keep the dashboard focused</h2>
           </div>
 
           <ul class="clean-list">
-            <li>MTTR for flow: how fast work closes</li>
-            <li>MOVA for backlog age: how old open work is</li>
-            <li>Review MTTR and MOVA together</li>
-            <li>Label the MTTR time window</li>
+            <li>MTTR for closure flow</li>
+            <li>MOVA for open backlog age</li>
+            <li>The time window used for MTTR</li>
+            <li>The prioritization context behind the movement</li>
           </ul>
         </section>
       </section>
 
       <section class="card" aria-labelledby="prioritize-title">
         <div class="section-heading">
-          <p class="eyebrow">How to prioritize</p>
-          <h2 id="prioritize-title">How to prioritize</h2>
+          <p class="eyebrow">Prioritization</p>
+          <h2 id="prioritize-title">Fix what matters first</h2>
         </div>
 
-        <p>Prioritize remediation based on risk. Not newest-first or oldest-first.</p>
+        <p class="body-copy">
+          Do not prioritize by newest-first or oldest-first alone. Use risk-based inputs, then use
+          MTTR and MOVA to see what those decisions are doing to the system.
+        </p>
 
         <ul class="clean-list">
-          <li>Severity (CVSS)</li>
-          <li>Exploitability (KEV, weaponized PoC)</li>
-          <li>Exposure (reachability)</li>
+          <li>Severity, such as CVSS</li>
+          <li>Exploitability, such as KEV or weaponized PoC</li>
+          <li>Exposure and reachability</li>
           <li>Asset criticality</li>
-          <li>Threat intelligence</li>
+          <li>Threat intelligence and business context</li>
         </ul>
       </section>
 
       <section class="card final-card" aria-labelledby="takeaway-title">
         <p class="eyebrow">Takeaway</p>
         <h2 id="takeaway-title">Read the system, not just the metric.</h2>
-        <p>Prioritization is risk-based.</p>
         <p>
-          If your prioritization is risk-based, MTTR and MOVA help verify the consequences. They
-          should not drive the queue.
+          MTTR and MOVA should not drive the queue. They should help verify whether risk-based
+          prioritization is producing the outcome you intended.
         </p>
       </section>
     </main>
