@@ -2,35 +2,33 @@
 
 This repository contains the [Quarto](https://quarto.org/) / Reveal.js talk deck and reproducible analysis for the MOVA talk **Why Vulnerability MTTR Alone Misleads**.
 
-The deck shows why one MTTR number can misread remediation progress when closure patterns change. Older vulnerabilities often persist because they are harder to fix, require coordination, or carry higher risk.
+The talk's thesis is practical: **MTTR and MOVA are complementary signals**. Mean Time to Remediate (MTTR) shows closure flow. Mean Open Vulnerability Age (MOVA) shows the age of the open backlog right now. Neither is sufficient alone.
 
-If older risk is not being addressed, it will show up in MOVA.
+The simulation is not meant to prove that oldest-first is best. It shows that prioritization choices have measurable consequences, and teams should read MTTR and MOVA together before judging progress.
 
-Metrics help observe the consequences of risk-based decisions.
-
-MTTR and MOVA are partial signals. Each answers a different question, and neither is sufficient alone.
+Older vulnerabilities often persist because they are harder to fix, require coordination, or carry higher risk. If older risk is not being addressed, it will show up in MOVA even when MTTR looks healthy.
 
 ## How to Prioritize
 
-Prioritize remediation based on risk. Not newest-first or oldest-first.
+Prioritize remediation based on risk, not newest-first or oldest-first. Use MTTR and MOVA to observe the consequences of those choices; in this repo, newest-first and oldest-first are simplified simulation patterns used to make metric behavior visible. Examples include CVSS, CISA Known Exploited Vulnerabilities (KEV), and the Exploit Prediction Scoring System (EPSS).
 
-- Severity (CVSS)
-- Exploitability (KEV, weaponized PoC)
-- Exposure (reachability)
-- Asset criticality
-- Threat intelligence
+- Severity, such as CVSS
+- Exploitability, such as CISA KEV, EPSS, or weaponized proof-of-concept
+- Exposure, such as internet reachability
+- Asset criticality, such as production or sensitive systems
+- Threat intelligence, such as active targeting
+- Business context, such as customer or compliance impact
 
 The talk is grounded in a real operational pattern, but the repo stays vendor-neutral and reproducible. The examples use deterministic synthetic data, and the metric definitions, charts, and tables all live in code rather than dashboard screenshots or hidden platform logic.
 
 ## Core Argument
 
-- **MTTR reflects flow**.
-- **MOVA measures backlog age**.
+- **MTTR reflects closure flow**: how old the remediated work was in a reporting window.
+- **MOVA reflects open backlog age**: how old the unresolved work is right now.
 - MTTR is windowed. Label the window before calling a regression.
-- MOVA is not windowed. It reflects the backlog right now.
-- Each answers a different question, and neither is sufficient alone.
-- MOVA without MTTR can also mislead. Lower backlog age can still hide slow response to new risk.
-- If prioritization is risk-based, MTTR and MOVA help verify the consequences.
+- MOVA is not windowed. It reflects open backlog age right now.
+- Lower MTTR can hide an aging backlog. Lower MOVA can still hide slow response to new risk.
+- Prioritization choices have measurable consequences. Read MTTR and MOVA together before judging progress.
 
 ## Repo Contents
 
@@ -45,31 +43,27 @@ Generated artifacts are created during render under `data/` and `_output/`.
 
 ## The Simulation
 
-The deck uses a small reproducible simulation to isolate prioritization:
+The deck uses a small reproducible simulation to isolate how closure order changes metric behavior:
 
 - same starting backlog
 - same deterministic arrival pattern (with realistic variability)
 - same deterministic capacity pattern (shared across strategies)
 - same 24-month horizon
-- only the work order changes: `newest_first` vs. `oldest_first`
+- only the simplified closure pattern changes: `newest_first` vs. `oldest_first`
 
-This is an intentionally simplified comparison. `newest_first` and `oldest_first` are simplified closure patterns used only to reveal metric behavior. This is not a remediation policy. It is a metric demonstration. Prioritization is risk-based.
+This is an intentionally simplified comparison. `newest_first` and `oldest_first` are not recommended remediation strategies. They are controlled simulation patterns used to reveal how MTTR and MOVA respond when the same team closes work in a different order.
 
-In the simulation, `oldest_first` changes MOVA by working older backlog first, but it ignores risk and is not a real-world strategy.
+In the simulation, `oldest_first` changes MOVA by working older backlog first, but it ignores risk and is not a real-world remediation strategy.
 
-Newest-first can improve MTTR while leaving high-risk older findings open.
+`newest_first` can improve MTTR while leaving high-risk older findings open.
 
-The simulation isolates closure order so the metric behavior is easy to see.
-
-Both strategies operate on the exact same arrivals and capacity each month. Only prioritization changes.
-
-Small deterministic variability is introduced to avoid perfectly smooth charts while keeping the comparison fair.
+Both patterns operate on the exact same arrivals and capacity each month. Small deterministic variability is introduced to avoid perfectly smooth charts while keeping the comparison fair.
 
 That makes the tradeoff explicit:
 
 - **Newest-First** keeps MTTR lower by closing newer findings first.
 - **Oldest-First** changes MOVA in the simulation because it reaches older backlog work first.
-- If you look only at MTTR, recent closures can look like full-program progress.
+- If you read only MTTR, recent closures can look like full-program progress.
 
 ## Published Links
 
