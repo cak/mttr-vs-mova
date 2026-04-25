@@ -419,7 +419,7 @@ Prioritization is risk-based.
 
 ---
 
-## MTTR reflects recent closures
+## MTTR reflects recent closures {.chart-slide}
 
 ```{python}
 #| echo: false
@@ -448,7 +448,7 @@ MTTR can make recent closure activity look like broad progress.
 
 ---
 
-## MOVA shows backlog age
+## MOVA shows backlog age {.chart-slide}
 
 ```{python}
 #| echo: false
