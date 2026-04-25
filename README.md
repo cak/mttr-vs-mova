@@ -26,6 +26,8 @@ The talk is grounded in a real operational pattern, but the repo stays vendor-ne
 
 - **MTTR reflects flow**: how fast work closes.
 - **MOVA measures backlog age**: how old work still open today is.
+- MTTR is always bounded by a time window. Label the window before calling a regression.
+- MOVA is not windowed. It reflects the age of the backlog right now.
 - Each answers a different question.
 - Neither metric is sufficient alone.
 - MOVA without MTTR can also mislead. Lower backlog age can still hide slow response to new risk.

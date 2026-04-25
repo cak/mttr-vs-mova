@@ -440,6 +440,10 @@ mttr_plot = metrics.select(
 )
 ```
 
+::: {.kicker .centered}
+MTTR is always bounded by a time window. Label it before calling a regression.
+:::
+
 ::: {.centered .muted}
 Newest-First looks better on MTTR alone.
 
@@ -469,6 +473,10 @@ mova_plot = metrics.select(
     )
 )
 ```
+
+::: {.kicker .centered}
+MOVA is not windowed. It reflects the age of the backlog right now.
+:::
 
 ::: {.centered .muted}
 MOVA reveals what remains open.

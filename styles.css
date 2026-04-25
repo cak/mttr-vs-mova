@@ -828,6 +828,16 @@
   max-height: 52vh;
 }
 
+.reveal .chart-slide .kicker {
+  margin-top: 0.32rem;
+  font-size: 0.78em;
+  line-height: 1.18;
+}
+
+.reveal .chart-slide .kicker p {
+  margin: 0;
+}
+
 .reveal .chart-slide .centered.muted {
   margin-top: 0.25rem;
   font-size: 0.78em;

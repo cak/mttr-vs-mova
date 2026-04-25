@@ -80,7 +80,10 @@
           </article>
         </div>
 
-        <p class="callout">The mistake is treating either signal as the whole system.</p>
+        <p class="callout">
+          MTTR is always bounded by a time window. MOVA is not windowed; it reflects backlog age
+          right now.
+        </p>
       </section>
 
       <section class="grid">
@@ -106,7 +109,7 @@
           <ul class="clean-list">
             <li>MTTR for closure flow</li>
             <li>MOVA for open backlog age</li>
-            <li>The time window used for MTTR</li>
+            <li>The time window used for MTTR before calling a regression</li>
             <li>The prioritization context behind the movement</li>
           </ul>
         </section>
