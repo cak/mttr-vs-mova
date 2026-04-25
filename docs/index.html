@@ -23,17 +23,18 @@
         <p class="subtitle">Use MTTR and MOVA to read the system.</p>
 
         <p class="lede">
-          MTTR shows how fast work closes. MOVA shows how old the open backlog is today. Each
-          answers a different question.
+          MTTR shows flow: how fast work closes. MOVA shows backlog age: how old the open work is
+          today. Each answers a different question.
         </p>
+
+        <p class="summary">If older risk is not being addressed, it will show up in MOVA.</p>
 
         <p class="summary">
           The paradox is simple:
           <strong>MTTR can rise while backlog age falls.</strong>
           When teams finally close older findings, the age of closed work goes up. MTTR can look
           worse even while the remaining backlog changes in a useful way. Older vulnerabilities
-          often persist because they are harder to fix, require coordination, or carry higher
-          risk.
+          often persist because they are harder to fix, require coordination, or carry higher risk.
         </p>
 
         <p class="summary">
@@ -47,8 +48,8 @@
         </p>
 
         <p class="summary">
-          MOVA without MTTR can also mislead. A healthier backlog can still hide slow response to
-          new risk.
+          MOVA without MTTR can also mislead. Lower backlog age can still hide slow response to new
+          risk.
         </p>
 
         <nav class="actions" aria-label="Project links">
@@ -103,23 +104,23 @@
           </div>
 
           <ul class="clean-list">
-            <li>Whether older backlog is actually shrinking</li>
-            <li>Whether recent closures are reaching the aging tail</li>
-            <li>Whether low MTTR is masking stranded findings</li>
+            <li>Whether MTTR and MOVA are moving in different directions</li>
+            <li>Whether backlog age is changing while recent closures look faster</li>
+            <li>Whether a single metric is hiding part of the system</li>
           </ul>
         </section>
 
         <section class="card" aria-labelledby="report-title">
           <div class="section-heading">
             <p class="eyebrow">What to report</p>
-            <h2 id="report-title">Use a small metric set</h2>
+            <h2 id="report-title">Report the two core signals</h2>
           </div>
 
           <ul class="clean-list">
-            <li>MTTR for closure flow</li>
-            <li>MOVA for open backlog age</li>
-            <li>Open count for backlog size</li>
-            <li>An aging-tail diagnostic, not a target</li>
+            <li>MTTR for flow: how fast work closes</li>
+            <li>MOVA for backlog age: how old open work is</li>
+            <li>Review MTTR and MOVA together</li>
+            <li>Label the MTTR time window</li>
           </ul>
         </section>
       </section>
@@ -144,13 +145,10 @@
       <section class="card final-card" aria-labelledby="takeaway-title">
         <p class="eyebrow">Takeaway</p>
         <h2 id="takeaway-title">Read the system, not just the metric.</h2>
+        <p>Prioritization is risk-based.</p>
         <p>
-          We do not prioritize by age. We prioritize by risk. Metrics show the consequences of
-          those decisions.
-        </p>
-        <p>
-          Use MTTR and MOVA together to understand whether your risk-based prioritization is
-          improving the system.
+          If your prioritization is risk-based, MTTR and MOVA help verify the consequences. They
+          should not drive the queue.
         </p>
       </section>
     </main>
