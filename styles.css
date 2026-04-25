@@ -692,13 +692,13 @@
   margin-bottom: 0.66rem;
 }
 
-.decision-card-wrong {
+.decision-card-guardrail {
   border-color: rgba(198, 90, 33, 0.2);
   background:
     linear-gradient(180deg, rgba(198, 90, 33, 0.08), rgba(198, 90, 33, 0.025)), var(--panel);
 }
 
-.decision-card-right {
+.decision-card-observe {
   border-color: rgba(31, 111, 120, 0.22);
   background:
     linear-gradient(180deg, rgba(31, 111, 120, 0.08), rgba(31, 111, 120, 0.025)), var(--panel);
@@ -715,7 +715,7 @@
   padding: 1.15rem 1.15rem 1.05rem;
 }
 
-.dashboard-card.winner {
+.dashboard-card.dashboard-card-emphasis {
   border-color: rgba(31, 111, 120, 0.62);
   background:
     linear-gradient(180deg, rgba(31, 111, 120, 0.08), rgba(31, 111, 120, 0.025)), var(--panel);

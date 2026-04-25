@@ -65,7 +65,6 @@ LINE_SIZE = 2.8
 ENDPOINT_SIZE = 5.0
 ENDPOINT_LABEL_SIZE = 8
 ENDPOINT_LABEL_X_NUDGE = 0.55
-COMPARISON_ALPHA = 0.75
 X_AXIS_EXPAND = (0.01, 0.85)
 DEFAULT_Y_EXPAND = (0.02, 0)
 TAIL_Y_EXPAND = (0.02, 12)
@@ -98,23 +97,18 @@ def strategy_line_plot(
     title,
     subtitle,
     y_axis_label,
-    highlighted_strategy,
     y_expand=DEFAULT_Y_EXPAND,
     y_limits=None,
 ):
-    is_highlighted = pl.col("strategy_label") == highlighted_strategy
     is_endpoint = pl.col("month_index") == LAST_MONTH
-    highlighted = dataframe.filter(is_highlighted)
-    comparison = dataframe.filter(~is_highlighted)
-    highlighted_endpoints = highlighted.filter(is_endpoint)
-    comparison_endpoints = comparison.filter(is_endpoint)
+    endpoints = dataframe.filter(is_endpoint)
     y_min = dataframe.select(pl.col(y_col).min()).item()
     y_max = dataframe.select(pl.col(y_col).max()).item()
     if y_min is None or y_max is None:
         raise ValueError(f"{y_col} does not contain any values to plot.")
 
     label_floor_offset = max(3.0, (y_max - y_min) * 0.03)
-    endpoint_labels = dataframe.filter(is_endpoint).with_columns(
+    endpoint_labels = endpoints.with_columns(
         (pl.col("month_index") + ENDPOINT_LABEL_X_NUDGE).alias("label_month"),
         pl.col(y_col).round(0).cast(pl.Int64).cast(pl.String).alias("endpoint_label"),
         (
@@ -123,34 +117,13 @@ def strategy_line_plot(
             .otherwise(pl.col(y_col))
         ).alias("label_value"),
     )
-    highlighted_labels = endpoint_labels.filter(is_highlighted)
-    comparison_labels = endpoint_labels.filter(~is_highlighted)
 
     return (
         ggplot(mapping=aes(x="month_index", y=y_col, color="strategy_label"))
-        + geom_line(data=comparison, size=LINE_SIZE, alpha=COMPARISON_ALPHA)
-        + geom_line(data=highlighted, size=LINE_SIZE)
-        + geom_point(
-            data=comparison_endpoints,
-            size=ENDPOINT_SIZE,
-            alpha=COMPARISON_ALPHA,
-        )
-        + geom_point(data=highlighted_endpoints, size=ENDPOINT_SIZE)
+        + geom_line(data=dataframe, size=LINE_SIZE)
+        + geom_point(data=endpoints, size=ENDPOINT_SIZE)
         + geom_text(
-            data=comparison_labels,
-            mapping=aes(
-                x="label_month",
-                y="label_value",
-                label="endpoint_label",
-            ),
-            size=ENDPOINT_LABEL_SIZE,
-            ha="left",
-            va="center",
-            alpha=COMPARISON_ALPHA,
-            show_legend=False,
-        )
-        + geom_text(
-            data=highlighted_labels,
+            data=endpoint_labels,
             mapping=aes(
                 x="label_month",
                 y="label_value",
@@ -322,7 +295,7 @@ while
 ::: {.line-anchor .line-anchor-subtle .centered}
 MTTR can rise while backlog age falls.
 
-Older vulnerabilities often persist because they are harder to fix, require coordination, or carry higher risk.
+Older vulnerabilities often persist because they are harder to fix, require coordination, or carry more risk.
 :::
 
 ---
@@ -354,7 +327,7 @@ If older risk is not being addressed, it will show up in MOVA.
 
 Each answers a different question. Neither is sufficient alone.
 
-MOVA without MTTR can also mislead. A healthier backlog can still hide slow response to new risk.
+MOVA without MTTR can also mislead. Lower backlog age can still hide slow response to new risk.
 :::
 
 ---
@@ -437,21 +410,19 @@ Keep arrivals and capacity fixed.
 ::: {.eyebrow}
 Change one thing
 :::
-### Prioritization
-Two simplified closure patterns.
+### Closure pattern
+Newest-First and Oldest-First are simplified closure patterns.
 
-Only the order of closure changes so the metric behavior is visible.
+They are used only to reveal metric behavior.
 :::
 :::
 
 ::: {.line-anchor .line-anchor-subtle .centered}
-Same team. Same capacity. Different prioritization.
+Same team. Same capacity. Different simulated closure pattern.
 :::
 
 ::: {.centered .muted}
 This is not a remediation policy. It is a metric demonstration.
-
-Oldest-First changes MOVA in the simulation, but it ignores risk and is not a real-world strategy.
 
 Prioritization is risk-based.
 :::
@@ -462,7 +433,7 @@ Prioritization is risk-based.
 
 ```{python}
 #| echo: false
-#| fig-alt: "Line chart of MTTR over time under two prioritization strategies. Newest-First is highlighted and finishes with the lower MTTR because it closes recent findings first."
+#| fig-alt: "Line chart of MTTR over time under two simplified closure patterns. MTTR looks lower when recent findings close first because it reflects age at closure."
 mttr_plot = metrics.select(
     "month_index",
     "strategy_label",
@@ -472,18 +443,17 @@ mttr_plot = metrics.select(
     strategy_line_plot(
         dataframe=mttr_plot,
         y_col="days",
-        title="Newest-First looks better on MTTR alone",
-        subtitle="Closing recent findings first keeps closure age low.",
+        title="MTTR reflects recent closures",
+        subtitle="Closing recent findings first lowers the age of closed work in the time window.",
         y_axis_label="MTTR (days)",
-        highlighted_strategy="Newest-First",
     )
 )
 ```
 
 ::: {.centered .muted}
-On MTTR alone, Newest-First looks better.
+Newest-First looks better on MTTR alone.
 
-Newest-First can improve MTTR while leaving high-risk older findings open.
+MTTR can make recent closure activity look like broad progress.
 :::
 
 ---
@@ -492,7 +462,7 @@ Newest-First can improve MTTR while leaving high-risk older findings open.
 
 ```{python}
 #| echo: false
-#| fig-alt: "Line chart of MOVA over time under two prioritization strategies. It shows how old open work is under each strategy."
+#| fig-alt: "Line chart of MOVA over time under two simplified closure patterns. It shows the age of work still open today under each pattern."
 mova_plot = metrics.select(
     "month_index",
     "strategy_label",
@@ -505,19 +475,20 @@ mova_plot = metrics.select(
         title="MOVA shows backlog age",
         subtitle="How old is the work still open today?",
         y_axis_label="MOVA (days)",
-        highlighted_strategy="Oldest-First",
         y_limits=(0, mova_plot.get_column("days").max() * 1.08),
     )
 )
 ```
 
 ::: {.centered .muted}
-MOVA shows how old open work is.
+MOVA reveals what remains open.
+
+It shows the age consequences of what remains unresolved.
 :::
 
 ---
 
-## End state: MOVA shows the difference
+## End state: MOVA reveals what remains open
 
 ::: {.score-grid .tail-grid}
 ::: {.score-card}
@@ -578,7 +549,7 @@ decision_table = (
 (
     GT(decision_table, rowname_col="strategy_label")
     .tab_header(
-        title="Strategy comparison",
+        title="Same data, different signals",
         subtitle="MTTR reflects flow. MOVA reflects backlog age. They are complementary partial signals.",
     )
     .tab_spanner(label="Flow", columns="mttr_days")
@@ -637,7 +608,7 @@ If you read only MTTR, you may misread progress.
 
 ---
 
-## Which metric drives the decision? {.center .meme-slide}
+## Which signal are you reading? {.center .meme-slide}
 
 ![](assets/images/mttr-vs-mova-meme.png){width=100%}
 
@@ -682,7 +653,7 @@ Both are partial signals. The mistake is reading either one alone.
 ## When the dashboard shows only MTTR {auto-animate="true"}
 
 ::: {.dashboard-grid}
-::: {.dashboard-card .winner}
+::: {.dashboard-card .dashboard-card-emphasis}
 ::: {.dashboard-title}
 Newest-First
 :::
@@ -708,7 +679,7 @@ MTTR
 :::
 
 ::: {.centered .muted}
-If this is the only KPI, recent closures can look like full-program progress.
+If this is the only KPI, recent closures can look like broad progress.
 :::
 
 ---
@@ -746,7 +717,7 @@ Oldest-First
 :::
 
 ::: {.centered .muted}
-The fuller view keeps MTTR and MOVA together.
+If your prioritization is risk-based, MTTR and MOVA help verify the consequences. They should not drive the queue.
 :::
 
 ---
@@ -923,25 +894,25 @@ Start with an export. Define the metric in code first.
 ## A simple policy {.center}
 
 ::: {.definition-grid .narrow-grid .decision-grid}
-::: {.definition-card .decision-card .decision-card-right}
+::: {.definition-card .decision-card .decision-card-observe}
 ::: {.eyebrow}
 Policy
 :::
 ### Track MTTR + MOVA
-Align metrics with your prioritization strategy.
+Use them to verify the consequences of risk-based prioritization.
 :::
 
-::: {.definition-card .decision-card .decision-card-wrong}
+::: {.definition-card .decision-card .decision-card-guardrail}
 ::: {.eyebrow}
 Guardrail
 :::
-### MTTR alone
-Can optimize for one part of the system.
+### Do not drive the queue
+Metrics stay observational. Prioritization stays risk-based.
 :::
 :::
 
 ::: {.line-anchor .centered .decision-close}
-Do not read low MTTR as progress without checking backlog age.
+If your prioritization is risk-based, MTTR and MOVA help verify the consequences. They should not drive the queue.
 :::
 
 ---
@@ -957,11 +928,11 @@ MOVA shows backlog age.
 :::
 
 ::: {.line-anchor .centered .blood-line}
-We do not prioritize by age. We prioritize by risk. Metrics show the consequences of those decisions.
+If your prioritization is risk-based, MTTR and MOVA help verify the consequences. They should not drive the queue.
 :::
 
 ::: {.centered .muted}
-MTTR and MOVA are complementary partial signals. Use them to observe the system, not optimize directly.
+MTTR and MOVA are complementary partial signals. Read the system, not just the metric.
 :::
 
 ::: {.cta-link}
