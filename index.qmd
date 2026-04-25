@@ -219,9 +219,13 @@ Security Metrics / BSides Charm
 :::
 
 <div class="hero-title">Why Vulnerability<br>MTTR Alone<br>Misleads</div>
-<div class="hero-subtitle">Add MOVA to Measure Real Risk</div>
+<div class="hero-subtitle">Use MTTR and MOVA to Read the System</div>
 <div class="hero-divider" aria-hidden="true"></div>
 <div class="hero-author">Caleb Kinney</div>
+
+::: {.line-anchor .line-anchor-subtle .centered}
+We do not prioritize by age. We prioritize by risk. Metrics show the consequences of those decisions.
+:::
 :::
 
 ---
@@ -323,6 +327,8 @@ while
 
 ::: {.line-anchor .line-anchor-subtle .centered}
 MTTR can rise while backlog age falls.
+
+Older vulnerabilities often persist because they are harder to fix, require coordination, or carry higher risk.
 :::
 
 ---
@@ -350,7 +356,9 @@ How old is the open backlog today?
 ::: {.line-anchor .line-anchor-subtle .centered}
 MTTR shows flow. MOVA shows backlog age.
 
-Same data. Different questions.
+Each answers a different question. Neither is sufficient alone.
+
+MOVA without MTTR can also mislead. A healthier backlog can still hide slow response to new risk.
 :::
 
 ---
@@ -446,7 +454,7 @@ You do not need a new platform.
 - MTTR and MOVA use the same records
 - A CSV export is often enough
 - MOVA comes from open findings
-- The oldest findings usually tell the real story
+- Older backlog often shows risk that averages hide
 :::
 
 ::: {.line-anchor .centered .blood-line}
@@ -473,9 +481,9 @@ Keep arrivals and capacity fixed.
 Change one thing
 :::
 ### Prioritization
-Newest-First vs. Oldest-First.
+Two simplified closure patterns.
 
-Only the order of closure changes.
+Only the order of closure changes so the metric behavior is visible.
 :::
 :::
 
@@ -483,9 +491,17 @@ Only the order of closure changes.
 Same team. Same capacity. Different prioritization.
 :::
 
+::: {.centered .muted}
+This is not a remediation policy. It is a metric demonstration.
+
+Oldest-First produces lower backlog age in the simulation, but it ignores risk and is not a real-world strategy.
+
+We do not prioritize by age. We prioritize by risk. Metrics show the consequences of those decisions.
+:::
+
 ---
 
-## MTTR rewards recent closures
+## MTTR reflects recent closures
 
 ```{python}
 #| echo: false
@@ -499,7 +515,7 @@ mttr_plot = metrics.select(
     strategy_line_plot(
         dataframe=mttr_plot,
         y_col="days",
-        title="Newest-First wins on MTTR alone",
+        title="Newest-First looks better on MTTR alone",
         subtitle="Closing recent findings first keeps closure age low.",
         y_axis_label="MTTR (days)",
         highlighted_strategy="Newest-First",
@@ -508,7 +524,9 @@ mttr_plot = metrics.select(
 ```
 
 ::: {.centered .muted}
-On MTTR, Newest-First wins.
+On MTTR alone, Newest-First looks better.
+
+Newest-First can improve MTTR while leaving high-risk older findings open.
 :::
 
 ---
@@ -517,7 +535,7 @@ On MTTR, Newest-First wins.
 
 ```{python}
 #| echo: false
-#| fig-alt: "Line chart of MOVA over time under two prioritization strategies. Oldest-First is highlighted and finishes with the lower backlog age because it removes older findings first."
+#| fig-alt: "Line chart of MOVA over time under two prioritization strategies. Reaching older backlog work lowers MOVA because older findings are being closed instead of left to age."
 mova_plot = metrics.select(
     "month_index",
     "strategy_label",
@@ -527,8 +545,8 @@ mova_plot = metrics.select(
     strategy_line_plot(
         dataframe=mova_plot,
         y_col="days",
-        title="Oldest-First lowers backlog age",
-        subtitle="Closing older findings first lowers today's backlog age.",
+        title="Older backlog work lowers MOVA",
+        subtitle="MOVA falls when the team reaches older backlog work.",
         y_axis_label="MOVA (days)",
         highlighted_strategy="Oldest-First",
         y_limits=(0, mova_plot.get_column("days").max() * 1.08),
@@ -537,16 +555,16 @@ mova_plot = metrics.select(
 ```
 
 ::: {.centered .muted}
-On backlog age, Oldest-First is healthier.
+MOVA shows whether older backlog is being reached.
 :::
 
 ---
 
-## The 180+ tail tells the truth
+## The 180+ tail shows stranded backlog
 
 ```{python}
 #| echo: false
-#| fig-alt: "Line chart of open vulnerabilities older than 180 days under two prioritization strategies. Oldest-First is highlighted and reduces the tail, while Newest-First leaves the 180+ tail stranded."
+#| fig-alt: "Line chart of open vulnerabilities older than 180 days under two prioritization strategies. The 180+ tail shrinks only when older backlog work is actually being reached."
 tail_plot = metrics.select(
     "month_index",
     "strategy_label",
@@ -556,8 +574,8 @@ tail_plot = metrics.select(
     strategy_line_plot(
         dataframe=tail_plot,
         y_col="aged_over_180",
-        title="Oldest-First reduces the 180+ tail",
-        subtitle="Newest-First leaves the 180+ tail in place.",
+        title="The 180+ tail shows stranded backlog",
+        subtitle="If the tail does not shrink, older backlog is being left behind.",
         y_axis_label="Open findings over 180 days",
         highlighted_strategy="Oldest-First",
         y_expand=TAIL_Y_EXPAND,
@@ -566,7 +584,7 @@ tail_plot = metrics.select(
 ```
 
 ::: {.centered .muted}
-Newest-First leaves the aging tail stranded.
+The tail shows whether older backlog is being reached.
 :::
 
 ---
@@ -605,15 +623,15 @@ Under Newest-First, the oldest backlog barely moves.
 
 ---
 
-## Same data, wrong winner {.statement-slide .table-slide}
+## Same data, different signals {.statement-slide .table-slide}
 
 ```{python}
 #| echo: false
 decision_table = (
     summary.with_columns(
         pl.when(pl.col("strategy") == "oldest_first")
-        .then(pl.lit("Recommended: best backlog outcome"))
-        .otherwise(pl.lit("MTTR-only winner"))
+        .then(pl.lit("Lower backlog age"))
+        .otherwise(pl.lit("Lower MTTR"))
         .alias("decision"),
         pl.when(pl.col("strategy") == "oldest_first")
         .then(pl.lit(0))
@@ -635,7 +653,7 @@ decision_table = (
     GT(decision_table, rowname_col="strategy_label")
     .tab_header(
         title="Strategy comparison",
-        subtitle="Newest-First wins on MTTR. Oldest-First wins on backlog age.",
+        subtitle="MTTR reflects recent closures. MOVA reflects current backlog age. Neither is sufficient alone.",
     )
     .tab_spanner(label="MTTR", columns="mttr_days")
     .tab_spanner(label="Backlog Age", columns=["mova_days", "aged_over_180"])
@@ -645,7 +663,7 @@ decision_table = (
         mttr_days="MTTR",
         mova_days="MOVA",
         open_count="Open count",
-        aged_over_180="180+ tail",
+        aged_over_180="Aging tail",
         decision="Interpretation",
     )
     .cols_align(align="left", columns=["decision"])
@@ -692,7 +710,7 @@ decision_table = (
 ```
 
 ::: {.line-anchor .line-anchor-subtle .centered}
-If you read only MTTR, you pick the wrong winner.
+If you read only MTTR, you may misread progress.
 :::
 
 ---
@@ -703,7 +721,7 @@ If you read only MTTR, you pick the wrong winner.
 
 ---
 
-## MTTR is not wrong {.center}
+## MTTR and MOVA answer different questions {.center}
 
 ::: {.dashboard-grid}
 
@@ -734,7 +752,7 @@ How old the backlog still is
 :::
 
 ::: {.line-anchor .centered .blood-line}
-MTTR is useful. The mistake is letting it decide alone.
+Both are partial signals. The mistake is reading either one alone.
 :::
 
 ---
@@ -768,7 +786,7 @@ MTTR
 :::
 
 ::: {.centered .muted}
-If this is the only KPI, the system rewards closing recent work first.
+If this is the only KPI, recent closures can look like full-program progress.
 :::
 
 ---
@@ -793,12 +811,12 @@ Newest-First
 <strong>`{python} newest_open`</strong>
 :::
 ::: {.dashboard-stat}
-<span>180+ days</span>
+<span>Aging tail</span>
 <strong>`{python} newest_tail`</strong>
 :::
 :::
 
-::: {.dashboard-card .dashboard-detail .winner}
+::: {.dashboard-card .dashboard-detail}
 ::: {.dashboard-title}
 Oldest-First
 :::
@@ -815,14 +833,14 @@ Oldest-First
 <strong>`{python} oldest_open`</strong>
 :::
 ::: {.dashboard-stat}
-<span>180+ days</span>
+<span>Aging tail</span>
 <strong>`{python} oldest_tail`</strong>
 :::
 :::
 :::
 
 ::: {.centered .muted}
-MTTR matters. It cannot stand alone.
+The fuller view shows flow, backlog age, size, and tail risk together.
 :::
 
 ---
@@ -851,7 +869,7 @@ Backlog is aging
 
 ::: {.score-card}
 ::: {.score-title}
-180+ tail ↑
+Aging tail ↑
 :::
 ::: {.score-label}
 Old risk is stranded
@@ -861,7 +879,27 @@ Old risk is stranded
 :::
 
 ::: {.line-anchor .centered}
-Read them together or you reward the wrong behavior.
+Read them together or you may misread progress.
+:::
+
+---
+
+## Prioritization is risk-based {.center}
+
+Real teams should not remediate by age alone.
+
+Prioritize remediation based on risk:
+
+- Severity (CVSS)
+- Exploitability (KEV, weaponized PoC)
+- Exposure (reachability)
+- Asset criticality
+- Threat intelligence
+
+Not newest-first or oldest-first.
+
+::: {.line-anchor .centered .blood-line}
+Metrics are not the goal. They are how we observe the consequences of risk-based decisions.
 :::
 
 ---
@@ -881,8 +919,8 @@ Put both on the same monthly view.
 ::: {.eyebrow}
 Backlog
 :::
-### Open count + 180+
-Add count and a threshold such as 180+ days.
+### Open count + aging tail
+Add open count and, if useful, an aging-tail threshold as a diagnostic only, not a target.
 :::
 
 ::: {.definition-card}
@@ -890,7 +928,7 @@ Add count and a threshold such as 180+ days.
 Review rule
 :::
 ### Read together
-Review MTTR with backlog age and the 180+ tail visible.
+Review MTTR with backlog age and the aging tail visible.
 :::
 
 ::: {.definition-card}
@@ -984,7 +1022,7 @@ Start with an export. Define the metric in code first.
 Policy
 :::
 ### Track MTTR + MOVA
-Prioritize older findings first.
+Align metrics with your prioritization strategy.
 :::
 
 ::: {.definition-card .decision-card .decision-card-wrong}
@@ -992,12 +1030,12 @@ Prioritize older findings first.
 Guardrail
 :::
 ### MTTR alone
-Can reward the wrong queue.
+Can optimize for one part of the system.
 :::
 :::
 
 ::: {.line-anchor .centered .decision-close}
-Do not let low MTTR outrank backlog age.
+Do not read low MTTR as progress without checking backlog age.
 :::
 
 ---
@@ -1013,7 +1051,11 @@ MOVA shows backlog age.
 :::
 
 ::: {.line-anchor .centered .blood-line}
-You need both.
+We do not prioritize by age. We prioritize by risk. Metrics show the consequences of those decisions.
+:::
+
+::: {.centered .muted}
+Use MTTR and MOVA together to understand whether your risk-based prioritization is improving the system.
 :::
 
 ::: {.cta-link}
