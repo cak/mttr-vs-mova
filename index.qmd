@@ -180,8 +180,6 @@ card_lookup = {
         "strategy_label",
         pl.col("mttr_days").round(1).alias("mttr_days"),
         pl.col("mova_days").round(1).alias("mova_days"),
-        "open_count",
-        "aged_over_180",
     ).to_dicts()
 }
 
@@ -202,13 +200,9 @@ newest_card = get_strategy_card("Newest-First")
 
 oldest_mttr = f"{oldest_card['mttr_days']:.1f}"
 oldest_mova = f"{oldest_card['mova_days']:.1f}"
-oldest_open = int(oldest_card["open_count"])
-oldest_tail = int(oldest_card["aged_over_180"])
 
 newest_mttr = f"{newest_card['mttr_days']:.1f}"
 newest_mova = f"{newest_card['mova_days']:.1f}"
-newest_open = int(newest_card["open_count"])
-newest_tail = int(newest_card["aged_over_180"])
 ```
 
 ## {#opening .hero-slide}
@@ -267,7 +261,7 @@ Dashboards call this failure.
 Better question: what actually changed?
 
 What happened to backlog age?
-What happened to the oldest findings?
+What happened to open risk?
 :::
 ::::
 
@@ -356,48 +350,11 @@ How old is the open backlog today?
 ::: {.line-anchor .line-anchor-subtle .centered}
 MTTR shows flow. MOVA shows backlog age.
 
+If older risk is not being addressed, it will show up in MOVA.
+
 Each answers a different question. Neither is sufficient alone.
 
 MOVA without MTTR can also mislead. A healthier backlog can still hide slow response to new risk.
-:::
-
----
-
-## The average said “fine.” {.center}
-
-::: {.tail-example-grid}
-::: {.tail-card}
-::: {.eyebrow}
-Most findings
-:::
-::: {.tail-number}
-95
-:::
-::: {.tail-text}
-at 7 days
-:::
-:::
-
-::: {.tail-card}
-::: {.eyebrow}
-Old tail
-:::
-::: {.tail-number}
-5
-:::
-::: {.tail-text}
-at 400 days
-:::
-:::
-
-::: {.tail-card .emphasis}
-::: {.tail-text .strong}
-The backlog said “absolutely not.”
-:::
-::: {.tail-text}
-The oldest findings are not moving.
-:::
-:::
 :::
 
 ---
@@ -494,9 +451,9 @@ Same team. Same capacity. Different prioritization.
 ::: {.centered .muted}
 This is not a remediation policy. It is a metric demonstration.
 
-Oldest-First produces lower backlog age in the simulation, but it ignores risk and is not a real-world strategy.
+Oldest-First changes MOVA in the simulation, but it ignores risk and is not a real-world strategy.
 
-We do not prioritize by age. We prioritize by risk. Metrics show the consequences of those decisions.
+Prioritization is risk-based.
 :::
 
 ---
@@ -535,7 +492,7 @@ Newest-First can improve MTTR while leaving high-risk older findings open.
 
 ```{python}
 #| echo: false
-#| fig-alt: "Line chart of MOVA over time under two prioritization strategies. Reaching older backlog work lowers MOVA because older findings are being closed instead of left to age."
+#| fig-alt: "Line chart of MOVA over time under two prioritization strategies. It shows how old open work is under each strategy."
 mova_plot = metrics.select(
     "month_index",
     "strategy_label",
@@ -545,8 +502,8 @@ mova_plot = metrics.select(
     strategy_line_plot(
         dataframe=mova_plot,
         y_col="days",
-        title="Older backlog work lowers MOVA",
-        subtitle="MOVA falls when the team reaches older backlog work.",
+        title="MOVA shows backlog age",
+        subtitle="How old is the work still open today?",
         y_axis_label="MOVA (days)",
         highlighted_strategy="Oldest-First",
         y_limits=(0, mova_plot.get_column("days").max() * 1.08),
@@ -555,70 +512,41 @@ mova_plot = metrics.select(
 ```
 
 ::: {.centered .muted}
-MOVA shows whether older backlog is being reached.
+MOVA shows how old open work is.
 :::
 
 ---
 
-## The 180+ tail shows stranded backlog
-
-```{python}
-#| echo: false
-#| fig-alt: "Line chart of open vulnerabilities older than 180 days under two prioritization strategies. The 180+ tail shrinks only when older backlog work is actually being reached."
-tail_plot = metrics.select(
-    "month_index",
-    "strategy_label",
-    "aged_over_180",
-)
-(
-    strategy_line_plot(
-        dataframe=tail_plot,
-        y_col="aged_over_180",
-        title="The 180+ tail shows stranded backlog",
-        subtitle="If the tail does not shrink, older backlog is being left behind.",
-        y_axis_label="Open findings over 180 days",
-        highlighted_strategy="Oldest-First",
-        y_expand=TAIL_Y_EXPAND,
-    )
-)
-```
-
-::: {.centered .muted}
-The tail shows whether older backlog is being reached.
-:::
-
----
-
-## End state: the tail tells the story
+## End state: MOVA shows the difference
 
 ::: {.score-grid .tail-grid}
-::: {.score-card .score-good}
+::: {.score-card}
 ::: {.score-title}
 Oldest-First
 :::
 ::: {.score-metric}
-`{python} oldest_tail`
+`{python} oldest_mova`
 :::
 ::: {.score-label}
-findings older than 180 days
+MOVA (days)
 :::
 :::
 
-::: {.score-card .score-bad}
+::: {.score-card}
 ::: {.score-title}
 Newest-First
 :::
 ::: {.score-metric}
-`{python} newest_tail`
+`{python} newest_mova`
 :::
 ::: {.score-label}
-findings older than 180 days
+MOVA (days)
 :::
 :::
 :::
 
 ::: {.centered .muted}
-Under Newest-First, the oldest backlog barely moves.
+End-state MOVA does not replace MTTR. It complements it.
 :::
 
 ---
@@ -630,8 +558,8 @@ Under Newest-First, the oldest backlog barely moves.
 decision_table = (
     summary.with_columns(
         pl.when(pl.col("strategy") == "oldest_first")
-        .then(pl.lit("Lower backlog age"))
-        .otherwise(pl.lit("Lower MTTR"))
+        .then(pl.lit("MOVA is lower"))
+        .otherwise(pl.lit("MTTR is lower"))
         .alias("decision"),
         pl.when(pl.col("strategy") == "oldest_first")
         .then(pl.lit(0))
@@ -643,8 +571,6 @@ decision_table = (
         "strategy_label",
         pl.col("mttr_days").round(1).alias("mttr_days"),
         pl.col("mova_days").round(1).alias("mova_days"),
-        "open_count",
-        "aged_over_180",
         "decision",
     )
 )
@@ -653,26 +579,22 @@ decision_table = (
     GT(decision_table, rowname_col="strategy_label")
     .tab_header(
         title="Strategy comparison",
-        subtitle="MTTR reflects recent closures. MOVA reflects current backlog age. Neither is sufficient alone.",
+        subtitle="MTTR reflects flow. MOVA reflects backlog age. They are complementary partial signals.",
     )
-    .tab_spanner(label="MTTR", columns="mttr_days")
-    .tab_spanner(label="Backlog Age", columns=["mova_days", "aged_over_180"])
-    .tab_spanner(label="Backlog", columns="open_count")
+    .tab_spanner(label="Flow", columns="mttr_days")
+    .tab_spanner(label="Backlog Age", columns="mova_days")
     .tab_spanner(label="Interpretation", columns="decision")
     .cols_label(
         mttr_days="MTTR",
         mova_days="MOVA",
-        open_count="Open count",
-        aged_over_180="Aging tail",
         decision="Interpretation",
     )
     .cols_align(align="left", columns=["decision"])
     .cols_align(
         align="center",
-        columns=["mttr_days", "mova_days", "open_count", "aged_over_180"],
+        columns=["mttr_days", "mova_days"],
     )
     .fmt_number(columns=["mttr_days", "mova_days"], decimals=1)
-    .fmt_integer(columns=["open_count", "aged_over_180"])
     .tab_style(
         style=[style.fill("#f7e7ec"), style.text(color="#6b1230", weight="bold")],
         locations=loc.body(
@@ -690,7 +612,7 @@ decision_table = (
     .tab_style(
         style=[style.fill("#e4f0ee"), style.text(color="#134b52", weight="bold")],
         locations=loc.body(
-            columns=["mova_days", "aged_over_180", "decision"],
+            columns=["mova_days", "decision"],
             rows=pl.col("strategy_label") == "Oldest-First",
         ),
     )
@@ -791,7 +713,7 @@ If this is the only KPI, recent closures can look like full-program progress.
 
 ---
 
-## When the dashboard shows the full system {auto-animate="true"}
+## When the dashboard shows both core signals {auto-animate="true"}
 
 ::: {.dashboard-grid}
 ::: {.dashboard-card .dashboard-detail}
@@ -805,14 +727,6 @@ Newest-First
 ::: {.dashboard-stat}
 <span>MOVA</span>
 <strong>`{python} newest_mova` days</strong>
-:::
-::: {.dashboard-stat}
-<span>Open count</span>
-<strong>`{python} newest_open`</strong>
-:::
-::: {.dashboard-stat}
-<span>Aging tail</span>
-<strong>`{python} newest_tail`</strong>
 :::
 :::
 
@@ -828,19 +742,11 @@ Oldest-First
 <span>MOVA</span>
 <strong>`{python} oldest_mova` days</strong>
 :::
-::: {.dashboard-stat}
-<span>Open count</span>
-<strong>`{python} oldest_open`</strong>
-:::
-::: {.dashboard-stat}
-<span>Aging tail</span>
-<strong>`{python} oldest_tail`</strong>
-:::
 :::
 :::
 
 ::: {.centered .muted}
-The fuller view shows flow, backlog age, size, and tail risk together.
+The fuller view keeps MTTR and MOVA together.
 :::
 
 ---
@@ -849,30 +755,30 @@ The fuller view shows flow, backlog age, size, and tail risk together.
 
 ::: {.score-grid .signals-grid}
 
-::: {.score-card .score-good}
+::: {.score-card}
 ::: {.score-title}
 MTTR ↑ + MOVA ↓
 :::
 ::: {.score-label}
-Clearing old risk
-:::
-:::
-
-::: {.score-card .score-bad}
-::: {.score-title}
-MTTR ↓ + MOVA ↑
-:::
-::: {.score-label}
-Backlog is aging
+Older risk is being addressed
 :::
 :::
 
 ::: {.score-card}
 ::: {.score-title}
-Aging tail ↑
+MTTR ↓ + MOVA ↑
 :::
 ::: {.score-label}
-Old risk is stranded
+New work closes while backlog ages
+:::
+:::
+
+::: {.score-card}
+::: {.score-title}
+MTTR or MOVA alone
+:::
+::: {.score-label}
+Partial signals can mislead
 :::
 :::
 
@@ -917,10 +823,10 @@ Put both on the same monthly view.
 
 ::: {.definition-card}
 ::: {.eyebrow}
-Backlog
+Definitions
 :::
-### Open count + aging tail
-Add open count and, if useful, an aging-tail threshold as a diagnostic only, not a target.
+### Flow + backlog age
+MTTR is flow. MOVA is backlog age.
 :::
 
 ::: {.definition-card}
@@ -928,7 +834,7 @@ Add open count and, if useful, an aging-tail threshold as a diagnostic only, not
 Review rule
 :::
 ### Read together
-Review MTTR with backlog age and the aging tail visible.
+Review MTTR with MOVA visible.
 :::
 
 ::: {.definition-card}
@@ -975,7 +881,7 @@ Define the metric in code before it reaches the dashboard.
 <div class="tool-icon" aria-hidden="true"><i class="bi bi-graph-up"></i></div>
 <div class="tool-title">Visualize the trend</div>
 </div>
-<div class="tool-note">Visualize flow, backlog age, and the tail over time</div>
+<div class="tool-note">Visualize flow and backlog age over time</div>
 <div class="tool-method">Plotnine</div>
 :::
 
@@ -984,7 +890,7 @@ Define the metric in code before it reaches the dashboard.
 <div class="tool-icon" aria-hidden="true"><i class="bi bi-table"></i></div>
 <div class="tool-title">Summarize the backlog</div>
 </div>
-<div class="tool-note">Summarize count, age, and tail at a glance</div>
+<div class="tool-note">Summarize the current state at a glance</div>
 <div class="tool-method">Great Tables</div>
 :::
 
@@ -1055,7 +961,7 @@ We do not prioritize by age. We prioritize by risk. Metrics show the consequence
 :::
 
 ::: {.centered .muted}
-Use MTTR and MOVA together to understand whether your risk-based prioritization is improving the system.
+MTTR and MOVA are complementary partial signals. Use them to observe the system, not optimize directly.
 :::
 
 ::: {.cta-link}

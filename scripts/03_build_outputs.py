@@ -43,7 +43,6 @@ def build_summary(metrics: pl.DataFrame) -> pl.DataFrame:
             "mttr_days",
             "mova_days",
             "open_count",
-            "aged_over_180",
         )
     )
 

@@ -1,8 +1,8 @@
 """Simulate month-end vulnerability metrics under different work-ordering rules.
 
-MTTR is computed from vulnerabilities resolved within each month. MOVA, open
-count, and 180+ tail are month-end snapshots after that month's remediation
-work is applied using a shared deterministic capacity schedule.
+MTTR is computed from vulnerabilities resolved within each month. MOVA and open
+count are month-end snapshots after that month's remediation work is applied
+using a shared deterministic capacity schedule.
 """
 
 from __future__ import annotations
@@ -24,7 +24,6 @@ METRICS_PATH = DATA_DIR / "metrics.parquet"
 DEFAULT_START = date(2024, 1, 1)
 DEFAULT_MONTHS = 24
 DEFAULT_MONTHLY_CAPACITY = 60
-DEFAULT_TAIL_DAYS = 180
 DEFAULT_SEED = 20260426
 DEFAULT_SEED_NAME = "talk_final_polish_v1"
 DEFAULT_CAPACITY_VARIATION = 0.12
@@ -61,7 +60,6 @@ class SimulationConfig:
     start_month: date = DEFAULT_START
     months: int = DEFAULT_MONTHS
     monthly_capacity: int = DEFAULT_MONTHLY_CAPACITY
-    tail_days: int = DEFAULT_TAIL_DAYS
     seed_name: str = DEFAULT_SEED_NAME
     seed: int = DEFAULT_SEED
     capacity_variation: float = DEFAULT_CAPACITY_VARIATION
@@ -74,8 +72,6 @@ def validate_config(config: SimulationConfig) -> None:
         raise ValueError("months must be positive")
     if config.monthly_capacity <= 0:
         raise ValueError("monthly_capacity must be positive")
-    if config.tail_days <= 0:
-        raise ValueError("tail_days must be positive")
     if not 0 < config.capacity_variation < 0.5:
         raise ValueError("capacity_variation must be between 0 and 0.5")
 
@@ -227,7 +223,6 @@ def compute_monthly_metrics(
     vulns: pl.DataFrame,
     strategy: str,
     window: MonthWindow,
-    tail_days: int,
 ) -> dict[str, object]:
     """Compute the flow and stock metrics for one month window."""
 
@@ -257,12 +252,6 @@ def compute_monthly_metrics(
         if open_with_age.is_empty()
         else open_with_age.select(pl.col("age_days").mean()).item()
     )
-    # The `aged_over_180` column name stays fixed even when the threshold moves.
-    aged_over_tail = (
-        0
-        if open_with_age.is_empty()
-        else open_with_age.filter(pl.col("age_days") >= tail_days).height
-    )
 
     return {
         "strategy": strategy,
@@ -272,7 +261,6 @@ def compute_monthly_metrics(
         "mttr_days": mttr_days,
         "mova_days": mova_days,
         "open_count": open_as_of_month_end.height,
-        "aged_over_180": aged_over_tail,
     }
 
 
@@ -300,9 +288,7 @@ def simulate_strategy(
         # strategic difference remains closure order.
         to_resolve = select_to_resolve(available_open, strategy, monthly_capacity)
         working = resolve_vulnerabilities(working, to_resolve, window.end)
-        rows.append(
-            compute_monthly_metrics(working, strategy, window, config.tail_days)
-        )
+        rows.append(compute_monthly_metrics(working, strategy, window))
 
     return pl.DataFrame(rows).sort(["strategy", "month_index"])
 
@@ -325,7 +311,7 @@ def print_validation_summary(
         .group_by("strategy", maintain_order=True)
         .tail(1)
         .sort("strategy")
-        .select("strategy", "mttr_days", "mova_days", "aged_over_180")
+        .select("strategy", "mttr_days", "mova_days", "open_count")
     )
 
     for row in final_rows.iter_rows(named=True):
@@ -333,7 +319,7 @@ def print_validation_summary(
             f"{row['strategy']}: "
             f"MTTR={row['mttr_days']:.1f} "
             f"MOVA={row['mova_days']:.1f} "
-            f"180+={int(row['aged_over_180'])}"
+            f"open={int(row['open_count'])}"
         )
 
 

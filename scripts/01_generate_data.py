@@ -202,9 +202,9 @@ def generate_base_vulnerabilities(
     """Build the synthetic vulnerability population used by the simulation.
 
     The initial backlog uses a simple ramp so recent months contribute more
-    findings than very old months while still leaving a real long tail to work
-    down. New arrivals follow one explicit deterministic schedule so the charts
-    feel less synthetic without changing the comparison.
+    findings than very old months while still leaving meaningful older work to
+    address. New arrivals follow one explicit deterministic schedule so the
+    charts feel less synthetic without changing the comparison.
     """
 
     validate_config(config)
