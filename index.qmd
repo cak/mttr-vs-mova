@@ -417,6 +417,29 @@ Prioritization is risk-based.
 
 ---
 
+## Real prioritization is risk-based {.center}
+
+::: {.risk-list}
+
+- **Severity**
+- **Exploitability**
+- **Exposure**
+
+- **Asset criticality**
+- **Threat intelligence**
+
+:::
+
+::: {.centered .risk-contrast}
+Not newest-first. Not oldest-first.
+:::
+
+::: {.line-anchor .centered .blood-line}
+Metrics do not drive the queue. They show the consequences.
+:::
+
+---
+
 ## MTTR reflects recent closures {.chart-slide}
 
 ```{python}
@@ -787,29 +810,6 @@ Backlog is aging
 
 ::: {.line-anchor .centered}
 Read them together or you may misread progress.
-:::
-
----
-
-## Real prioritization is risk-based {.center}
-
-::: {.risk-list}
-
-- **Severity**
-- **Exploitability**
-- **Exposure**
-
-- **Asset criticality**
-- **Threat intelligence**
-
-:::
-
-::: {.centered .risk-contrast}
-Not newest-first. Not oldest-first.
-:::
-
-::: {.line-anchor .centered .blood-line}
-Metrics do not drive the queue. They show the consequences.
 :::
 
 ---
