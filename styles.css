@@ -816,6 +816,28 @@
   margin: 0 auto;
 }
 
+.reveal .chart-slide h2 {
+  margin-bottom: 0.22em;
+}
+
+.reveal .chart-slide .cell-output-display {
+  margin-top: 0.1em;
+}
+
+.reveal .chart-slide .cell-output-display img {
+  max-height: 52vh;
+}
+
+.reveal .chart-slide .centered.muted {
+  margin-top: 0.25rem;
+  font-size: 0.78em;
+  line-height: 1.18;
+}
+
+.reveal .chart-slide .centered.muted p {
+  margin: 0.08em 0;
+}
+
 .reveal .gt_table {
   background: transparent;
   font-size: 0.68em;
