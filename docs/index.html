@@ -30,7 +30,7 @@
 
         <p class="summary">
           The paradox is simple:
-          <strong>MTTR can rise while backlog age falls.</strong>
+          <strong>closing older backlog can make MTTR look worse.</strong>
           When teams finally close older findings, MTTR can look worse even as the open backlog gets
           healthier.
         </p>
@@ -81,8 +81,8 @@
         </div>
 
         <p class="callout">
-          MTTR is always bounded by a time window. MOVA is not windowed; it reflects backlog age
-          right now.
+          MTTR is windowed. Label the window before calling a regression. MOVA is not windowed; it
+          reflects backlog age right now.
         </p>
       </section>
 

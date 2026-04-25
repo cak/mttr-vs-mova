@@ -268,32 +268,6 @@ MTTR rose because we finally closed older backlog, not just recent work.
 
 ---
 
-## Paradox {.center .statement-slide}
-
-::: {.metric-big .centered}
-The MTTR Paradox
-:::
-
-::: {.paradox-cue}
-::: {.paradox-pill}
-<span class="paradox-name">MTTR</span>
-<span class="paradox-trend">↑</span>
-:::
-::: {.paradox-connector}
-while
-:::
-::: {.paradox-pill}
-<span class="paradox-name">MOVA</span>
-<span class="paradox-trend paradox-trend-down">↓</span>
-:::
-:::
-
-::: {.line-anchor .line-anchor-subtle .centered}
-MTTR can rise while backlog age falls.
-:::
-
----
-
 ## Flow vs. backlog age
 
 ::: {.definition-grid}
@@ -441,13 +415,11 @@ mttr_plot = metrics.select(
 ```
 
 ::: {.kicker .centered}
-MTTR is always bounded by a time window. Label it before calling a regression.
+Newest-First looks better on MTTR alone.
 :::
 
 ::: {.centered .muted}
-Newest-First looks better on MTTR alone.
-
-MTTR can make recent closure activity look like broad progress.
+MTTR is windowed. Label the window before calling a regression.
 :::
 
 ---
@@ -475,13 +447,37 @@ mova_plot = metrics.select(
 ```
 
 ::: {.kicker .centered}
-MOVA is not windowed. It reflects the age of the backlog right now.
+MOVA reveals what remains open.
 :::
 
 ::: {.centered .muted}
-MOVA reveals what remains open.
+MOVA is not windowed. It reflects the backlog right now.
+:::
 
-It shows the age consequences of what remains unresolved.
+---
+
+## Paradox {.center .statement-slide}
+
+::: {.metric-big .centered}
+The MTTR Paradox
+:::
+
+::: {.paradox-cue}
+::: {.paradox-pill}
+<span class="paradox-name">MTTR</span>
+<span class="paradox-trend">↑</span>
+:::
+::: {.paradox-connector}
+while
+:::
+::: {.paradox-pill}
+<span class="paradox-name">MOVA</span>
+<span class="paradox-trend paradox-trend-down">↓</span>
+:::
+:::
+
+::: {.line-anchor .line-anchor-subtle .centered}
+MTTR can rise while backlog age falls.
 :::
 
 ---
@@ -650,38 +646,14 @@ If you read only MTTR, you may misread progress.
 
 ---
 
-## MTTR and MOVA answer different questions {.center}
-
-::: {.dashboard-grid}
-
-::: {.dashboard-card}
-::: {.dashboard-title}
-MTTR
-:::
-::: {.dashboard-value}
-Flow
-:::
-::: {.dashboard-label}
-How fast work closes
-:::
-:::
-
-::: {.dashboard-card}
-::: {.dashboard-title}
-MOVA
-:::
-::: {.dashboard-value}
-Backlog age
-:::
-::: {.dashboard-label}
-How old the backlog still is
-:::
-:::
-
-:::
+## Both are partial signals {.center .statement-slide}
 
 ::: {.line-anchor .centered .blood-line}
-Both are partial signals. The mistake is reading either one alone.
+MTTR shows closure flow.
+
+MOVA shows backlog age.
+
+The mistake is reading either one alone.
 :::
 
 ---

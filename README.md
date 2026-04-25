@@ -2,7 +2,7 @@
 
 This repository contains the [Quarto](https://quarto.org/) / Reveal.js talk deck and reproducible analysis for the MOVA talk **Why Vulnerability MTTR Alone Misleads**.
 
-The central pattern is simple: **MTTR can rise while backlog age falls**. MTTR reflects flow: how fast work closes. **MOVA** (Mean Open Vulnerability Age) measures backlog age: how old work still open today is. When a team finally closes older backlog, the age of closed work goes up, so MTTR can look worse even while the remaining backlog changes in a useful way. Older vulnerabilities often persist because they are harder to fix, require coordination, or carry higher risk.
+The central pattern is simple: closing older backlog can make MTTR look worse while the remaining open backlog gets younger. MTTR reflects flow: how fast work closes. **MOVA** (Mean Open Vulnerability Age) measures backlog age: how old work still open today is. Older vulnerabilities often persist because they are harder to fix, require coordination, or carry higher risk.
 
 If older risk is not being addressed, it will show up in MOVA.
 
@@ -26,7 +26,7 @@ The talk is grounded in a real operational pattern, but the repo stays vendor-ne
 
 - **MTTR reflects flow**: how fast work closes.
 - **MOVA measures backlog age**: how old work still open today is.
-- MTTR is always bounded by a time window. Label the window before calling a regression.
+- MTTR is windowed. Label the window before calling a regression.
 - MOVA is not windowed. It reflects the age of the backlog right now.
 - Each answers a different question.
 - Neither metric is sufficient alone.
