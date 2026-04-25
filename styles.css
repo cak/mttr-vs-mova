@@ -403,8 +403,7 @@
 .definition-card,
 .tool-card,
 .dashboard-card,
-.score-card,
-.tail-card {
+.score-card {
   background: linear-gradient(180deg, rgba(255, 252, 247, 0.97), rgba(255, 249, 241, 0.93));
   border: 1px solid var(--line);
   border-radius: var(--radius-card);
@@ -415,15 +414,13 @@
 .definition-card p,
 .tool-card p,
 .dashboard-card p,
-.score-card p,
-.tail-card p {
+.score-card p {
   margin: 0;
 }
 
 .definition-grid,
 .dashboard-grid,
-.score-grid,
-.tail-example-grid {
+.score-grid {
   display: grid;
   gap: 1.05rem;
   align-items: stretch;
@@ -580,7 +577,6 @@
 }
 
 .shock-value,
-.tail-number,
 .dashboard-title,
 .score-title {
   color: var(--headline);
@@ -649,48 +645,9 @@
   min-height: 180px;
 }
 
-.definition-card p,
-.tail-text {
+.definition-card p {
   color: var(--ink-soft);
   font-size: 0.78em;
-}
-
-.tail-card {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  min-height: 186px;
-  padding: 1.02rem 1rem 0.96rem;
-  text-align: center;
-}
-
-.tail-example-grid {
-  max-width: 920px;
-  margin: 0.42rem auto 0;
-}
-
-.tail-card .eyebrow {
-  margin-bottom: 0.54rem;
-}
-
-.tail-number {
-  font-size: 2.08em;
-  line-height: 1;
-  margin-bottom: 0.35rem;
-}
-
-.tail-card.emphasis {
-  grid-column: 1 / -1;
-  min-height: auto;
-  padding: 1rem 1.18rem;
-  background:
-    linear-gradient(180deg, rgba(198, 90, 33, 0.08), rgba(198, 90, 33, 0.02)), var(--panel);
-}
-
-.tail-text.strong {
-  color: var(--headline);
-  font-weight: 700;
-  margin-bottom: 0.3rem;
 }
 
 .dashboard-grid {
@@ -820,16 +777,6 @@
 .score-card {
   padding: 1.12rem 1.05rem;
   text-align: center;
-}
-
-.score-good {
-  background:
-    linear-gradient(180deg, rgba(31, 111, 120, 0.1), rgba(31, 111, 120, 0.03)), var(--panel);
-}
-
-.score-bad {
-  background:
-    linear-gradient(180deg, rgba(139, 30, 63, 0.12), rgba(139, 30, 63, 0.03)), var(--panel);
 }
 
 .score-metric {
@@ -977,7 +924,6 @@
   .definition-grid,
   .dashboard-grid,
   .score-grid,
-  .tail-example-grid,
   .tool-grid {
     grid-template-columns: 1fr;
   }
