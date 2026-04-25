@@ -1,5 +1,5 @@
 ---
-pagetitle: "Why Vulnerability MTTR Alone Misleads"
+pagetitle: "MTTR Alone Misleads | MOVA"
 format:
   revealjs:
     include-in-header:
