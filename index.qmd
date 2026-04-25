@@ -189,10 +189,6 @@ Security Metrics / BSides Charm
 <div class="hero-subtitle">Use MTTR and MOVA to Read the System</div>
 <div class="hero-divider" aria-hidden="true"></div>
 <div class="hero-author">Caleb Kinney</div>
-
-::: {.line-anchor .line-anchor-subtle .centered}
-We do not prioritize by age. We prioritize by risk. Metrics show the consequences of those decisions.
-:::
 :::
 
 ---
@@ -250,7 +246,7 @@ MTTR went up after we made it a KPI.
 
 ::: {.story-steps}
 - We made MTTR visible
-- Teams started closing older findings first
+- Teams started closing older backlog, not just recent work
 - The metric got worse
 :::
 
@@ -267,7 +263,7 @@ That was a fun meeting.
 :::
 
 ::: {.line-anchor .line-anchor-subtle .centered}
-MTTR rose because we finally closed the oldest findings.
+MTTR rose because we finally closed older backlog, not just recent work.
 :::
 
 ---
@@ -294,8 +290,6 @@ while
 
 ::: {.line-anchor .line-anchor-subtle .centered}
 MTTR can rise while backlog age falls.
-
-Older vulnerabilities often persist because they are harder to fix, require coordination, or carry more risk.
 :::
 
 ---
@@ -323,11 +317,7 @@ How old is the open backlog today?
 ::: {.line-anchor .line-anchor-subtle .centered}
 MTTR shows flow. MOVA shows backlog age.
 
-If older risk is not being addressed, it will show up in MOVA.
-
-Each answers a different question. Neither is sufficient alone.
-
-MOVA without MTTR can also mislead. Lower backlog age can still hide slow response to new risk.
+Different questions. Both needed.
 :::
 
 ---
@@ -488,36 +478,74 @@ It shows the age consequences of what remains unresolved.
 
 ---
 
-## End state: MOVA reveals what remains open
+## When the dashboard shows only MTTR
 
-::: {.score-grid .tail-grid}
-::: {.score-card}
-::: {.score-title}
+::: {.dashboard-grid}
+
+::: {.dashboard-card .dashboard-bad}
+::: {.dashboard-title}
 Oldest-First
 :::
-::: {.score-metric}
-`{python} oldest_mova`
+::: {.dashboard-value}
+`{python} oldest_mttr`
 :::
-::: {.score-label}
-MOVA (days)
+::: {.dashboard-label}
+MTTR
 :::
 :::
 
-::: {.score-card}
-::: {.score-title}
+::: {.dashboard-card .dashboard-good}
+::: {.dashboard-title}
 Newest-First
 :::
-::: {.score-metric}
-`{python} newest_mova`
+::: {.dashboard-value}
+`{python} newest_mttr`
 :::
-::: {.score-label}
-MOVA (days)
+::: {.dashboard-label}
+MTTR
 :::
 :::
+
 :::
 
 ::: {.centered .muted}
-End-state MOVA does not replace MTTR. It complements it.
+On MTTR alone, Newest-First looks better.
+:::
+
+---
+
+## What MOVA shows instead
+
+::: {.dashboard-grid}
+
+::: {.dashboard-card .dashboard-good}
+::: {.dashboard-title}
+Oldest-First
+:::
+::: {.dashboard-value}
+`{python} oldest_mova`
+:::
+::: {.dashboard-label}
+MOVA
+:::
+:::
+
+::: {.dashboard-card .dashboard-bad}
+::: {.dashboard-title}
+Newest-First
+:::
+::: {.dashboard-value}
+`{python} newest_mova`
+:::
+::: {.dashboard-label}
+MOVA
+:::
+:::
+
+:::
+
+::: {.centered .muted}
+On backlog age, the story changes.
 :::
 
 ---
@@ -650,40 +678,6 @@ Both are partial signals. The mistake is reading either one alone.
 
 ---
 
-## When the dashboard shows only MTTR {auto-animate="true"}
-
-::: {.dashboard-grid}
-::: {.dashboard-card .dashboard-card-emphasis}
-::: {.dashboard-title}
-Newest-First
-:::
-::: {.dashboard-value}
-`{python} newest_mttr` days
-:::
-::: {.dashboard-label}
-MTTR
-:::
-:::
-
-::: {.dashboard-card}
-::: {.dashboard-title}
-Oldest-First
-:::
-::: {.dashboard-value}
-`{python} oldest_mttr` days
-:::
-::: {.dashboard-label}
-MTTR
-:::
-:::
-:::
-
-::: {.centered .muted}
-If this is the only KPI, recent closures can look like broad progress.
-:::
-
----
-
 ## When the dashboard shows both core signals {auto-animate="true"}
 
 ::: {.dashboard-grid}
@@ -717,7 +711,9 @@ Oldest-First
 :::
 
 ::: {.centered .muted}
-If your prioritization is risk-based, MTTR and MOVA help verify the consequences. They should not drive the queue.
+MTTR and MOVA show the consequences of your prioritization.
+
+They should not drive the queue.
 :::
 
 ---
@@ -728,28 +724,28 @@ If your prioritization is risk-based, MTTR and MOVA help verify the consequences
 
 ::: {.score-card}
 ::: {.score-title}
-MTTR ↑ + MOVA ↓
+MTTR <i class="bi bi-arrow-down text-good"></i> + MOVA <i class="bi bi-arrow-down text-good"></i>
 :::
 ::: {.score-label}
-Older risk is being addressed
+System improving
 :::
 :::
 
 ::: {.score-card}
 ::: {.score-title}
-MTTR ↓ + MOVA ↑
+MTTR <i class="bi bi-arrow-up text-warn"></i> + MOVA <i class="bi bi-arrow-down text-good"></i>
 :::
 ::: {.score-label}
-New work closes while backlog ages
+Clearing older backlog
 :::
 :::
 
 ::: {.score-card}
 ::: {.score-title}
-MTTR or MOVA alone
+MTTR <i class="bi bi-arrow-down text-good"></i> + MOVA <i class="bi bi-arrow-up text-bad"></i>
 :::
 ::: {.score-label}
-Partial signals can mislead
+Backlog is aging
 :::
 :::
 
@@ -761,22 +757,25 @@ Read them together or you may misread progress.
 
 ---
 
-## Prioritization is risk-based {.center}
+## Real prioritization is risk-based {.center}
 
-Real teams should not remediate by age alone.
+::: {.risk-list}
 
-Prioritize remediation based on risk:
+- **Severity**
+- **Exploitability**
+- **Exposure**
 
-- Severity (CVSS)
-- Exploitability (KEV, weaponized PoC)
-- Exposure (reachability)
-- Asset criticality
-- Threat intelligence
+- **Asset criticality**
+- **Threat intelligence**
 
-Not newest-first or oldest-first.
+:::
+
+::: {.centered .risk-contrast}
+Not newest-first. Not oldest-first.
+:::
 
 ::: {.line-anchor .centered .blood-line}
-Metrics are not the goal. They are how we observe the consequences of risk-based decisions.
+Metrics do not drive the queue. They show the consequences.
 :::
 
 ---
@@ -894,12 +893,13 @@ Start with an export. Define the metric in code first.
 ## A simple policy {.center}
 
 ::: {.definition-grid .narrow-grid .decision-grid}
+
 ::: {.definition-card .decision-card .decision-card-observe}
 ::: {.eyebrow}
 Policy
 :::
 ### Track MTTR + MOVA
-Use them to verify the consequences of risk-based prioritization.
+Review both together in the same view.
 :::
 
 ::: {.definition-card .decision-card .decision-card-guardrail}
@@ -907,12 +907,13 @@ Use them to verify the consequences of risk-based prioritization.
 Guardrail
 :::
 ### Do not drive the queue
-Metrics stay observational. Prioritization stays risk-based.
+Prioritization stays risk-based.
 :::
+
 :::
 
 ::: {.line-anchor .centered .decision-close}
-If your prioritization is risk-based, MTTR and MOVA help verify the consequences. They should not drive the queue.
+Metrics verify decisions. They do not decide them.
 :::
 
 ---
@@ -928,11 +929,11 @@ MOVA shows backlog age.
 :::
 
 ::: {.line-anchor .centered .blood-line}
-If your prioritization is risk-based, MTTR and MOVA help verify the consequences. They should not drive the queue.
+If they disagree, the system is telling you something.
 :::
 
 ::: {.centered .muted}
-MTTR and MOVA are complementary partial signals. Read the system, not just the metric.
+Read both or you may misread progress.
 :::
 
 ::: {.cta-link}
