@@ -7,7 +7,7 @@
     <title>Why Vulnerability MTTR Alone Misleads | MOVA</title>
     <meta
       name="description"
-      content="A practical security metrics talk on why MTTR and MOVA answer different questions, how prioritization changes both, and why teams should read them together."
+      content="A practical security metrics talk on why MTTR and MOVA are complementary signals, how prioritization changes both, and why teams should read them together."
     />
 
     <link rel="stylesheet" href="styles.css" />
@@ -20,20 +20,21 @@
 
         <h1>Why Vulnerability MTTR Alone Misleads</h1>
 
-        <p class="subtitle">Use MTTR and MOVA to read the system.</p>
+        <p class="subtitle">Closure flow and backlog age are different signals.</p>
 
         <p class="lede">
-          MTTR and MOVA answer different questions. Read together, they show whether remediation is
-          changing the system or only changing the dashboard.
+          Mean Time to Remediate (MTTR) shows the age of closed work. Mean Open Vulnerability Age
+          (MOVA) shows the age of open work. Read together, they make remediation tradeoffs visible.
         </p>
 
         <p class="summary">
           The deck uses one simulated team, fixed capacity, and two simplified closure patterns to
-          show how the signals diverge.
+          show how prioritization choices change what the metrics report.
         </p>
 
         <p class="summary">
-          Use metrics to observe the consequences of risk-based decisions.
+          The goal is not to prove oldest-first is best. The goal is to read both signals before
+          judging progress.
         </p>
 
         <nav class="actions" aria-label="Project links">
@@ -60,26 +61,28 @@
       <section class="card" aria-labelledby="signals-title">
         <div class="section-heading">
           <p class="eyebrow">Core idea</p>
-          <h2 id="signals-title">Same data. Different questions.</h2>
+          <h2 id="signals-title">Same records. Different slices.</h2>
         </div>
 
         <div class="comparison">
           <article class="metric">
             <p class="metric-kicker">Flow</p>
             <h3>MTTR</h3>
-            <p class="metric-text">How old was the work that closed?</p>
+            <p class="metric-name">Mean Time to Remediate</p>
+            <p class="metric-text">How old was the work that closed in the reporting window?</p>
           </article>
 
           <article class="metric">
             <p class="metric-kicker">Backlog age</p>
             <h3>MOVA</h3>
-            <p class="metric-text">How old is the work still open today?</p>
+            <p class="metric-name">Mean Open Vulnerability Age</p>
+            <p class="metric-text">How old is the work still open right now?</p>
           </article>
         </div>
 
         <p class="callout">
-          MTTR is windowed. Label the window before calling a regression. MOVA is not windowed; it
-          reflects backlog age right now.
+          MTTR is windowed. MOVA reflects open backlog age right now. If they disagree, the system
+          is telling you where to look.
         </p>
       </section>
 
@@ -91,9 +94,9 @@
           </div>
 
           <ul class="clean-list">
-            <li>Whether closure speed and backlog age are moving in different directions</li>
-            <li>Whether faster-looking closures are leaving older findings behind</li>
-            <li>Whether remediation progress is real or cosmetic</li>
+            <li>Whether closure flow and open backlog age are moving together</li>
+            <li>Whether faster-looking closures are leaving older work behind</li>
+            <li>Whether a regression reflects slower work or older backlog getting cleared</li>
           </ul>
         </section>
 
@@ -104,10 +107,10 @@
           </div>
 
           <ul class="clean-list">
-            <li>MTTR for closure flow</li>
-            <li>MOVA for open backlog age</li>
-            <li>The time window used for MTTR before calling a regression</li>
-            <li>The prioritization context behind the movement</li>
+            <li>MTTR and MOVA in the same view</li>
+            <li>The time window used for MTTR</li>
+            <li>The measurement date for open backlog age</li>
+            <li>The risk context behind the movement</li>
           </ul>
         </section>
       </section>
@@ -119,16 +122,18 @@
         </div>
 
         <p class="body-copy">
-          Do not prioritize by newest-first or oldest-first alone. Use risk-based inputs, then use
-          MTTR and MOVA to see what those decisions are doing to the system.
+          Use risk-based inputs first, then use MTTR and MOVA to see what those choices are doing to
+          the system. Examples include CVSS, CISA Known Exploited Vulnerabilities (KEV), and the
+          Exploit Prediction Scoring System (EPSS).
         </p>
 
         <ul class="clean-list">
           <li>Severity, such as CVSS</li>
-          <li>Exploitability, such as KEV or weaponized PoC</li>
-          <li>Exposure and reachability</li>
-          <li>Asset criticality</li>
-          <li>Threat intelligence and business context</li>
+          <li>Exploitability, such as CISA KEV, EPSS, or weaponized proof-of-concept</li>
+          <li>Exposure, such as internet reachability</li>
+          <li>Asset criticality, such as production or sensitive systems</li>
+          <li>Threat intelligence, such as active targeting</li>
+          <li>Business context, such as customer or compliance impact</li>
         </ul>
       </section>
 
@@ -137,7 +142,7 @@
         <h2 id="takeaway-title">Read the system, not just the metric.</h2>
         <p>
           Use the pair to verify whether risk-based prioritization is producing the outcome you
-          intended.
+          intended, and question the disagreement when the signals diverge.
         </p>
       </section>
     </main>
