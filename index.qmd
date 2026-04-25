@@ -197,7 +197,7 @@ Security Metrics / BSides Charm
 
 :::: {.shock-card}
 ::: {.shock-label}
-Mean time to remediate
+Dashboard metric
 :::
 
 :::: {.shock-row}
@@ -268,30 +268,54 @@ MTTR rose because we finally closed older backlog, not just recent work.
 
 ---
 
-## Flow vs. backlog age
+## Two Metrics, Two Questions
 
 ::: {.definition-grid}
 ::: {.definition-card}
 ::: {.eyebrow}
 Flow
 :::
-### MTTR
+### MTTR — Mean Time to Remediate
 How fast are we closing work?
 :::
 
 ::: {.definition-card}
 ::: {.eyebrow}
-Backlog age
+Backlog Age
 :::
-### MOVA
+### MOVA — Mean Open Vulnerability Age
 How old is the open backlog today?
 :::
 :::
 
-::: {.line-anchor .line-anchor-subtle .centered}
-MTTR shows flow. MOVA shows backlog age.
+::: {.centered .muted}
+Flow vs Backlog Age
+:::
 
-Different questions. Both needed.
+---
+
+## Same records, different slices
+
+::: {.definition-grid}
+::: {.definition-card}
+::: {.eyebrow}
+Resolved records
+:::
+### MTTR
+Closed findings only.
+:::
+
+::: {.definition-card}
+::: {.eyebrow}
+Open records
+:::
+### MOVA
+Open findings only.
+:::
+:::
+
+::: {.line-anchor .line-anchor-subtle .centered}
+Same export. Different slice. Different signal.
 :::
 
 ---
